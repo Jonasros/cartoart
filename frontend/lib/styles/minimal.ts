@@ -6,6 +6,7 @@ import {
   getAwsTerrariumTileUrl
 } from '@/lib/styles/tileUrl';
 import { TERRAIN_TILE_SIZE } from '@/lib/styles/config';
+import { extraPalettes } from './extra-palettes';
 
 const inkPalette: ColorPalette = {
   id: 'minimal-ink',
@@ -596,7 +597,8 @@ export const minimalStyle: PosterStyle = {
     warmGrayPalette, 
     blushPalette, 
     sagePalette, 
-    copperPalette
+    copperPalette,
+    ...extraPalettes
   ],
   recommendedFonts: ['Inter', 'Helvetica Neue', 'Outfit', 'DM Sans'],
   layerToggles: layerToggles,
