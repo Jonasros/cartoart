@@ -101,6 +101,14 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
     map.setZoom(originalZoom + zoomOffset);
     map.getCanvas().width = drawWidth;
     map.getCanvas().height = drawHeight;
+    
+    // Explicitly center the map at the target coordinates to ensure 
+    // it matches the marker's fixed center position in the export
+    map.jumpTo({
+      center: config.location.center,
+      zoom: originalZoom + zoomOffset
+    });
+
     map.resize();
 
     // Wait for map to render at new size and high-res tiles

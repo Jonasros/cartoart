@@ -54,6 +54,34 @@ export async function searchLocation(
   return data as NominatimResult[];
 }
 
+export async function reverseGeocode(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal
+): Promise<NominatimResult | null> {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lon),
+  });
+
+  const resp = await fetch(`/api/geocode?${params.toString()}`, { signal });
+
+  if (!resp.ok) {
+    let errorDetail = '';
+    try {
+      const errorJson = await resp.json();
+      errorDetail = errorJson.error || errorJson.details || errorJson.message || '';
+    } catch {
+      // ignore
+    }
+    const baseMsg = `Reverse geocoding error ${resp.status}`;
+    throw new Error(errorDetail ? `${baseMsg}: ${errorDetail}` : `${baseMsg}`);
+  }
+
+  const data = await resp.json();
+  return data as NominatimResult;
+}
+
 const STATE_INITIALS: Record<string, string> = {
   // US States
   'Alabama': 'AL',

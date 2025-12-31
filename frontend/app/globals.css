@@ -132,4 +132,7 @@
   .dark .bg-grid-pattern {
     background-image: radial-gradient(#334155 1px, transparent 1px);
   }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

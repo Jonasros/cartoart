@@ -36,89 +36,130 @@ function enqueue<T>(task: () => Promise<T>): Promise<T> {
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    // ... (rest of the function)
+    const qRaw = (url.searchParams.get('q') ?? '').trim();
+    const lat = url.searchParams.get('lat');
+    const lon = url.searchParams.get('lon');
 
-  const qRaw = (url.searchParams.get('q') ?? '').trim();
-  const q = qRaw.replace(/\s+/g, ' ');
+    const userAgent =
+      process.env.NOMINATIM_USER_AGENT?.trim() ||
+      process.env.VERCEL_URL?.trim()?.replace(/^/, 'carto-art/') ||
+      'carto-art (dev)';
 
-  if (!q || q.length < MIN_QUERY_LEN) {
-    return NextResponse.json([], { status: 200, headers: { 'Cache-Control': 'no-store' } });
-  }
-  if (q.length > MAX_QUERY_LEN) {
-    return NextResponse.json({ error: 'Query too long' }, { status: 400 });
-  }
+    const fromEmail = process.env.NOMINATIM_FROM_EMAIL?.trim();
 
-  const limitParam = Number(url.searchParams.get('limit') ?? DEFAULT_LIMIT);
-  const limit = Number.isFinite(limitParam)
-    ? Math.min(Math.max(1, limitParam), MAX_LIMIT)
-    : DEFAULT_LIMIT;
-
-  const cacheKey = `${q.toLowerCase()}::${limit}`;
-  const cached = cache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return NextResponse.json(cached.payload, {
-      status: 200,
-      headers: { 'Cache-Control': 'public, max-age=300' },
-    });
-  }
-
-  const userAgent =
-    process.env.NOMINATIM_USER_AGENT?.trim() ||
-    process.env.VERCEL_URL?.trim()?.replace(/^/, 'carto-art/') ||
-    'carto-art (dev)';
-
-  const fromEmail = process.env.NOMINATIM_FROM_EMAIL?.trim();
-
-  const payload = await enqueue(async () => {
-    const params = new URLSearchParams({
-      q,
-      format: 'json',
-      limit: String(limit),
-      addressdetails: '1',
-      namedetails: '1',
-    });
-
-    try {
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-        headers: {
-          'User-Agent': userAgent,
-          ...(fromEmail ? { From: fromEmail } : {}),
-        },
-        cache: 'no-store',
-      });
-
-      if (!resp.ok) {
-        const text = await resp.text().catch(() => '');
-        return { __error: true, status: resp.status, text };
+    // Handle Reverse Geocoding
+    if (lat && lon) {
+      const cacheKey = `reverse::${lat}::${lon}`;
+      const cached = cache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        return NextResponse.json(cached.payload, {
+          status: 200,
+          headers: { 'Cache-Control': 'public, max-age=300' },
+        });
       }
 
-      return resp.json();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown network error';
-      console.error('Nominatim fetch exception:', err);
-      return { 
-        __error: true, 
-        status: 500, 
-        text: `Network failure while reaching Nominatim: ${msg}` 
-      };
+      const payload = await enqueue(async () => {
+        const params = new URLSearchParams({
+          lat,
+          lon,
+          format: 'json',
+          addressdetails: '1',
+          namedetails: '1',
+        });
+
+        try {
+          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, {
+            headers: {
+              'User-Agent': userAgent,
+              ...(fromEmail ? { From: fromEmail } : {}),
+            },
+            cache: 'no-store',
+          });
+
+          if (!resp.ok) {
+            const text = await resp.text().catch(() => '');
+            return { __error: true, status: resp.status, text };
+          }
+
+          return resp.json();
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown network error';
+          return { __error: true, status: 500, text: msg };
+        }
+      });
+
+      if (payload && typeof payload === 'object' && (payload as any).__error) {
+        const { status, text } = payload as any;
+        return NextResponse.json({ error: 'Reverse geocoding failed', details: text }, { status });
+      }
+
+      cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, payload });
+      return NextResponse.json(payload, {
+        status: 200,
+        headers: { 'Cache-Control': 'public, max-age=300' },
+      });
     }
-  });
 
-  if (payload && typeof payload === 'object' && (payload as any).__error) {
-    const { status, text } = payload as any;
-    console.error(`Geocoding API error (status ${status}):`, text);
-    
-    return NextResponse.json(
-      { 
-        error: `Geocoding failed (${status})`, 
-        details: text || 'No detailed error message from upstream',
-        source: 'nominatim'
-      },
-      { status }
-    );
-  }
+    // Forward Geocoding
+    const q = qRaw.replace(/\s+/g, ' ');
 
-  cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, payload });
+    if (!q || q.length < MIN_QUERY_LEN) {
+      return NextResponse.json([], { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    }
+    if (q.length > MAX_QUERY_LEN) {
+      return NextResponse.json({ error: 'Query too long' }, { status: 400 });
+    }
+
+    const limitParam = Number(url.searchParams.get('limit') ?? DEFAULT_LIMIT);
+    const limit = Number.isFinite(limitParam)
+      ? Math.min(Math.max(1, limitParam), MAX_LIMIT)
+      : DEFAULT_LIMIT;
+
+    const cacheKey = `${q.toLowerCase()}::${limit}`;
+    const cached = cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return NextResponse.json(cached.payload, {
+        status: 200,
+        headers: { 'Cache-Control': 'public, max-age=300' },
+      });
+    }
+
+    const payload = await enqueue(async () => {
+      const params = new URLSearchParams({
+        q,
+        format: 'json',
+        limit: String(limit),
+        addressdetails: '1',
+        namedetails: '1',
+      });
+
+      try {
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+          headers: {
+            'User-Agent': userAgent,
+            ...(fromEmail ? { From: fromEmail } : {}),
+          },
+          cache: 'no-store',
+        });
+
+        if (!resp.ok) {
+          const text = await resp.text().catch(() => '');
+          return { __error: true, status: resp.status, text };
+        }
+
+        return resp.json();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown network error';
+        return { __error: true, status: 500, text: msg };
+      }
+    });
+
+    if (payload && typeof payload === 'object' && (payload as any).__error) {
+      const { status, text } = payload as any;
+      return NextResponse.json({ error: 'Geocoding failed', details: text }, { status });
+    }
+
+    cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, payload });
 
     return NextResponse.json(payload, {
       status: 200,
@@ -129,11 +170,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Internal Server Error', 
-        details: error instanceof Error ? error.message : 'Unknown error',
-        message: error instanceof Error ? error.message : 'An unexpected error occurred'
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );
   }
 }
-

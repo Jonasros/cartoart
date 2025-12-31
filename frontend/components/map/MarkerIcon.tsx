@@ -22,7 +22,6 @@ export const MarkerIcon: React.FC<MarkerIconProps> = ({
         width: size, 
         height: size, 
         filter: shadow ? 'drop-shadow(0px 2px 3px rgba(0,0,0,0.3))' : 'none',
-        transform: 'translate(-50%, -100%)' // Anchor at bottom center
       }}
       className="relative pointer-events-none"
     >

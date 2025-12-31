@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette } from '@/types/poster';
 import { getDefaultStyle } from '@/lib/styles';
+import { reverseGeocode, nominatimResultToPosterLocation } from '@/lib/geocoding/nominatim';
 
 // Default location: San Francisco
 const defaultLocation: PosterLocation = {
@@ -65,6 +66,39 @@ const defaultConfig: PosterConfig = {
 
 export function usePosterConfig() {
   const [config, setConfig] = useState<PosterConfig>(defaultConfig);
+
+  // Detect user location on load
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const result = await reverseGeocode(latitude, longitude);
+          
+          if (result) {
+            const location = nominatimResultToPosterLocation(result);
+            if (location) {
+              setConfig(prev => ({
+                ...prev,
+                location
+              }));
+            }
+          }
+        } catch (error) {
+          console.error('Failed to reverse geocode user location:', error);
+        }
+      },
+      (error) => {
+        // Geolocation denied or failed, just keep default
+        if (error.code !== error.PERMISSION_DENIED) {
+          console.warn('Geolocation error:', error.message);
+        }
+      },
+      { timeout: 10000 }
+    );
+  }, []);
 
   const updateLocation = useCallback((location: Partial<PosterLocation>) => {
     setConfig(prev => ({ 
