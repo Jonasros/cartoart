@@ -137,6 +137,7 @@ export function PosterEditor() {
                 left: `${config.format.margin}cqw`,
                 right: `${config.format.margin}cqw`,
                 bottom: `${config.format.margin}cqw`,
+                borderRadius: (config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
               }}
             >
               <MapPreview
@@ -198,6 +199,7 @@ export function PosterEditor() {
                     border: `${
                       config.format.borderStyle === 'thick' ? '1.5cqw' : '0.5cqw'
                     } solid ${config.palette.accent || config.palette.text}`,
+                    borderRadius: (config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
                   }}
                 />
               </div>

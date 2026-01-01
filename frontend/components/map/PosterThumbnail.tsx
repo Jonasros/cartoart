@@ -154,13 +154,25 @@ export const PosterThumbnail: React.FC<PosterThumbnailProps> = ({ config, classN
         {renderPattern()}
         
         {/* Margin and Border Mockup */}
-        <rect 
-          x="10" y="10" width="80" height="80" 
-          fill="none" 
-          stroke={palette.border} 
-          strokeWidth={format.borderStyle === 'thick' ? "2" : "0.5"} 
-          opacity="0.4" 
-        />
+        {(format.maskShape || 'rectangular') === 'circular' ? (
+          <circle 
+            cx="50" 
+            cy="50" 
+            r="40" 
+            fill="none" 
+            stroke={palette.border} 
+            strokeWidth={format.borderStyle === 'thick' ? "2" : "0.5"} 
+            opacity="0.4" 
+          />
+        ) : (
+          <rect 
+            x="10" y="10" width="80" height="80" 
+            fill="none" 
+            stroke={palette.border} 
+            strokeWidth={format.borderStyle === 'thick' ? "2" : "0.5"} 
+            opacity="0.4" 
+          />
+        )}
 
         {/* Text Representation */}
         <g opacity="0.6">

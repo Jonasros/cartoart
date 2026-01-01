@@ -42,6 +42,7 @@ export const DEFAULT_CONFIG: PosterConfig = {
     orientation: 'portrait',
     margin: 5,
     borderStyle: 'inset',
+    maskShape: 'rectangular',
     texture: 'none',
     textureIntensity: 20,
   },

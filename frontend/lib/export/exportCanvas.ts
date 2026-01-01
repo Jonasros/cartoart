@@ -92,7 +92,15 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
     // 4. DRAW MAP
     exportCtx.save();
     exportCtx.beginPath();
-    exportCtx.rect(marginPx, marginPx, drawWidth, drawHeight);
+    const maskShape = config.format.maskShape || 'rectangular';
+    if (maskShape === 'circular') {
+      const radius = Math.min(drawWidth, drawHeight) / 2;
+      const centerX = marginPx + drawWidth / 2;
+      const centerY = marginPx + drawHeight / 2;
+      exportCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    } else {
+      exportCtx.rect(marginPx, marginPx, drawWidth, drawHeight);
+    }
     exportCtx.clip();
     exportCtx.drawImage(mapCanvas, marginPx, marginPx, drawWidth, drawHeight);
     exportCtx.restore();
@@ -116,14 +124,46 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
       exportCtx.lineWidth = exportResolution.width * 0.005;
       
       const { borderStyle } = config.format;
-      if (borderStyle === 'thin') {
-        exportCtx.strokeRect(marginPx, marginPx, drawWidth, drawHeight);
-      } else if (borderStyle === 'thick') {
-        exportCtx.lineWidth = exportResolution.width * 0.015;
-        exportCtx.strokeRect(marginPx, marginPx, drawWidth, drawHeight);
-      } else if (borderStyle === 'inset') {
-        const inset = exportResolution.width * 0.02;
-        exportCtx.strokeRect(marginPx + inset, marginPx + inset, drawWidth - (inset * 2), drawHeight - (inset * 2));
+      const maskShape = config.format.maskShape || 'rectangular';
+      
+      if (maskShape === 'circular') {
+        const radius = Math.min(drawWidth, drawHeight) / 2;
+        const centerX = marginPx + drawWidth / 2;
+        const centerY = marginPx + drawHeight / 2;
+        
+        if (borderStyle === 'thin') {
+          exportCtx.lineWidth = exportResolution.width * 0.005;
+          exportCtx.beginPath();
+          exportCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          exportCtx.stroke();
+        } else if (borderStyle === 'thick') {
+          exportCtx.lineWidth = exportResolution.width * 0.015;
+          exportCtx.beginPath();
+          exportCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          exportCtx.stroke();
+        } else if (borderStyle === 'inset') {
+          const inset = exportResolution.width * 0.02;
+          exportCtx.lineWidth = exportResolution.width * 0.005;
+          exportCtx.beginPath();
+          exportCtx.arc(centerX, centerY, radius - inset, 0, Math.PI * 2);
+          exportCtx.stroke();
+        } else {
+          // Default fallback for 'double' or any other border style
+          exportCtx.lineWidth = exportResolution.width * 0.005;
+          exportCtx.beginPath();
+          exportCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          exportCtx.stroke();
+        }
+      } else {
+        if (borderStyle === 'thin') {
+          exportCtx.strokeRect(marginPx, marginPx, drawWidth, drawHeight);
+        } else if (borderStyle === 'thick') {
+          exportCtx.lineWidth = exportResolution.width * 0.015;
+          exportCtx.strokeRect(marginPx, marginPx, drawWidth, drawHeight);
+        } else if (borderStyle === 'inset') {
+          const inset = exportResolution.width * 0.02;
+          exportCtx.strokeRect(marginPx + inset, marginPx + inset, drawWidth - (inset * 2), drawHeight - (inset * 2));
+        }
       }
       exportCtx.restore();
     }

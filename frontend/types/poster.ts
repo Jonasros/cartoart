@@ -95,6 +95,7 @@ export interface PosterConfig {
     orientation: 'portrait' | 'landscape';
     margin: number; // 0-100 (percentage based)
     borderStyle: 'none' | 'thin' | 'thick' | 'double' | 'inset';
+    maskShape?: 'rectangular' | 'circular';
     texture?: 'none' | 'paper' | 'canvas' | 'grain'; // Added texture support
     textureIntensity?: number; // 0-100
   };

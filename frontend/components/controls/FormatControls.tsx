@@ -103,6 +103,38 @@ export function FormatControls({ format, onFormatChange }: FormatControlsProps) 
           </div>
 
           <div className="space-y-2">
+            <ControlLabel>Mask Shape</ControlLabel>
+            <ControlRow>
+              <button
+                type="button"
+                onClick={() => onFormatChange({ maskShape: 'rectangular' })}
+                className={cn(
+                  'flex items-center justify-center gap-2 p-3 border rounded-lg transition-all',
+                  (format.maskShape || 'rectangular') === 'rectangular'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400'
+                )}
+              >
+                <Frame className="w-4 h-4" />
+                <span className="text-sm font-medium">Rectangular</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onFormatChange({ maskShape: 'circular' })}
+                className={cn(
+                  'flex items-center justify-center gap-2 p-3 border rounded-lg transition-all',
+                  format.maskShape === 'circular'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400'
+                )}
+              >
+                <div className="w-4 h-4 rounded-full border-2 border-current" />
+                <span className="text-sm font-medium">Circular</span>
+              </button>
+            </ControlRow>
+          </div>
+
+          <div className="space-y-2">
             <ControlLabel>Border Style</ControlLabel>
             <div className="grid grid-cols-5 gap-2">
               {['none', 'thin', 'thick', 'double', 'inset'].map((style) => (
