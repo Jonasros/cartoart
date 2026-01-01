@@ -3,18 +3,33 @@
  * Sanitizes user-generated content to prevent XSS and other security issues
  */
 
-import DOMPurify from 'isomorphic-dompurify';
-
 /**
  * Sanitize text input by removing HTML tags and dangerous content
+ * Uses a simple regex approach that works on both client and server
  * @param text - Text to sanitize
  * @returns Sanitized text
  */
 export function sanitizeText(text: string): string {
-  return DOMPurify.sanitize(text, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-  }).trim();
+  if (!text) return '';
+
+  // Remove HTML tags
+  let sanitized = text.replace(/<[^>]*>/g, '');
+
+  // Decode common HTML entities
+  sanitized = sanitized
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+
+  // Re-escape < and > to prevent injection after entity decoding
+  sanitized = sanitized
+    .replace(/</g, '')
+    .replace(/>/g, '');
+
+  return sanitized.trim();
 }
 
 /**
