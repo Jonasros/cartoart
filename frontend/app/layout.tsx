@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { KofiWidget } from "@/components/third-party/KofiWidget";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,8 +69,10 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        <KofiWidget />
-        {children}
+        <ToastProvider>
+          <KofiWidget />
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

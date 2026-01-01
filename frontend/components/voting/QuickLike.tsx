@@ -5,19 +5,22 @@ import { Heart } from 'lucide-react';
 import { voteOnMap, removeVote } from '@/lib/actions/votes';
 import { cn } from '@/lib/utils';
 
-interface VoteButtonsProps {
+interface QuickLikeProps {
   mapId: string;
-  initialVote: number | null;
   initialScore: number;
+  initialLiked?: boolean;
+  className?: string;
 }
 
-export function VoteButtons({ mapId, initialVote, initialScore }: VoteButtonsProps) {
-  // Convert any positive vote to "liked" state (for backwards compatibility with old +1/-1 votes)
-  const [liked, setLiked] = useState(initialVote === 1);
+export function QuickLike({ mapId, initialScore, initialLiked = false, className }: QuickLikeProps) {
+  const [liked, setLiked] = useState(initialLiked);
   const [score, setScore] = useState(initialScore);
   const [isPending, startTransition] = useTransition();
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation when inside a link
+    e.stopPropagation();
+
     const newLiked = !liked;
     const scoreDelta = newLiked ? 1 : -1;
 
@@ -46,27 +49,27 @@ export function VoteButtons({ mapId, initialVote, initialScore }: VoteButtonsPro
       onClick={handleClick}
       disabled={isPending}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
+        "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all",
         "hover:bg-gray-100 dark:hover:bg-gray-700",
-        isPending && "opacity-50 cursor-not-allowed"
+        isPending && "opacity-50 cursor-not-allowed",
+        className
       )}
       aria-label={liked ? "Unlike this map" : "Like this map"}
     >
       <Heart
         className={cn(
-          "w-5 h-5 transition-all",
+          "w-4 h-4 transition-all",
           liked
             ? "fill-red-500 text-red-500 scale-110"
             : "text-gray-400 dark:text-gray-500 hover:text-red-400"
         )}
       />
       <span className={cn(
-        "text-base font-semibold",
-        liked ? "text-red-500" : "text-gray-600 dark:text-gray-300"
+        "text-sm font-medium",
+        liked ? "text-red-500" : "text-gray-500 dark:text-gray-400"
       )}>
         {score}
       </span>
     </button>
   );
 }
-

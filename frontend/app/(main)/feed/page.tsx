@@ -1,4 +1,5 @@
 import { FeedClient } from '@/components/feed/FeedClient';
+import type { TimeRange } from '@/lib/actions/feed';
 
 export const metadata = {
   title: 'Browse Maps | CartoArt',
@@ -6,12 +7,17 @@ export const metadata = {
 };
 
 interface FeedPageProps {
-  searchParams: Promise<{ sort?: 'fresh' | 'top' }>;
+  searchParams: Promise<{ sort?: 'fresh' | 'top'; time?: TimeRange }>;
 }
+
+const VALID_TIME_RANGES: TimeRange[] = ['all', 'today', 'week', 'month', 'year'];
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
   const params = await searchParams;
   const sort = (params.sort || 'fresh') as 'fresh' | 'top';
+  const timeRange: TimeRange = VALID_TIME_RANGES.includes(params.time as TimeRange)
+    ? (params.time as TimeRange)
+    : 'all';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -24,8 +30,8 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             Explore beautiful map posters created by the community
           </p>
         </div>
-        
-        <FeedClient initialSort={sort} />
+
+        <FeedClient initialSort={sort} initialTimeRange={timeRange} />
       </div>
     </div>
   );

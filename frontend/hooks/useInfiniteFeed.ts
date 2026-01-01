@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFeed } from '@/lib/actions/feed';
-import type { FeedMap } from '@/lib/actions/feed';
+import type { FeedMap, TimeRange } from '@/lib/actions/feed';
 
 const INITIAL_PAGE = 0;
 const PAGE_SIZE = 24;
 
-export function useInfiniteFeed(sort: 'fresh' | 'top') {
+export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'all') {
   const [maps, setMaps] = useState<FeedMap[]>([]);
   const [page, setPage] = useState(INITIAL_PAGE);
   const [hasMore, setHasMore] = useState(true);
@@ -16,11 +16,16 @@ export function useInfiniteFeed(sort: 'fresh' | 'top') {
   const [error, setError] = useState<string | null>(null);
   const pageRef = useRef(INITIAL_PAGE);
   const sortRef = useRef(sort);
+  const timeRangeRef = useRef(timeRange);
 
   // Update refs when values change
   useEffect(() => {
     sortRef.current = sort;
   }, [sort]);
+
+  useEffect(() => {
+    timeRangeRef.current = timeRange;
+  }, [timeRange]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -31,7 +36,8 @@ export function useInfiniteFeed(sort: 'fresh' | 'top') {
     try {
       const currentPage = pageRef.current;
       const currentSort = sortRef.current;
-      const newMaps = await getFeed(currentSort, currentPage, PAGE_SIZE);
+      const currentTimeRange = timeRangeRef.current;
+      const newMaps = await getFeed(currentSort, currentPage, PAGE_SIZE, currentTimeRange);
       
       if (newMaps.length === 0) {
         setHasMore(false);
@@ -69,7 +75,7 @@ export function useInfiniteFeed(sort: 'fresh' | 'top') {
     setInitialLoading(true);
   }, []);
 
-  // Reset when sort changes
+  // Reset when sort or timeRange changes
   useEffect(() => {
     setMaps([]);
     pageRef.current = INITIAL_PAGE;
@@ -77,7 +83,7 @@ export function useInfiniteFeed(sort: 'fresh' | 'top') {
     setHasMore(true);
     setError(null);
     setInitialLoading(true);
-  }, [sort]);
+  }, [sort, timeRange]);
 
   // Load initial page
   useEffect(() => {

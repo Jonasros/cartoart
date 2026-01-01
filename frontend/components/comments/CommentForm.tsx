@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/control-components';
+import { useToast } from '@/components/ui/Toast';
 import { addComment } from '@/lib/actions/comments';
 import type { Comment } from '@/lib/actions/comments';
 
@@ -13,6 +14,7 @@ interface CommentFormProps {
 export function CommentForm({ mapId, onCommentAdded }: CommentFormProps) {
   const [content, setContent] = useState('');
   const [isPending, startTransition] = useTransition();
+  const { showError } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +26,11 @@ export function CommentForm({ mapId, onCommentAdded }: CommentFormProps) {
 
     startTransition(async () => {
       try {
-        await addComment(mapId, commentText);
-        // Reload page to get updated comments with profile info
-        window.location.reload();
+        const newComment = await addComment(mapId, commentText);
+        onCommentAdded(newComment);
       } catch (error) {
         console.error('Failed to add comment:', error);
-        alert('Failed to add comment. Please try again.');
+        showError('Failed to add comment. Please try again.');
         setContent(commentText); // Restore content on error
       }
     });

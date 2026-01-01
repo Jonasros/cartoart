@@ -7,12 +7,36 @@ import { FEED_PAGE_SIZE, FEED_MAX_PAGE } from '@/lib/constants/limits';
 import { checkRateLimit } from '@/lib/middleware/rateLimit';
 import { RATE_LIMITS } from '@/lib/constants/limits';
 
+export type TimeRange = 'all' | 'today' | 'week' | 'month' | 'year';
+
+/**
+ * Get date threshold for time range filter
+ */
+function getTimeRangeDate(range: TimeRange): Date | null {
+  if (range === 'all') return null;
+
+  const now = new Date();
+  switch (range) {
+    case 'today':
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case 'week':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case 'month':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case 'year':
+      return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    default:
+      return null;
+  }
+}
+
 export interface FeedMap {
   id: string;
   title: string;
   subtitle: string | null;
   thumbnail_url: string | null;
   vote_score: number;
+  comment_count: number;
   published_at: string;
   created_at: string;
   author: {
@@ -23,13 +47,42 @@ export interface FeedMap {
 }
 
 /**
+ * Helper to get comment counts for a list of map IDs
+ */
+async function getCommentCounts(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  mapIds: string[]
+): Promise<Map<string, number>> {
+  if (mapIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from('comments')
+    .select('map_id')
+    .in('map_id', mapIds);
+
+  if (error) {
+    logger.warn('Failed to fetch comment counts:', { error });
+    return new Map();
+  }
+
+  // Count comments per map_id
+  const counts = new Map<string, number>();
+  for (const row of data || []) {
+    const mapId = (row as any).map_id;
+    counts.set(mapId, (counts.get(mapId) || 0) + 1);
+  }
+  return counts;
+}
+
+/**
  * Get feed of published maps
  * Uses JOIN to fetch maps and profiles in a single query
  */
 export async function getFeed(
   sort: 'fresh' | 'top' = 'fresh',
   page: number = 0,
-  limit: number = FEED_PAGE_SIZE
+  limit: number = FEED_PAGE_SIZE,
+  timeRange: TimeRange = 'all'
 ): Promise<FeedMap[]> {
   const supabase = await createClient();
   
@@ -51,6 +104,9 @@ export async function getFeed(
       `Rate limit exceeded. Please try again in ${rateLimit.retryAfter} seconds.`
     );
   }
+
+  // Calculate time range date threshold
+  const timeRangeDate = getTimeRangeDate(timeRange);
 
   // Try JOIN query first, fallback to two-query approach if foreign key is missing
   try {
@@ -74,6 +130,11 @@ export async function getFeed(
       .eq('is_published', true)
       .not('published_at', 'is', null);
 
+    // Apply time range filter
+    if (timeRangeDate) {
+      query = query.gte('published_at', timeRangeDate.toISOString());
+    }
+
     // Apply sorting
     if (sort === 'fresh') {
       query = query.order('published_at', { ascending: false });
@@ -90,7 +151,7 @@ export async function getFeed(
       // Check if error is due to missing foreign key
       if (error.message?.includes('foreign key') || error.code === 'PGRST116' || error.message?.includes('relation')) {
         logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-        return getFeedFallback(supabase, sort, page, limit);
+        return getFeedFallback(supabase, sort, page, limit, timeRange);
       }
       logger.error('Failed to fetch feed:', { error, sort, page, limit });
       throw createError.databaseError(`Failed to fetch feed: ${error.message}`);
@@ -99,6 +160,10 @@ export async function getFeed(
     if (!maps || maps.length === 0) {
       return [];
     }
+
+    // Fetch comment counts for all maps
+    const mapIds = maps.map((m: any) => m.id);
+    const commentCounts = await getCommentCounts(supabase, mapIds);
 
     // Transform the data to match FeedMap interface
     return maps.map((map: any) => {
@@ -109,6 +174,7 @@ export async function getFeed(
         subtitle: map.subtitle,
         thumbnail_url: map.thumbnail_url,
         vote_score: map.vote_score,
+        comment_count: commentCounts.get(map.id) || 0,
         published_at: map.published_at,
         created_at: map.created_at,
         author: profile ? {
@@ -126,7 +192,7 @@ export async function getFeed(
     // If it's a foreign key error, try fallback
     if (error.message?.includes('foreign key') || error.code === 'PGRST116') {
       logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-      return getFeedFallback(supabase, sort, page, limit);
+      return getFeedFallback(supabase, sort, page, limit, timeRange);
     }
     throw error;
   }
@@ -140,14 +206,23 @@ async function getFeedFallback(
   supabase: Awaited<ReturnType<typeof createClient>>,
   sort: 'fresh' | 'top',
   page: number,
-  limit: number
+  limit: number,
+  timeRange: TimeRange = 'all'
 ): Promise<FeedMap[]> {
+  // Calculate time range date threshold
+  const timeRangeDate = getTimeRangeDate(timeRange);
+
   // First, fetch the maps
   let query = supabase
     .from('maps')
     .select('id, title, subtitle, thumbnail_url, vote_score, published_at, created_at, user_id')
     .eq('is_published', true)
     .not('published_at', 'is', null);
+
+  // Apply time range filter
+  if (timeRangeDate) {
+    query = query.gte('published_at', timeRangeDate.toISOString());
+  }
 
   if (sort === 'fresh') {
     query = query.order('published_at', { ascending: false });
@@ -187,6 +262,10 @@ async function getFeedFallback(
     (profiles || []).map((profile: any) => [profile.id, profile])
   );
 
+  // Fetch comment counts for all maps
+  const mapIds = (maps as any[]).map(m => m.id);
+  const commentCounts = await getCommentCounts(supabase, mapIds);
+
   // Combine maps with profiles
   return (maps as any[]).map((map) => {
     const profile = profileMap.get(map.user_id);
@@ -196,6 +275,7 @@ async function getFeedFallback(
       subtitle: map.subtitle,
       thumbnail_url: map.thumbnail_url,
       vote_score: map.vote_score,
+      comment_count: commentCounts.get(map.id) || 0,
       published_at: map.published_at,
       created_at: map.created_at,
       author: profile ? {

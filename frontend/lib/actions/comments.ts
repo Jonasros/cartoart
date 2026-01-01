@@ -25,10 +25,11 @@ export interface Comment {
 
 /**
  * Add a comment to a published map
+ * Returns the newly created comment with profile info
  */
-export async function addComment(mapId: string, content: string) {
+export async function addComment(mapId: string, content: string): Promise<Comment> {
   const supabase = await createClient();
-  
+
   const {
     data: { user },
     error: authError,
@@ -54,7 +55,7 @@ export async function addComment(mapId: string, content: string) {
   // Normalize and sanitize comment content
   const normalizedContent = normalizeComment(content);
   const sanitizedContent = sanitizeText(normalizedContent);
-  
+
   // Validate comment content
   if (sanitizedContent.length < COMMENT_MIN_LENGTH) {
     throw createError.validationError('Comment cannot be empty');
@@ -81,13 +82,23 @@ export async function addComment(mapId: string, content: string) {
     throw createError.permissionDenied('Can only comment on published maps');
   }
 
-  const { error } = await supabase
+  // Insert and return the new comment with profile info
+  const { data: newComment, error } = await supabase
     .from('comments')
     .insert({
       user_id: user.id,
       map_id: mapId,
       content: sanitizedContent,
-    } as any);
+    } as any)
+    .select(`
+      *,
+      profiles!comments_user_id_profiles_fkey (
+        username,
+        display_name,
+        avatar_url
+      )
+    `)
+    .single();
 
   if (error) {
     logger.error('Failed to add comment:', { error, mapId, userId: user.id });
@@ -96,6 +107,22 @@ export async function addComment(mapId: string, content: string) {
 
   logger.info('Comment added successfully', { mapId, userId: user.id });
   revalidatePath(`/map/${mapId}`);
+
+  // Transform to Comment type
+  const comment = newComment as any;
+  return {
+    id: comment.id,
+    user_id: comment.user_id,
+    map_id: comment.map_id,
+    content: comment.content,
+    created_at: comment.created_at,
+    updated_at: comment.updated_at,
+    profile: comment.profiles ? {
+      username: comment.profiles.username,
+      display_name: comment.profiles.display_name,
+      avatar_url: comment.profiles.avatar_url,
+    } : undefined,
+  };
 }
 
 /**
