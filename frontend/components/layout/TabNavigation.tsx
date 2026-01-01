@@ -1,6 +1,6 @@
 'use client';
 
-import { Map as MapIcon, Type, Layout, FolderHeart } from 'lucide-react';
+import { Map as MapIcon, Type, Layout, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type Tab = 'library' | 'map' | 'text' | 'frame';
@@ -32,7 +32,7 @@ export function TabNavigation({
     <button
       onClick={() => handleTabClick(id)}
       className={cn(
-        "flex-1 md:w-full flex flex-col items-center justify-center py-2 md:py-4 px-2 space-y-1 transition-colors relative",
+        "flex-1 md:w-full flex flex-col items-center justify-center py-2.5 md:py-5 px-3 space-y-1.5 transition-colors relative",
         activeTab === id && isDrawerOpen
           ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" 
           : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -40,7 +40,7 @@ export function TabNavigation({
       title={label}
     >
       <Icon className="w-5 h-5 md:w-6 md:h-6" />
-      <span className="text-[10px] font-medium hidden md:block">{label}</span>
+      <span className="text-[11px] font-medium hidden md:block">{label}</span>
       {activeTab === id && isDrawerOpen && (
         <>
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 dark:bg-blue-400 hidden md:block" />
@@ -57,7 +57,7 @@ export function TabNavigation({
       </div>
       
       <div className="flex md:flex-col flex-1 md:flex-none md:w-full md:space-y-1">
-        <TabButton id="library" icon={FolderHeart} label="Library" />
+        <TabButton id="library" icon={Sparkles} label="Gallery" />
         <TabButton id="map" icon={MapIcon} label="Map" />
         <TabButton id="text" icon={Type} label="Text" />
         <TabButton id="frame" icon={Layout} label="Frame" />

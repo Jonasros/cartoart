@@ -128,6 +128,7 @@ export function ControlDrawer({
               <StyleSelector
                 selectedStyleId={config.style.id}
                 onStyleSelect={updateStyle}
+                currentConfig={config}
               />
               <ColorControls
                 palette={config.palette}

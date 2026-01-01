@@ -74,11 +74,16 @@ function posterReducer(state: PosterConfig, action: PosterAction): PosterConfig 
   }
 }
 
+const MAX_HISTORY_SIZE = 50;
+
 export function usePosterConfig() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isInitialized = useRef(false);
+  const historyRef = useRef<PosterConfig[]>([]);
+  const historyIndexRef = useRef(-1);
+  const isUndoRedoRef = useRef(false);
 
   const [config, dispatch] = useReducer(posterReducer, DEFAULT_CONFIG);
   const [shouldAutoLocate, setShouldAutoLocate] = useState(() => !searchParams.has('s'));
@@ -97,6 +102,33 @@ export function usePosterConfig() {
     }
     isInitialized.current = true;
   }, [searchParams]);
+
+  // Add to history when config changes (but not during undo/redo)
+  useEffect(() => {
+    if (!isInitialized.current || isUndoRedoRef.current) {
+      isUndoRedoRef.current = false;
+      return;
+    }
+
+    // Don't add duplicate states
+    const lastState = historyRef.current[historyIndexRef.current];
+    if (lastState && JSON.stringify(lastState) === JSON.stringify(config)) {
+      return;
+    }
+
+    // Remove any states after current index (when undoing and then making a new change)
+    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
+
+    // Add new state
+    historyRef.current.push(JSON.parse(JSON.stringify(config)));
+    historyIndexRef.current = historyRef.current.length - 1;
+
+    // Limit history size
+    if (historyRef.current.length > MAX_HISTORY_SIZE) {
+      historyRef.current.shift();
+      historyIndexRef.current = MAX_HISTORY_SIZE - 1;
+    }
+  }, [config]);
 
   // Sync state to URL
   useEffect(() => {
@@ -152,6 +184,32 @@ export function usePosterConfig() {
     dispatch({ type: 'UPDATE_LAYERS', payload: layers });
   }, []);
 
+  const undo = useCallback(() => {
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current--;
+      isUndoRedoRef.current = true;
+      dispatch({ type: 'SET_CONFIG', payload: JSON.parse(JSON.stringify(historyRef.current[historyIndexRef.current])) });
+      setShouldAutoLocate(false);
+    }
+  }, []);
+
+  const redo = useCallback(() => {
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current++;
+      isUndoRedoRef.current = true;
+      dispatch({ type: 'SET_CONFIG', payload: JSON.parse(JSON.stringify(historyRef.current[historyIndexRef.current])) });
+      setShouldAutoLocate(false);
+    }
+  }, []);
+
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  useEffect(() => {
+    setCanUndo(historyIndexRef.current > 0);
+    setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
+  }, [config]);
+
   return {
     config,
     updateLocation,
@@ -161,5 +219,9 @@ export function usePosterConfig() {
     updateFormat,
     updateLayers,
     setConfig,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   };
 }

@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import { usePosterConfig } from '@/hooks/usePosterConfig';
 import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
-import { Maximize, Plus, Minus } from 'lucide-react';
+import { Maximize, Plus, Minus, Undo2, Redo2 } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
 import { TextOverlay } from '@/components/map/TextOverlay';
 import { ExportButton } from '@/components/controls/ExportButton';
@@ -28,6 +28,10 @@ export function PosterEditor() {
     updateFormat,
     updateLayers,
     setConfig,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = usePosterConfig();
   
   const { 
@@ -69,6 +73,22 @@ export function PosterEditor() {
     throttledUpdateLocation(center, zoom);
   }, [throttledUpdateLocation]);
 
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) undo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (canRedo) redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, undo, redo]);
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Mobile Header */}
@@ -107,11 +127,39 @@ export function PosterEditor() {
 
       {/* Main Content */}
       <main 
-        className="flex-1 relative bg-gray-100 dark:bg-gray-950 bg-grid-pattern flex flex-col overflow-hidden pb-16 md:pb-0"
+        className="flex-1 relative bg-gray-100 dark:bg-gray-950 flex flex-col overflow-hidden pb-16 md:pb-0"
         style={{ containerType: 'size' }}
       >
         {/* Top Actions Overlay - Desktop Only */}
-        <div className="absolute top-6 right-8 z-50 pointer-events-auto hidden md:block">
+        <div className="absolute top-6 right-8 z-50 pointer-events-auto hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-1">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              className={cn(
+                "p-2 rounded-md transition-colors",
+                canUndo
+                  ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                  : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              )}
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              className={cn(
+                "p-2 rounded-md transition-colors",
+                canRedo
+                  ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                  : "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              )}
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              <Redo2 className="w-4 h-4" />
+            </button>
+          </div>
           <ExportButton onExport={exportToPNG} isExporting={isExporting} />
         </div>
 
@@ -240,19 +288,20 @@ export function PosterEditor() {
                         const centerX = 50;
                         const centerY = 50;
                         // Border is at the edge of the original 100x100 viewBox
-                        // Position compass just outside the border
+                        // Position ticks starting at the border edge
                         const borderOuterRadius = 49.5; // Outer edge of border in 100x100 coordinate system
-                        const spacing = 0.4; // Spacing between border and compass elements
-                        const compassRadius = borderOuterRadius + spacing; // Position ticks outside border
                         const tickLen = label === 'N' || label === 'S' || label === 'E' || label === 'W' ? 1.2 : 0.6;
+                        // Ticks start at the border edge and extend outward
+                        const tickStartRadius = borderOuterRadius;
+                        const tickEndRadius = borderOuterRadius + tickLen;
                         
-                        const x1 = centerX + Math.cos(rad) * compassRadius;
-                        const y1 = centerY + Math.sin(rad) * compassRadius;
-                        const x2 = centerX + Math.cos(rad) * (compassRadius - tickLen);
-                        const y2 = centerY + Math.sin(rad) * (compassRadius - tickLen);
+                        const x1 = centerX + Math.cos(rad) * tickStartRadius;
+                        const y1 = centerY + Math.sin(rad) * tickStartRadius;
+                        const x2 = centerX + Math.cos(rad) * tickEndRadius;
+                        const y2 = centerY + Math.sin(rad) * tickEndRadius;
                         
-                        // Position labels further out from the ticks
-                        const labelRadius = compassRadius + 1.2;
+                        // Position labels further out from the border
+                        const labelRadius = borderOuterRadius + tickLen + 1.0;
                         const labelX = centerX + Math.cos(rad) * labelRadius;
                         const labelY = centerY + Math.sin(rad) * labelRadius;
                         
@@ -281,14 +330,15 @@ export function PosterEditor() {
                         const centerX = 50;
                         const centerY = 50;
                         const borderOuterRadius = 49.5;
-                        const spacing = 0.4;
-                        const compassRadius = borderOuterRadius + spacing;
                         const tickLen = 0.4;
+                        // Ticks start at the border edge and extend outward
+                        const tickStartRadius = borderOuterRadius;
+                        const tickEndRadius = borderOuterRadius + tickLen;
                         
-                        const x1 = centerX + Math.cos(angle) * compassRadius;
-                        const y1 = centerY + Math.sin(angle) * compassRadius;
-                        const x2 = centerX + Math.cos(angle) * (compassRadius - tickLen);
-                        const y2 = centerY + Math.sin(angle) * (compassRadius - tickLen);
+                        const x1 = centerX + Math.cos(angle) * tickStartRadius;
+                        const y1 = centerY + Math.sin(angle) * tickStartRadius;
+                        const x2 = centerX + Math.cos(angle) * tickEndRadius;
+                        const y2 = centerY + Math.sin(angle) * tickEndRadius;
                         
                         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} opacity="0.6" />;
                       })}

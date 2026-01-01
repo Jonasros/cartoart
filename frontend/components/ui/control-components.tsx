@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, ChevronRight } from 'lucide-react';
 
 /* -------------------------------------------------------------------------------------------------
  * Layout Components
@@ -41,6 +41,38 @@ export function ControlRow({ children, className }: { children: React.ReactNode;
   return (
     <div className={cn("grid grid-cols-2 gap-3", className)}>
       {children}
+    </div>
+  );
+}
+
+interface CollapsibleSectionProps {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+}
+
+export function CollapsibleSection({ title, children, defaultOpen = true, className }: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = React.useState(defaultOpen);
+
+  return (
+    <div className={cn("space-y-2", className)}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 w-full text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+      >
+        {isOpen ? (
+          <ChevronDown className="w-4 h-4" />
+        ) : (
+          <ChevronRight className="w-4 h-4" />
+        )}
+        {title}
+      </button>
+      {isOpen && (
+        <div className="pl-6 space-y-2">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -108,10 +140,53 @@ ControlSelect.displayName = "ControlSelect";
 
 interface SliderProps extends React.InputHTMLAttributes<HTMLInputElement> {
   displayValue?: React.ReactNode;
+  onValueChange?: (value: number) => void;
+  parseValue?: (value: string) => number;
+  formatValue?: (value: number) => string;
 }
 
 export const ControlSlider = React.forwardRef<HTMLInputElement, SliderProps>(
-  ({ className, displayValue, ...props }, ref) => {
+  ({ className, displayValue, onValueChange, parseValue, formatValue, ...props }, ref) => {
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editValue, setEditValue] = React.useState('');
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleDisplayClick = () => {
+      if (displayValue !== undefined && onValueChange && props.value !== undefined) {
+        const currentValue = typeof props.value === 'string' ? parseFloat(props.value) : props.value;
+        setEditValue(formatValue ? formatValue(currentValue) : String(currentValue));
+        setIsEditing(true);
+      }
+    };
+
+    React.useEffect(() => {
+      if (isEditing && inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.select();
+      }
+    }, [isEditing]);
+
+    const handleSubmit = () => {
+      if (onValueChange && editValue !== '') {
+        const parsed = parseValue ? parseValue(editValue) : parseFloat(editValue);
+        if (!isNaN(parsed)) {
+          const min = props.min ? parseFloat(String(props.min)) : 0;
+          const max = props.max ? parseFloat(String(props.max)) : 100;
+          const clamped = Math.max(min, Math.min(max, parsed));
+          onValueChange(clamped);
+        }
+      }
+      setIsEditing(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        handleSubmit();
+      } else if (e.key === 'Escape') {
+        setIsEditing(false);
+      }
+    };
+
     return (
       <div className={cn("relative flex items-center gap-3", className)}>
         <input
@@ -121,9 +196,32 @@ export const ControlSlider = React.forwardRef<HTMLInputElement, SliderProps>(
           {...props}
         />
         {displayValue !== undefined && (
-          <span className="w-12 text-right text-xs font-mono text-gray-500 dark:text-gray-400 tabular-nums">
-            {displayValue}
-          </span>
+          <>
+            {isEditing && onValueChange ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleSubmit}
+                onKeyDown={handleKeyDown}
+                className="w-12 text-right text-xs font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={handleDisplayClick}
+                className={cn(
+                  "w-12 text-right text-xs font-mono tabular-nums transition-colors",
+                  onValueChange
+                    ? "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer"
+                    : "text-gray-500 dark:text-gray-400 cursor-default"
+                )}
+              >
+                {displayValue}
+              </button>
+            )}
+          </>
         )}
       </div>
     );

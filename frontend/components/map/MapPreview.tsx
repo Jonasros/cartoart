@@ -74,16 +74,54 @@ export function MapPreview({
     }
   }, [onMove]);
 
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const handleError = useCallback((e: any) => {
     console.error('MapLibre error details:', {
       message: e.error?.message || e.message || 'Unknown map error',
       error: e.error,
       originalEvent: e
     });
+    setHasError(true);
+    const msg = e.error?.message || e.message || 'Unable to load map data';
+    setErrorMessage(msg);
   }, []);
+
+  // Check for edge cases (Antarctica, very remote locations)
+  const isEdgeCase = location.center[1] < -60 || Math.abs(location.center[0]) > 170;
 
   return (
     <div className="relative w-full h-full">
+      {hasError || isEdgeCase ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-10">
+          <div className="text-center p-8 max-w-md">
+            <div className="text-4xl mb-4">🗺️</div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              {hasError ? 'Map Loading Error' : 'Limited Map Data'}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              {hasError 
+                ? errorMessage || 'Unable to load map data for this location. Try a different area or zoom level.'
+                : 'Map data may be limited for this remote location. Try adjusting the zoom level or selecting a different area.'
+              }
+            </p>
+            <button
+              onClick={() => {
+                setHasError(false);
+                setErrorMessage(null);
+                if (mapRef.current) {
+                  const map = mapRef.current.getMap();
+                  map.resize();
+                }
+              }}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      ) : null}
         <Map
         ref={mapRef}
         key={`${format?.aspectRatio}-${format?.orientation}`}

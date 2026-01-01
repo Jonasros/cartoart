@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 import { useState, useMemo } from 'react';
 import { Type, Palette, Heart, Home, MapPin, Target, Circle, Radio, Check } from 'lucide-react';
-import { ControlSection, ControlCheckbox, ControlSlider, ControlLabel, ControlInput } from '@/components/ui/control-components';
+import { ControlSection, ControlCheckbox, ControlSlider, ControlLabel, ControlInput, CollapsibleSection } from '@/components/ui/control-components';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface LayerControlsProps {
   layers: PosterConfig['layers'];
@@ -58,154 +59,184 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
     onLayersChange({ roadWeight: parseFloat(e.target.value) });
   };
 
+  // Categorize layers
+  const geographicLayers = availableToggles.filter(t => 
+    ['terrain', 'water', 'parks', 'buildings', 'terrainUnderWater', 'contours'].includes(t.id)
+  );
+  const labelLayers = availableToggles.filter(t => 
+    ['labels', 'labels-admin', 'labels-cities'].includes(t.id)
+  );
+  const dataLayers = availableToggles.filter(t => 
+    ['streets', 'population'].includes(t.id)
+  );
+
+  const renderLayerItem = (item: LayerToggle) => {
+    return (
+      <div key={item.id} className="space-y-2">
+        <ControlCheckbox
+          label={item.name}
+          checked={Boolean(layers[item.id as keyof PosterConfig['layers']])}
+          onChange={() => toggleLayer(item.id as keyof PosterConfig['layers'])}
+        />
+
+        {/* Road Weight Control */}
+        {item.id === 'streets' && layers.streets && (
+          <div className="pl-8 pr-2 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
+              <div className="space-y-1">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Line Weight</ControlLabel>
+                <ControlSlider
+                  min="0.1"
+                  max="3.0"
+                  step="0.1"
+                  value={layers.roadWeight ?? 1.0}
+                  onChange={handleRoadWeightChange}
+                  displayValue={`${(layers.roadWeight ?? 1.0).toFixed(1)}x`}
+                  onValueChange={(value) => onLayersChange({ roadWeight: value })}
+                  formatValue={(v) => v.toFixed(1)}
+                  parseValue={(s) => parseFloat(s.replace('x', ''))}
+                />
+                <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                  <span>Fine</span>
+                  <span>Bold</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Label Size Control */}
+        {item.id === 'labels' && layers.labels && (
+          <div className="pl-8 pr-2 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-4">
+              <div className="space-y-2">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Label Style</ControlLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {['standard', 'elevated', 'glass', 'vintage'].map((style) => (
+                    <button
+                      key={style}
+                      onClick={() => onLayersChange({ labelStyle: style as any })}
+                      className={cn(
+                        "py-1.5 px-2 text-[10px] uppercase font-bold rounded border transition-all",
+                        (layers.labelStyle || 'elevated') === style 
+                          ? "bg-blue-600 border-blue-600 text-white shadow-sm" 
+                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
+                      )}
+                    >
+                      {style}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Label Size</ControlLabel>
+                <ControlSlider
+                  min="0.5"
+                  max="2.5"
+                  step="0.1"
+                  value={layers.labelSize ?? 1.0}
+                  onChange={handleLabelSizeChange}
+                  displayValue={`${(layers.labelSize ?? 1.0).toFixed(1)}x`}
+                  onValueChange={(value) => onLayersChange({ labelSize: value })}
+                  formatValue={(v) => v.toFixed(1)}
+                  parseValue={(s) => parseFloat(s.replace('x', ''))}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Label Wrap</ControlLabel>
+                <ControlSlider
+                  min="2"
+                  max="20"
+                  step="1"
+                  value={layers.labelMaxWidth ?? 10}
+                  onChange={handleLabelMaxWidthChange}
+                  displayValue={layers.labelMaxWidth ?? 10}
+                  onValueChange={(value) => onLayersChange({ labelMaxWidth: value })}
+                  formatValue={(v) => String(Math.round(v))}
+                  parseValue={(s) => parseInt(s)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Hillshade Exaggeration Control */}
+        {item.id === 'terrain' && layers.terrain && (
+          <div className="pl-8 pr-2 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
+              <div className="space-y-1">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Shading Intensity</ControlLabel>
+                <ControlSlider
+                  min="0.0"
+                  max="1.0"
+                  step="0.05"
+                  value={layers.hillshadeExaggeration ?? 0.5}
+                  onChange={handleHillshadeExaggerationChange}
+                  displayValue={`${(layers.hillshadeExaggeration ?? 0.5).toFixed(2)}x`}
+                  onValueChange={(value) => onLayersChange({ hillshadeExaggeration: value })}
+                  formatValue={(v) => v.toFixed(2)}
+                  parseValue={(s) => parseFloat(s.replace('x', ''))}
+                />
+                <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                  <Tooltip content="No shading (0.0x)">
+                    <span>Subtle</span>
+                  </Tooltip>
+                  <Tooltip content="Maximum shading (1.0x)">
+                    <span>Strong</span>
+                  </Tooltip>
+                </div>
+              </div>
+              
+              {isTerrainUnderWaterToggleVisible && (
+                <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                  <ControlCheckbox
+                    label="Show under water"
+                    checked={Boolean(layers.terrainUnderWater)}
+                    onChange={() => toggleLayer('terrainUnderWater')}
+                    className="text-[10px] font-medium"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Contour Density Control */}
+        {item.id === 'contours' && layers.contours && (
+          <div className="pl-8 pr-2 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
+              <div className="space-y-1">
+                <ControlLabel className="text-[10px] uppercase text-gray-500">Line Interval</ControlLabel>
+                <ControlSlider
+                  min="10"
+                  max="250"
+                  step="10"
+                  value={layers.contourDensity ?? 50}
+                  onChange={handleContourDensityChange}
+                  displayValue={`${layers.contourDensity ?? 50}m`}
+                  onValueChange={(value) => onLayersChange({ contourDensity: Math.round(value) })}
+                  formatValue={(v) => `${Math.round(v)}m`}
+                  parseValue={(s) => parseInt(s.replace('m', ''))}
+                />
+                <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                  <span>Dense</span>
+                  <span>Sparse</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <ControlSection title="Visible Layers">
-        <div className="grid grid-cols-1 gap-2">
-          {availableToggles.map((item) => (
-            <div key={item.id} className="space-y-2">
-            <ControlCheckbox
-              label={item.name}
-              checked={Boolean(layers[item.id as keyof PosterConfig['layers']])}
-              onChange={() => toggleLayer(item.id as keyof PosterConfig['layers'])}
-            />
-
-            {/* Road Weight Control */}
-            {item.id === 'streets' && layers.streets && (
-              <div className="pl-8 pr-2 pb-2">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
-                  <div className="space-y-1">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Line Weight</ControlLabel>
-                    <ControlSlider
-                      min="0.1"
-                      max="3.0"
-                      step="0.1"
-                      value={layers.roadWeight ?? 1.0}
-                      onChange={handleRoadWeightChange}
-                      displayValue={`${(layers.roadWeight ?? 1.0).toFixed(1)}x`}
-                    />
-                    <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
-                      <span>Fine</span>
-                      <span>Bold</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Label Size Control */}
-            {item.id === 'labels' && layers.labels && (
-              <div className="pl-8 pr-2 pb-2">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-4">
-                  <div className="space-y-2">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Label Style</ControlLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['standard', 'elevated', 'glass', 'vintage'].map((style) => (
-                        <button
-                          key={style}
-                          onClick={() => onLayersChange({ labelStyle: style as any })}
-                          className={cn(
-                            "py-1.5 px-2 text-[10px] uppercase font-bold rounded border transition-all",
-                            (layers.labelStyle || 'elevated') === style 
-                              ? "bg-blue-600 border-blue-600 text-white shadow-sm" 
-                              : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
-                          )}
-                        >
-                          {style}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Label Size</ControlLabel>
-                    <ControlSlider
-                      min="0.5"
-                      max="2.5"
-                      step="0.1"
-                      value={layers.labelSize ?? 1.0}
-                      onChange={handleLabelSizeChange}
-                      displayValue={`${(layers.labelSize ?? 1.0).toFixed(1)}x`}
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Label Wrap</ControlLabel>
-                    <ControlSlider
-                      min="2"
-                      max="20"
-                      step="1"
-                      value={layers.labelMaxWidth ?? 10}
-                      onChange={handleLabelMaxWidthChange}
-                      displayValue={layers.labelMaxWidth ?? 10}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Hillshade Exaggeration Control */}
-            {item.id === 'terrain' && layers.terrain && (
-              <div className="pl-8 pr-2 pb-2">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
-                  <div className="space-y-1">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Shading Intensity</ControlLabel>
-                    <ControlSlider
-                      min="0.0"
-                      max="1.0"
-                      step="0.05"
-                      value={layers.hillshadeExaggeration ?? 0.5}
-                      onChange={handleHillshadeExaggerationChange}
-                      displayValue={`${(layers.hillshadeExaggeration ?? 0.5).toFixed(2)}x`}
-                    />
-                    <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
-                      <span>Flat</span>
-                      <span>Dramatic</span>
-                    </div>
-                  </div>
-                  
-                  {isTerrainUnderWaterToggleVisible && (
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
-                      <ControlCheckbox
-                        label="Show under water"
-                        checked={Boolean(layers.terrainUnderWater)}
-                        onChange={() => toggleLayer('terrainUnderWater')}
-                        className="text-[10px] font-medium"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Contour Density Control */}
-            {item.id === 'contours' && layers.contours && (
-              <div className="pl-8 pr-2 pb-2">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
-                  <div className="space-y-1">
-                    <ControlLabel className="text-[10px] uppercase text-gray-500">Line Interval</ControlLabel>
-                    <ControlSlider
-                      min="10"
-                      max="250"
-                      step="10"
-                      value={layers.contourDensity ?? 50}
-                      onChange={handleContourDensityChange}
-                      displayValue={`${layers.contourDensity ?? 50}m`}
-                    />
-                    <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
-                      <span>Dense</span>
-                      <span>Sparse</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-        </div>
-
-        {/* Marker controls */}
-        <div key="marker-group" className="space-y-4 pt-4 mt-4 border-t border-gray-100 dark:border-gray-800">
+        {/* Location Marker - First */}
+        <div className="space-y-4 pb-4 border-b border-gray-100 dark:border-gray-800">
           <ControlCheckbox
             label="Location Marker"
             checked={Boolean(layers.marker)}
@@ -295,8 +326,34 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
             </div>
           )}
         </div>
+
+        {/* Geographic Features */}
+        {geographicLayers.length > 0 && (
+          <CollapsibleSection title="Geographic Features" defaultOpen={true}>
+            <div className="space-y-2">
+              {geographicLayers.map(renderLayerItem)}
+            </div>
+          </CollapsibleSection>
+        )}
+
+        {/* Labels */}
+        {labelLayers.length > 0 && (
+          <CollapsibleSection title="Labels" defaultOpen={true}>
+            <div className="space-y-2">
+              {labelLayers.map(renderLayerItem)}
+            </div>
+          </CollapsibleSection>
+        )}
+
+        {/* Data Layers */}
+        {dataLayers.length > 0 && (
+          <CollapsibleSection title="Data Layers" defaultOpen={true}>
+            <div className="space-y-2">
+              {dataLayers.map(renderLayerItem)}
+            </div>
+          </CollapsibleSection>
+        )}
       </ControlSection>
     </div>
   );
 }
-
