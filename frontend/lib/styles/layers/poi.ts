@@ -138,8 +138,8 @@ export function createPOILayers(
     // Debug logging for spaceport layer creation
     console.log('🚀 [SPACEPORT LAYER] Creating spaceport layers:', {
       usingCustomFilter: !!spaceportLabelFilter,
-      labelFilter: spaceportLabelFilter || defaultSpaceportFilter,
-      labelSourceLayer: 'aeroway',  // Now using aeroway instead of aerodrome_label
+      labelFilter: spaceportLabelFilter || 'all (default)',
+      labelSource: 'spaceports (GeoJSON from Launch Library API)',
       spaceportOpacity,
       spaceportColor: spaceportColor || 'using palette.accent'
     });
@@ -156,21 +156,20 @@ export function createPOILayers(
       },
     };
     
-    // Use aeroway source layer with Point geometry filter instead of aerodrome_label
-    // since aerodrome_label often doesn't contain spaceport data
-    const spaceportLabelFilterForAeroway = spaceportLabelFilter 
-      ? ['all', ['==', ['geometry-type'], 'Point'], spaceportLabelFilter]
-      : ['all', ['==', ['geometry-type'], 'Point'], ['==', ['get', 'class'], 'spaceport']];
+    // Use GeoJSON source from Launch Library 2 API instead of aerodrome_label or aeroway
+    // since those sources don't contain reliable spaceport label data
+    // GeoJSON sources don't need geometry-type filters (they're always points)
+    // Custom filters can still filter by properties if provided (e.g., by active status)
+    // If no custom filter is provided, show all pads (no filter means all features shown)
     
-    const spaceportLabelLayer = {
+    const spaceportLabelLayer: any = {
       id: 'spaceport-label',
       type: 'symbol',
-      source: 'openmaptiles',
-      'source-layer': 'aeroway',  // Changed from 'aerodrome_label' to 'aeroway'
+      source: 'spaceports',  // Changed to use GeoJSON source from Launch Library API
       minzoom: 10,
-      filter: spaceportLabelFilterForAeroway,
+      ...(spaceportLabelFilter ? { filter: spaceportLabelFilter } : {}), // Only add filter if custom filter provided
       layout: {
-        'text-field': ['concat', '🚀 ', ['coalesce', ['get', 'name:en'], ['get', 'name:latin'], ['get', 'name']]],
+        'text-field': ['concat', '🚀 ', ['coalesce', ['get', 'name']]],
         'text-font': ['Noto Sans Regular'],
         'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 14, 12],
         'text-padding': 5,
@@ -197,7 +196,7 @@ export function createPOILayers(
       },
       spaceportLabel: {
         id: spaceportLabelLayer.id,
-        sourceLayer: spaceportLabelLayer['source-layer'],
+        source: spaceportLabelLayer.source,
         filter: spaceportLabelLayer.filter,
         minzoom: spaceportLabelLayer.minzoom,
         textField: spaceportLabelLayer.layout['text-field'],

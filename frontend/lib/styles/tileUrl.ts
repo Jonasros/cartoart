@@ -115,4 +115,19 @@ export function getPopulationTileUrl(): string {
   return `${PROXY_BASE}/${path}`;
 }
 
+/**
+ * Returns the URL for spaceports GeoJSON data from Launch Library 2 API.
+ */
+export function getSpaceportsGeoJsonUrl(): string {
+  const path = 'api/spaceports';
+  const baseUrl = getBaseUrl();
+  
+  if (baseUrl) {
+    return joinBaseAndPath(baseUrl, path);
+  }
+  
+  // Fallback to relative path if no base URL is available
+  return `/${path}`;
+}
+
 

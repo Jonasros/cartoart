@@ -2,7 +2,8 @@ import {
   getOpenFreeMapPlanetTileJsonUrl, 
   getContourTileJsonUrl, 
   getPopulationTileUrl,
-  getAwsTerrariumTileUrl
+  getAwsTerrariumTileUrl,
+  getSpaceportsGeoJsonUrl
 } from './tileUrl';
 import { TERRAIN_TILE_SIZE } from './config';
 
@@ -37,6 +38,10 @@ export function getBaseSources() {
       tileSize: TERRAIN_TILE_SIZE,
       encoding: 'terrarium',
       maxzoom: 14,
+    },
+    spaceports: {
+      type: 'geojson',
+      data: getSpaceportsGeoJsonUrl(),
     },
   };
 }

@@ -70,55 +70,27 @@ export function MapPreview({
       map.once('idle', () => {
         console.log('🚀 [SPACEPORT DEBUG] Map is idle, checking spaceport data...');
         try {
+          // Query spaceport areas from aeroway (polygons)
           const aerowayFeatures = map.querySourceFeatures('openmaptiles', {
             sourceLayer: 'aeroway'
           });
-          const aerodromeFeatures = map.querySourceFeatures('openmaptiles', {
-            sourceLayer: 'aerodrome_label'
-          });
-          const poiFeatures = map.querySourceFeatures('openmaptiles', {
-            sourceLayer: 'poi'
-          });
-
-          // Check geometry types in aeroway
-          const aerowayPoints = aerowayFeatures.filter((f: any) => f.geometry?.type === 'Point');
           const aerowayPolygons = aerowayFeatures.filter((f: any) => f.geometry?.type === 'Polygon');
-          
-          // Specifically filter for spaceports
           const spaceportAreas = aerowayPolygons.filter((f: any) => 
             f.properties?.class === 'spaceport' || 
             (f.properties?.name && typeof f.properties.name === 'string' && 
              f.properties.name.toLowerCase().includes('spaceport'))
           );
-          
-          const spaceportPoints = aerowayPoints.filter((f: any) => 
-            f.properties?.class === 'spaceport' ||
-            (f.properties?.name && typeof f.properties.name === 'string' && 
-             (f.properties.name.toLowerCase().includes('spaceport') ||
-              f.properties.name.toLowerCase().includes('space center') ||
-              f.properties.name.toLowerCase().includes('ksc')))
-          );
-          
-          const spaceportLabels = aerodromeFeatures.filter((f: any) => 
-            f.properties?.class === 'spaceport' ||
-            (f.properties?.name && typeof f.properties.name === 'string' && 
-             (f.properties.name.toLowerCase().includes('spaceport') ||
-              f.properties.name.toLowerCase().includes('space center') ||
-              f.properties.name.toLowerCase().includes('ksc')))
-          );
 
-          console.log('🚀 [SPACEPORT DEBUG] Aeroway geometry breakdown:', {
-            totalAeroway: aerowayFeatures.length,
-            polygons: aerowayPolygons.length,
-            points: aerowayPoints.length,
-            spaceportAreas: spaceportAreas.length,
-            spaceportPoints: spaceportPoints.length,
-            spaceportLabelsFromAerodrome: spaceportLabels.length
-          });
+          // Query spaceport labels from GeoJSON source (points)
+          let spaceportLabels: any[] = [];
+          try {
+            spaceportLabels = map.querySourceFeatures('spaceports') || [];
+          } catch (err) {
+            console.warn('🚀 [SPACEPORT DEBUG] Could not query spaceports source (may not be loaded yet):', err);
+          }
 
-          console.log('🚀 [SPACEPORT DEBUG] Spaceport-specific data:', {
+          console.log('🚀 [SPACEPORT DEBUG] Spaceport data from sources:', {
             spaceportAreaCount: spaceportAreas.length,
-            spaceportPointCount: spaceportPoints.length,
             spaceportLabelCount: spaceportLabels.length,
             currentZoom: map.getZoom().toFixed(2),
             spaceportAreaFeatures: spaceportAreas.map((f: any) => ({
@@ -126,31 +98,23 @@ export function MapPreview({
               name: f.properties?.name || f.properties?.['name:en'] || f.properties?.['name:latin'],
               geometry: f.geometry?.type
             })),
-            spaceportPointFeatures: spaceportPoints.map((f: any) => ({
-              class: f.properties?.class,
-              name: f.properties?.name || f.properties?.['name:en'] || f.properties?.['name:latin'],
-              geometry: f.geometry?.type
-            })),
-            spaceportLabelFeatures: spaceportLabels.map((f: any) => ({
-              class: f.properties?.class,
-              name: f.properties?.name || f.properties?.['name:en'] || f.properties?.['name:latin'],
+            spaceportLabelFeatures: spaceportLabels.slice(0, 10).map((f: any) => ({
+              name: f.properties?.name,
+              location: f.properties?.location,
+              country: f.properties?.country,
+              active: f.properties?.active,
               geometry: f.geometry?.type
             }))
           });
 
-          // Check all aeroway classes for debugging
+          // Check aeroway classes for debugging (areas only)
           const aerowayClasses = aerowayFeatures.length > 0 
             ? [...new Set(aerowayFeatures.map((f: any) => f.properties?.class).filter(Boolean))]
             : [];
-          const aerodromeClasses = aerodromeFeatures.length > 0
-            ? [...new Set(aerodromeFeatures.map((f: any) => f.properties?.class).filter(Boolean))]
-            : [];
 
-          console.log('🚀 [SPACEPORT DEBUG] Available classes in source layers:', {
+          console.log('🚀 [SPACEPORT DEBUG] Available classes in aeroway source:', {
             aerowayClasses,
-            aerodromeClasses,
-            totalAerowayCount: aerowayFeatures.length,
-            totalAerodromeCount: aerodromeFeatures.length
+            totalAerowayCount: aerowayFeatures.length
           });
 
           // Check if spaceport layers exist and their configuration
@@ -168,7 +132,7 @@ export function MapPreview({
             spaceportLabelLayer: spaceportLabelLayer ? {
               exists: true,
               visibility: (spaceportLabelLayer as any).layout?.visibility || 'visible (default)',
-              sourceLayer: (spaceportLabelLayer as any).sourceLayer,
+              source: (spaceportLabelLayer as any).source,
               filter: (spaceportLabelLayer as any).filter,
               minzoom: (spaceportLabelLayer as any).minzoom,
               layout: {
@@ -181,19 +145,19 @@ export function MapPreview({
           });
 
           // Check if we have spaceport areas but no labels
-          if (spaceportAreas.length > 0 && spaceportLabels.length === 0 && spaceportPoints.length === 0) {
-            console.warn('🚀 [SPACEPORT DEBUG] ⚠️ Found spaceport areas but NO matching labels in aerodrome_label or point features in aeroway!', {
+          if (spaceportAreas.length > 0 && spaceportLabels.length === 0) {
+            console.warn('🚀 [SPACEPORT DEBUG] ⚠️ Found spaceport areas but NO labels from GeoJSON source!', {
               areaCount: spaceportAreas.length,
               areas: spaceportAreas.map((f: any) => ({
                 name: f.properties?.name || f.properties?.['name:en'] || f.properties?.['name:latin'],
                 class: f.properties?.class
               })),
-              suggestion: 'Labels may not exist in aerodrome_label source layer. Consider using aeroway point features if available.'
+              suggestion: 'Labels should come from Launch Library API GeoJSON source. Check if source is loaded.'
             });
-          } else if (spaceportAreas.length > 0 && spaceportPoints.length > 0) {
-            console.log('🚀 [SPACEPORT DEBUG] ✓ Found spaceport areas AND point features in aeroway - labels should work!', {
-              areaCount: spaceportAreas.length,
-              pointCount: spaceportPoints.length
+          } else if (spaceportLabels.length > 0) {
+            console.log('🚀 [SPACEPORT DEBUG] ✓ Found spaceport labels from GeoJSON source!', {
+              labelCount: spaceportLabels.length,
+              sampleLabels: spaceportLabels.slice(0, 5).map((f: any) => f.properties?.name)
             });
           }
 

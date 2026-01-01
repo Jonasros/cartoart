@@ -32,6 +32,14 @@ export const CACHE = {
 } as const;
 
 /**
+ * Spaceports cache configuration
+ */
+export const SPACEPORTS_CACHE = {
+  /** Cache TTL in milliseconds (7 days) - spaceports change infrequently */
+  TTL_MS: 7 * 24 * 60 * 60 * 1000,
+} as const;
+
+/**
  * History management limits
  */
 export const HISTORY = {
