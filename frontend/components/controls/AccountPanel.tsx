@@ -12,12 +12,9 @@ import {
   Map,
   Share2,
   Compass,
-  Settings,
   Upload,
-  EyeOff,
-  MessageCircle
+  EyeOff
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { PublishModal } from '@/components/profile/PublishModal';
 import { publishMap, unpublishMap } from '@/lib/actions/maps';
 
@@ -251,15 +248,6 @@ export function AccountPanel({
             <Button
               variant="outline"
               className="w-full justify-start gap-3"
-              onClick={() => window.open('https://discord.gg/UVKEfcfZVc', '_blank', 'noopener,noreferrer')}
-            >
-              <MessageCircle className="w-4 h-4" />
-              Join Discord
-            </Button>
-
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3"
               onClick={handleShareMap}
               data-share-button
             >
@@ -296,15 +284,6 @@ export function AccountPanel({
             >
               <Compass className="w-4 h-4" />
               Browse Feed
-            </Button>
-
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3"
-              onClick={() => window.open('https://discord.gg/UVKEfcfZVc', '_blank', 'noopener,noreferrer')}
-            >
-              <MessageCircle className="w-4 h-4" />
-              Join Discord
             </Button>
 
             <Button
