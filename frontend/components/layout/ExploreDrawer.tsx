@@ -1,0 +1,217 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Compass, ExternalLink, Loader2, TrendingUp, Clock, Heart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { getFeed } from '@/lib/actions/feed';
+import type { FeedMap } from '@/lib/actions/feed';
+import Link from 'next/link';
+import Image from 'next/image';
+
+interface ExploreDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
+  const [maps, setMaps] = useState<FeedMap[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<'fresh' | 'top'>('top');
+  const [mounted, setMounted] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  // Only render portal after mount (SSR safety)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Load maps when drawer opens or sort changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadMaps = async () => {
+      setLoading(true);
+      try {
+        const feedMaps = await getFeed(sort, 0, 12, 'all');
+        setMaps(feedMaps);
+      } catch (error) {
+        console.error('Failed to load explore maps:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMaps();
+  }, [isOpen, sort]);
+
+  // Close on escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Don't render on server or when closed
+  if (!mounted || !isOpen) return null;
+
+  const drawerContent = (
+    <div className="fixed inset-0" style={{ zIndex: 99999 }}>
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+
+      {/* Drawer Panel */}
+      <div
+        ref={drawerRef}
+        className="absolute top-0 right-0 bottom-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl flex flex-col"
+        style={{ maxWidth: '384px' }}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <div className="flex items-center gap-2">
+            <Compass className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Explore
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 -mr-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Sort Tabs */}
+        <div className="flex-shrink-0 flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <button
+            onClick={() => setSort('top')}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              sort === 'top'
+                ? "text-blue-600 border-blue-600"
+                : "text-gray-500 border-transparent hover:text-gray-700"
+            )}
+          >
+            <TrendingUp className="w-4 h-4" />
+            Top
+          </button>
+          <button
+            onClick={() => setSort('fresh')}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              sort === 'fresh'
+                ? "text-blue-600 border-blue-600"
+                : "text-gray-500 border-transparent hover:text-gray-700"
+            )}
+          >
+            <Clock className="w-4 h-4" />
+            Fresh
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+            </div>
+          ) : maps.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <Compass className="w-12 h-12 text-gray-300 mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No maps to explore yet
+              </p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                Be the first to publish!
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 space-y-3">
+              {maps.map((map) => (
+                <ExploreCard key={map.id} map={map} onClose={onClose} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <Link
+            href="/feed"
+            onClick={onClose}
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Browse All Maps
+            <ExternalLink className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(drawerContent, document.body);
+}
+
+interface ExploreCardProps {
+  map: FeedMap;
+  onClose: () => void;
+}
+
+function ExploreCard({ map, onClose }: ExploreCardProps) {
+  return (
+    <Link
+      href={`/map/${map.id}`}
+      onClick={onClose}
+      className="block bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-md"
+    >
+      {/* Thumbnail */}
+      <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
+        {map.thumbnail_url ? (
+          <Image
+            src={map.thumbnail_url}
+            alt={map.title}
+            fill
+            className="object-cover"
+            sizes="384px"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+            <Compass className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+          </div>
+        )}
+
+        {/* Like count badge */}
+        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs">
+          <Heart className="w-3 h-3" />
+          <span>{map.vote_score}</span>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="p-3">
+        <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-1">
+          {map.title}
+        </h3>
+        {map.subtitle && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+            {map.subtitle}
+          </p>
+        )}
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          by {map.author.display_name || map.author.username}
+        </p>
+      </div>
+    </Link>
+  );
+}

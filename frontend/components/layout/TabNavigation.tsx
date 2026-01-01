@@ -1,6 +1,6 @@
 'use client';
 
-import { Map as MapIcon, Type, Layout, Sparkles, Palette, User } from 'lucide-react';
+import { Map as MapIcon, Type, Layout, Sparkles, Palette, User, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -11,13 +11,15 @@ interface TabNavigationProps {
   isDrawerOpen: boolean;
   onTabChange: (tab: Tab) => void;
   onToggleDrawer: (open: boolean) => void;
+  onOpenExplore?: () => void;
 }
 
-export function TabNavigation({ 
-  activeTab, 
-  isDrawerOpen, 
-  onTabChange, 
-  onToggleDrawer 
+export function TabNavigation({
+  activeTab,
+  isDrawerOpen,
+  onTabChange,
+  onToggleDrawer,
+  onOpenExplore
 }: TabNavigationProps) {
   
   const handleTabClick = (id: Tab) => {
@@ -69,8 +71,18 @@ export function TabNavigation({
         </div>
       </div>
 
-      {/* Account tab on desktop - shows at bottom of sidenav */}
+      {/* Explore and Account tabs on desktop - shows at bottom of sidenav */}
       <div className="hidden md:flex md:flex-col md:w-full md:space-y-1 md:mt-auto md:mb-2 md:border-t md:border-gray-200 dark:md:border-gray-700 md:pt-2">
+        {onOpenExplore && (
+          <button
+            onClick={onOpenExplore}
+            className="w-full flex flex-col items-center justify-center py-5 px-3 space-y-1.5 transition-colors text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+            title="Explore Community Maps"
+          >
+            <Compass className="w-6 h-6" />
+            <span className="text-[11px] font-medium">Explore</span>
+          </button>
+        )}
         <TabButton id="account" icon={User} label="Account" />
       </div>
     </nav>

@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { KofiWidget } from "@/components/third-party/KofiWidget";
+// Ko-fi widget temporarily disabled
+// import { KofiWidget } from "@/components/third-party/KofiWidget";
 import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
@@ -70,7 +71,6 @@ export default function RootLayout({
           </>
         )}
         <ToastProvider>
-          <KofiWidget />
           {children}
         </ToastProvider>
       </body>

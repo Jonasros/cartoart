@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { usePosterConfig } from '@/hooks/usePosterConfig';
 import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
-import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw } from 'lucide-react';
+import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
 import { TextOverlay } from '@/components/map/TextOverlay';
 import { ExportButton } from '@/components/controls/ExportButton';
@@ -16,6 +16,7 @@ import { THROTTLE } from '@/lib/constants';
 import { getNumericRatio, getAspectRatioCSS } from '@/lib/styles/dimensions';
 import { TabNavigation, type Tab } from './TabNavigation';
 import { ControlDrawer } from './ControlDrawer';
+import { ExploreDrawer } from './ExploreDrawer';
 import { ErrorToastContainer } from '@/components/ui/ErrorToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import Link from 'next/link';
@@ -31,6 +32,7 @@ export function PosterEditor() {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<Tab>('location');
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
 
   const { 
     config, 
@@ -232,6 +234,13 @@ export function PosterEditor() {
           <span className="font-bold text-gray-900 dark:text-white">CartoArt</span>
         </Link>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsExploreOpen(true)}
+            className="p-2 rounded-md transition-colors text-gray-600 hover:text-blue-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+            title="Explore Community Maps"
+          >
+            <Compass className="w-4 h-4" />
+          </button>
           <SaveButton
             onSave={handleSaveClick}
             currentMapName={currentMapName}
@@ -250,11 +259,17 @@ export function PosterEditor() {
         </div>
       </div>
 
-      <TabNavigation 
+      <TabNavigation
         activeTab={activeTab}
         isDrawerOpen={isDrawerOpen}
         onTabChange={setActiveTab}
         onToggleDrawer={setIsDrawerOpen}
+        onOpenExplore={() => setIsExploreOpen(true)}
+      />
+
+      <ExploreDrawer
+        isOpen={isExploreOpen}
+        onClose={() => setIsExploreOpen(false)}
       />
 
       <ControlDrawer
