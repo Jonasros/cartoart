@@ -4,14 +4,14 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Login | CartoArt',
-  description: 'Sign in to save and share your map posters',
+  title: 'Sign Up | CartoArt',
+  description: 'Create an account to save and share your map posters',
 };
 
-export default async function LoginPage({
+export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string; error?: string }>;
+  searchParams: Promise<{ redirect?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -30,29 +30,23 @@ export default async function LoginPage({
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Welcome Back
+              Create Account
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Sign in to your CartoArt account
+              Join CartoArt to save and share your map posters
             </p>
           </div>
 
-          {params.error && (
-            <div className="mb-6 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">{params.error}</p>
-            </div>
-          )}
-
-          <EmailAuthForm mode="login" redirectTo={params.redirect} />
+          <EmailAuthForm mode="signup" redirectTo={params.redirect} />
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Don&apos;t have an account?{' '}
+              Already have an account?{' '}
               <Link
-                href={params.redirect ? `/signup?redirect=${encodeURIComponent(params.redirect)}` : '/signup'}
+                href={params.redirect ? `/login?redirect=${encodeURIComponent(params.redirect)}` : '/login'}
                 className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
               >
-                Sign up
+                Sign in
               </Link>
             </p>
           </div>
