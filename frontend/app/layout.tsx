@@ -20,6 +20,18 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.svg",
   },
+  openGraph: {
+    title: "CartoArt | Map Poster Generator",
+    description: "Create beautifully stylized map posters from real geographic data",
+    images: ["/hero.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CartoArt | Map Poster Generator",
+    description: "Create beautifully stylized map posters from real geographic data",
+    images: ["/hero.jpg"],
+  },
 };
 
 export default function RootLayout({
