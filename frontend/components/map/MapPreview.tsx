@@ -20,17 +20,20 @@ interface MapPreviewProps {
   onMove?: (center: [number, number], zoom: number) => void;
   layers?: PosterConfig['layers'];
   layerToggles?: LayerToggle[];
+  /** When false, disables all map interactions (zoom, pan, rotate) for view-only mode */
+  interactive?: boolean;
 }
 
-export function MapPreview({ 
-  mapStyle, 
-  location, 
+export function MapPreview({
+  mapStyle,
+  location,
   format,
-  showMarker = true, 
-  markerColor, 
-  onMapLoad, 
-  onMove 
-  , layers, layerToggles
+  showMarker = true,
+  markerColor,
+  onMapLoad,
+  onMove,
+  layers,
+  interactive = true,
 }: MapPreviewProps) {
   const mapRef = useRef<MapRef>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -197,13 +200,19 @@ export function MapPreview({
         attributionControl={false}
         preserveDrawingBuffer={true}
         onLoad={handleLoad}
-        onMove={handleMove}
-        onMoveEnd={handleMove}
+        onMove={interactive ? handleMove : undefined}
+        onMoveEnd={interactive ? handleMove : undefined}
         onError={handleError}
         antialias={true}
         pixelRatio={MAP.PIXEL_RATIO}
         maxZoom={MAP.MAX_ZOOM}
         minZoom={MAP.MIN_ZOOM}
+        scrollZoom={interactive}
+        dragPan={interactive}
+        dragRotate={interactive}
+        doubleClickZoom={interactive}
+        touchZoomRotate={interactive}
+        keyboard={interactive}
       >
       {showMarker && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">

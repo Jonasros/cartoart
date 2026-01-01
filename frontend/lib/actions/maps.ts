@@ -483,6 +483,73 @@ export async function getUserMaps(): Promise<SavedMap[]> {
 }
 
 /**
+ * Duplicate a map to the current user's library
+ * This allows users to copy someone else's published map and make it their own
+ */
+export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw createError.authRequired('You must be signed in to duplicate maps');
+  }
+
+  // Fetch the source map
+  const { data: sourceMap, error: fetchError } = await (supabase as any)
+    .from('maps')
+    .select('*')
+    .eq('id', sourceMapId)
+    .single();
+
+  if (fetchError || !sourceMap) {
+    throw createError.notFound('Map');
+  }
+
+  // Check if the source map is published (anyone can duplicate published maps)
+  // Or if the user owns it (can duplicate their own maps)
+  if (!sourceMap.is_published && sourceMap.user_id !== user.id) {
+    throw createError.permissionDenied('You can only duplicate published maps');
+  }
+
+  // Create a new map with the same config but owned by the current user
+  const insertData: Database['public']['Tables']['maps']['Insert'] = {
+    user_id: user.id,
+    title: `${sourceMap.title} (Copy)`,
+    subtitle: sourceMap.subtitle,
+    config: sourceMap.config, // Already serialized
+    is_published: false, // Duplicates start as unpublished
+    thumbnail_url: sourceMap.thumbnail_url,
+  };
+
+  const { data, error } = await (supabase as any)
+    .from('maps')
+    .insert(insertData)
+    .select()
+    .single();
+
+  if (error) {
+    logger.error('Failed to duplicate map:', { error, sourceMapId, userId: user.id });
+    throw createError.databaseError(`Failed to duplicate map: ${error.message}`);
+  }
+
+  logger.info('Map duplicated successfully', {
+    sourceMapId,
+    newMapId: data.id,
+    userId: user.id
+  });
+
+  revalidatePath('/profile');
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
+}
+
+/**
  * Get a single map by ID (checks permissions)
  */
 export async function getMapById(id: string): Promise<SavedMap | null> {

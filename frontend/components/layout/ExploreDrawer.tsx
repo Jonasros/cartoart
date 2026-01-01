@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Compass, ExternalLink, Loader2, TrendingUp, Clock, Heart } from 'lucide-react';
+import { X, Compass, ExternalLink, Loader2, TrendingUp, Clock, Heart, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFeed } from '@/lib/actions/feed';
 import type { FeedMap } from '@/lib/actions/feed';
@@ -191,10 +191,18 @@ function ExploreCard({ map, onClose }: ExploreCardProps) {
           </div>
         )}
 
-        {/* Like count badge */}
-        <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs">
-          <Heart className="w-3 h-3" />
-          <span>{map.vote_score}</span>
+        {/* Stats badges */}
+        <div className="absolute bottom-2 right-2 flex items-center gap-2">
+          <div className="flex items-center gap-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs">
+            <Heart className="w-3 h-3" />
+            <span>{map.vote_score}</span>
+          </div>
+          {map.comment_count > 0 && (
+            <div className="flex items-center gap-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs">
+              <MessageCircle className="w-3 h-3" />
+              <span>{map.comment_count}</span>
+            </div>
+          )}
         </div>
       </div>
 

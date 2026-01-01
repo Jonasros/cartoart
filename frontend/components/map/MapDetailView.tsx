@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MapPreview } from './MapPreview';
 import { TextOverlay } from './TextOverlay';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
@@ -11,7 +12,8 @@ import { CommentList } from '@/components/comments/CommentList';
 import { CommentForm } from '@/components/comments/CommentForm';
 import { Button } from '@/components/ui/control-components';
 import { FeedHeader } from '@/components/feed/FeedHeader';
-import { Edit } from 'lucide-react';
+import { Edit, Copy, Loader2 } from 'lucide-react';
+import { duplicateMap } from '@/lib/actions/maps';
 import type { SavedMap } from '@/lib/actions/maps';
 import type { Comment } from '@/lib/actions/comments';
 
@@ -24,6 +26,22 @@ interface MapDetailViewProps {
 
 export function MapDetailView({ map, comments: initialComments, userVote, isOwner }: MapDetailViewProps) {
   const [comments, setComments] = useState(initialComments);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const router = useRouter();
+
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    try {
+      await duplicateMap(map.id);
+      // Redirect to profile where they can see and edit their new copy
+      router.push('/profile');
+    } catch (error) {
+      console.error('Failed to duplicate map:', error);
+      alert('Failed to duplicate map. Please try again.');
+    } finally {
+      setIsDuplicating(false);
+    }
+  };
 
   const handleCommentAdded = (newComment: Comment) => {
     setComments([...comments, newComment]);
@@ -89,7 +107,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                       showMarker={map.config.layers.marker}
                       markerColor={map.config.layers.markerColor || map.config.palette.primary || map.config.palette.accent || map.config.palette.text}
                       layers={map.config.layers}
-                      layerToggles={map.config.style.layerToggles}
+                      interactive={false}
                     />
                   </div>
                   
@@ -221,14 +239,33 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                 <div className="flex items-center gap-4">
                   <VoteButtons mapId={map.id} initialVote={userVote} initialScore={map.vote_score} />
                 </div>
-                
-                {isOwner && (
+
+                {isOwner ? (
                   <Link href="/profile">
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
                   </Link>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDuplicate}
+                    disabled={isDuplicating}
+                  >
+                    {isDuplicating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Duplicating...
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Duplicate to My Library
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
             </div>

@@ -43,15 +43,23 @@ export function formatRelativeTime(date: string | Date): string {
 
 /**
  * Format a date for display with full date and time
+ * Uses manual formatting for consistent server/client rendering
  * @param date - Date string or Date object
- * @returns Formatted date string
+ * @returns Formatted date string (e.g., "Jan 1, 2026, 10:29 PM")
  */
 export function formatFullDate(date: string | Date): string {
-  return new Date(date).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const d = new Date(date);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const month = months[d.getMonth()];
+  const day = d.getDate();
+  const year = d.getFullYear();
+
+  let hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  return `${month} ${day}, ${year}, ${hours}:${minutes} ${ampm}`;
 }
