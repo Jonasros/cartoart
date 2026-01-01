@@ -380,7 +380,6 @@ export function PosterEditor() {
                 onMapLoad={handleMapLoad}
                 onMove={handleMapMove}
                 layers={config.layers}
-                layerToggles={config.style.layerToggles}
               />
               
               {/* Floating Map Controls */}

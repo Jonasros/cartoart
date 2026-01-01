@@ -3,7 +3,7 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
 import Map, { type MapRef } from 'react-map-gl/maplibre';
 import { Loader2 } from 'lucide-react';
-import type { PosterLocation, LayerToggle, PosterConfig } from '@/types/poster';
+import type { PosterLocation, PosterConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { MarkerIcon } from './MarkerIcon';
 import { MAP, TIMEOUTS, TEXTURE } from '@/lib/constants';
@@ -19,7 +19,6 @@ interface MapPreviewProps {
   onMapLoad?: (map: any) => void;
   onMove?: (center: [number, number], zoom: number) => void;
   layers?: PosterConfig['layers'];
-  layerToggles?: LayerToggle[];
   /** When false, disables all map interactions (zoom, pan, rotate) for view-only mode */
   interactive?: boolean;
 }
