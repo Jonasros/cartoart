@@ -35,7 +35,8 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps) {
 
   return (
     <div className="space-y-4">
-      <Button
+      {/* Temporarily hidden Google login button */}
+      {/* <Button
         onClick={() => handleOAuth('google')}
         disabled={loading !== null}
         className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-600"
@@ -68,7 +69,7 @@ export function OAuthButtons({ redirectTo }: OAuthButtonsProps) {
             <span>Continue with Google</span>
           </>
         )}
-      </Button>
+      </Button> */}
 
       <Button
         onClick={() => handleOAuth('github')}
