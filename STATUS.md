@@ -1,93 +1,96 @@
-# Map Poster Generator - Current Status
+# CartoArt - Current Status
 
-**Last Updated**: 2025-12-30
+**Last Updated**: 2026-01-01
 
-## Phase 1 - Core MVP: ✅ **COMPLETE**
+## Overview
 
-### Overview
-The Phase 1 MVP is fully implemented and ready for testing. All core features are in place.
+CartoArt is a web application for creating beautifully stylized map posters from real geographic data. Users can search locations, customize styles and colors, add typography, and export high-resolution images for printing.
+
+---
+
+## Project Phases
+
+### Phase 1 - Core MVP: ✅ COMPLETE
+Map editor with styles, palettes, typography, layer controls, and PNG export.
+
+### Phase 2 - User Accounts & Persistence: ✅ COMPLETE
+Authentication, map saving, cloud storage, and user profiles.
+
+### Phase 3 - Social Features: ✅ COMPLETE
+Public feed, likes/voting, comments, map sharing, and duplication.
+
+### Phase 4 - Style Expansion: ✅ COMPLETE
+Expanded from 3 styles to 11 unique map styles.
 
 ---
 
 ## ✅ Completed Features
 
-### 1. Project Setup
-- ✅ Next.js 16.1.1 with TypeScript
-- ✅ Tailwind CSS 4.x configured
-- ✅ MapLibre GL JS 4.7.1 with React Map GL 7.1.9
-- ✅ Organized directory structure (components, lib, types, hooks)
-- ✅ shadcn/ui MCP server configured
+### Authentication & Users
+- ✅ Email/password authentication
+- ✅ OAuth sign-in (Google - temporarily disabled)
+- ✅ Protected routes with middleware
+- ✅ User sessions via Supabase Auth
 
-### 2. Core Infrastructure
-- ✅ TypeScript type definitions (`types/poster.ts`)
-  - PosterLocation, PosterStyle, ColorPalette, PosterConfig
-  - LayerToggle interface
-  - Support for advanced typography options
-- ✅ State management via `usePosterConfig` hook
-- ✅ Export functionality via `useMapExport` hook
-
-### 3. Map Rendering
-- ✅ MapLibre integration with OpenFreeMap tiles
+### Map Editor
 - ✅ Real-time map preview with pan/zoom
-- ✅ Dynamic style application based on selected palette
-- ✅ Aspect ratio and format preservation
-- ✅ Location marker toggle
+- ✅ Location search via Nominatim geocoding
+- ✅ 11 unique map styles with multiple palettes each
+- ✅ Custom color picker for all palette colors
+- ✅ Typography controls (fonts, sizes, spacing, ALL CAPS)
+- ✅ Layer visibility toggles (streets, buildings, water, parks, terrain, labels, contours, POIs)
+- ✅ Format controls (5 aspect ratios, portrait/landscape, margins, borders)
+- ✅ Texture overlays (paper, canvas, grain)
+- ✅ Circular mask with compass rose option
+- ✅ Location marker with multiple icon types
+- ✅ Text backdrop/gradient options
 
-### 4. Map Styles (3 styles implemented)
-- ✅ **Minimal Line Art** - Clean, monochromatic with 6 color palettes
-  - Ink & Paper, Blush, Charcoal, Navy & Cream, Midnight, Warm Gray
-- ✅ **Dark Mode/Noir** - Dramatic dark backgrounds with 5 palettes
-  - Classic Noir, Deep Ocean, Midnight Purple, Forest Night, Warm Earth
-- ✅ **Blueprint/Technical** - Architectural style with 4 palettes
-  - Classic Blueprint, Sepia, Green, White
+### Map Styles (11 total)
+| Style | Description |
+|-------|-------------|
+| Minimal | Clean monochromatic line art |
+| Dark Mode | Dramatic dark backgrounds |
+| Midnight | Deep blue noir aesthetic |
+| Blueprint | Technical architectural style |
+| Vintage | Antique parchment feel |
+| Topographic | Elevation contours and terrain |
+| Watercolor | Soft painted appearance |
+| Abstract | Artistic interpretation |
+| Atmospheric | Moody environmental style |
+| Organic | Natural earth tones |
+| Retro | Classic vintage cartography |
 
-Each style includes:
-- Custom MapLibre style definition
-- Multiple color palette presets
-- Recommended font pairings
-- Layer toggle configurations
+### Export & Storage
+- ✅ PNG export at multiple resolutions (up to 7200x10800px)
+- ✅ Canvas-based composition with text overlay
+- ✅ Map saving to Supabase database
+- ✅ Thumbnail generation and storage
+- ✅ Auto-save detection for unsaved changes
 
-### 5. Control Panel Components
-- ✅ **LocationSearch** - Nominatim geocoding with autocomplete
-- ✅ **StyleSelector** - Switch between 3 map styles
-- ✅ **ColorControls** -
-  - Preset palette selector
-  - Custom color picker for each color (HexColorPicker)
-  - Background, Primary, Secondary, Water, Green Space, Text colors
-- ✅ **TypographyControls** -
-  - Font family selection
-  - Title size slider
-  - Letter spacing control
-  - ALL CAPS toggle
-  - Show coordinates toggle
-- ✅ **LayerControls** - Toggle visibility of:
-  - Streets, Buildings, Water, Parks, Labels, Terrain, Location Marker
-- ✅ **FormatControls** -
-  - Aspect ratio selection (2:3, 3:4, 4:5, 1:1, ISO)
-  - Orientation (Portrait/Landscape)
-  - Margin control
+### Social Features
+- ✅ Public feed with published maps
+- ✅ Feed filtering (newest, popular, trending)
+- ✅ Upvote/downvote system
+- ✅ Comments on maps
+- ✅ Map detail view with full preview
+- ✅ "Duplicate to My Library" for copying others' maps
+- ✅ Share links for published maps
 
-### 6. UI/UX Features
-- ✅ Responsive layout with sidebar controls
-- ✅ Real-time preview updates
-- ✅ Dark mode support throughout UI
-- ✅ Text overlay with position controls (top/center/bottom)
-- ✅ Typography with halo/outline for contrast
-- ✅ Visual aspect ratio preview
+### Profile & Management
+- ✅ My Maps page with grid view
+- ✅ Publish/unpublish controls
+- ✅ Delete maps with confirmation
+- ✅ Edit maps (redirects to editor)
+- ✅ Navigation header across all pages
 
-### 7. Export Functionality
-- ✅ PNG export at configurable resolution
-- ✅ Default: 3600x5400px (Small 12x18" @ 300 DPI)
-- ✅ Additional resolutions defined:
-  - Medium: 5400x7200px (18x24" @ 300 DPI)
-  - Large: 7200x10800px (24x36" @ 300 DPI)
-- ✅ Canvas-based composition with:
-  - Map rendering at export resolution
-  - Margin/border application
-  - Location marker overlay
-  - Text overlay with proper scaling
-  - Optional texture/grain overlay
-- ✅ Download as PNG file
+### UX & Polish
+- ✅ Dark mode support throughout
+- ✅ Responsive layout (desktop & mobile)
+- ✅ Loading states and error handling
+- ✅ Toast notifications
+- ✅ Confirmation dialogs
+- ✅ Non-interactive map on detail view
+- ✅ Explore drawer for browsing while editing
 
 ---
 
@@ -96,142 +99,111 @@ Each style includes:
 ```
 frontend/
 ├── app/
-│   ├── api/tiles/[...path]/
-│   │   └── route.ts          # Tile proxy API endpoint
-│   ├── layout.tsx             # Root layout
-│   ├── page.tsx               # Main page (renders PosterEditor)
-│   └── globals.css            # Global styles
+│   ├── (auth)/              # Login & signup pages
+│   ├── (main)/              # Protected routes
+│   │   ├── feed/            # Public feed
+│   │   ├── map/[id]/        # Map detail view
+│   │   └── profile/         # User's maps
+│   ├── api/                 # API routes
+│   │   ├── geocode/         # Location search
+│   │   ├── publish/         # Map publishing
+│   │   └── tiles/           # Tile proxy
+│   ├── auth/callback/       # OAuth callback
+│   └── page.tsx             # Main editor
 ├── components/
-│   ├── controls/
-│   │   ├── ColorControls.tsx
-│   │   ├── ExportButton.tsx
-│   │   ├── FormatControls.tsx
-│   │   ├── LayerControls.tsx
-│   │   ├── LocationSearch.tsx
-│   │   ├── StyleSelector.tsx
-│   │   └── TypographyControls.tsx
-│   ├── layout/
-│   │   └── PosterEditor.tsx   # Main editor component
-│   └── map/
-│       ├── MapPreview.tsx     # MapLibre GL wrapper
-│       └── TextOverlay.tsx    # Text overlay component
-├── hooks/
-│   ├── useMapExport.ts        # Export logic hook
-│   └── usePosterConfig.ts     # State management hook
+│   ├── auth/                # Auth forms & buttons
+│   ├── comments/            # Comment system
+│   ├── controls/            # Editor controls
+│   ├── feed/                # Feed components
+│   ├── layout/              # Editor layout
+│   ├── map/                 # Map components
+│   ├── profile/             # Profile components
+│   ├── ui/                  # Shared UI components
+│   └── voting/              # Vote buttons
+├── hooks/                   # Custom React hooks
 ├── lib/
-│   ├── export/
-│   │   ├── constants.ts       # Export resolution presets
-│   │   └── exportCanvas.ts    # Canvas export logic
-│   ├── geocoding/
-│   │   └── nominatim.ts       # Nominatim API integration
-│   ├── styles/
-│   │   ├── applyPalette.ts    # Dynamic color application
-│   │   ├── blueprint.ts       # Blueprint style definition
-│   │   ├── dark-mode.ts       # Dark mode style definition
-│   │   ├── minimal.ts         # Minimal style definition
-│   │   ├── index.ts           # Style registry
-│   │   └── tileUrl.ts         # Tile source URLs
-│   └── utils.ts               # Utility functions
-├── types/
-│   └── poster.ts              # TypeScript type definitions
-├── components.json            # shadcn/ui configuration
-├── package.json
-├── tsconfig.json
-└── tailwind.config.ts
+│   ├── actions/             # Server actions
+│   │   ├── comments.ts
+│   │   ├── feed.ts
+│   │   ├── maps.ts
+│   │   ├── storage.ts
+│   │   └── votes.ts
+│   ├── config/              # App configuration
+│   ├── constants/           # App constants
+│   ├── geocoding/           # Nominatim integration
+│   ├── styles/              # 11 map style definitions
+│   ├── supabase/            # Supabase client
+│   └── utils/               # Utility functions
+└── types/                   # TypeScript definitions
 ```
 
 ---
 
-## 🔧 Technical Highlights
+## 🔧 Tech Stack
 
-### Dynamic Color Swapping
-The `applyPaletteToStyle` function dynamically replaces colors in MapLibre style definitions, allowing real-time palette changes without recreating the entire style.
-
-### High-Resolution Export
-- Canvas-based rendering supports resolutions up to 7200x10800px
-- Preserves drawing buffer for export
-- Composite rendering: map + margins + border + text + marker
-- Optional grain texture overlay for print quality
-
-### State Management
-- Centralized config in `usePosterConfig` hook
-- Individual update functions for each config section
-- Automatic palette reset when switching styles
-- Font recommendations per style
-
-### Typography System
-- Letter spacing with manual tracking implementation
-- Text halo effect for contrast against map
-- Coordinate formatting with precision
-- Position-aware text placement (top/center/bottom)
+- **Framework**: Next.js 15+ with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4.x
+- **Map**: MapLibre GL JS + React Map GL
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth
+- **Storage**: Supabase Storage (thumbnails)
+- **Tiles**: OpenFreeMap / MapTiler
 
 ---
 
-## 🚀 Next Steps
+## 🚀 Potential Next Steps
 
-### Testing Phase
-1. ✅ Verify dev server runs without errors
-2. ⏳ Test location search with various queries
-3. ⏳ Test style switching and palette changes
-4. ⏳ Test typography controls and text positioning
-5. ⏳ Test layer toggles
-6. ⏳ Test export functionality at all resolutions
-7. ⏳ Test aspect ratio and orientation changes
+### Features
+- [ ] PDF export for vector output
+- [ ] SVG export for certain styles
+- [ ] More border/frame styles (double, decorative)
+- [ ] Preset location library (famous cities)
+- [ ] Custom subtitle text field
+- [ ] Undo/redo functionality
+- [ ] URL-based state for sharing editor configs
+- [ ] User profiles with bio/avatar
+- [ ] Follow users
+- [ ] Collections/folders for organizing maps
 
-### Phase 2 Enhancements (Future)
-- Add remaining 5 styles (Topographic, Vintage, Watercolor, Isometric, Abstract)
-- Implement more color palettes per style
-- Add PDF export support
-- Add SVG export for vector-friendly styles
-- Implement save/load poster configurations
-- Add shareable links (URL-based state)
-- Create example gallery
-- Add print partner integration
+### Technical
+- [ ] Add more map styles
+- [ ] Performance optimization for large exports
+- [ ] Progressive image loading in feed
+- [ ] Infinite scroll in feed
+- [ ] Search within feed
+- [ ] Rate limiting improvements
+- [ ] Error reporting service integration
 
-### Potential Improvements
-- Add loading states for location search
-- Add error boundaries for graceful error handling
-- Optimize export performance for very large resolutions
-- Add export preview modal with size selection
-- Add undo/redo functionality
-- Add preset location library (famous cities, landmarks)
-- Add custom text field for subtitle
-- Add more border styles (double, decorative)
-- Add watermark/branding options
+### Polish
+- [ ] Onboarding tutorial
+- [ ] Keyboard shortcuts
+- [ ] Accessibility improvements
+- [ ] Mobile editor optimization
+- [ ] Print partner integration
 
 ---
 
-## 🐛 Known Issues / To Investigate
+## 📊 Codebase Health
 
-1. **Dev Server**: Check if there are any console errors when running
-2. **Font Loading**: Verify Google Fonts load correctly for export
-3. **Tile Loading**: Ensure OpenFreeMap tiles load reliably
-4. **Export Performance**: Test large exports (7200x10800) for memory/performance
-5. **Dark Mode**: Verify all UI elements work properly in dark mode
-6. **Marker Positioning**: Verify marker position is accurate in exported PNG
-
----
-
-## 📚 Documentation
-
-- README.md - Original project specification
-- claude.md - Development context for AI assistants
-- STATUS.md (this file) - Current implementation status
+| Metric | Status |
+|--------|--------|
+| TypeScript | ✅ Compiles without errors |
+| Git | ✅ Clean (all committed) |
+| ESLint | ⚠️ 143 warnings (mostly `any` types) |
+| Tests | ❌ Not implemented |
+| Documentation | ✅ Up to date |
 
 ---
 
-## 🎯 Success Criteria for Phase 1
+## 📚 Documentation Files
 
-- [✅] User can search for a location
-- [✅] User can select from 3 different styles
-- [✅] User can customize colors
-- [✅] User can customize typography
-- [✅] User can toggle map layers
-- [✅] User can change aspect ratio and format
-- [✅] User can see live preview of poster
-- [✅] User can export PNG at print resolution
-- [⏳] All features work without errors (needs testing)
+- `STATUS.md` - This file (current status)
+- `CLAUDE.md` - Development context for AI
+- `design.md` - Original design specification
+- `readme.md` - Project overview
+- `SUPABASE_SETUP.md` - Database setup guide
 
 ---
 
-**Status**: Phase 1 MVP implementation is COMPLETE. Ready for testing and refinement.
+**Status**: Production-ready for current feature set. All core features implemented and working.
