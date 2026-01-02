@@ -194,7 +194,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
           onFocus={() => {
             if (results.length > 0) setIsOpen(true);
           }}
-          placeholder="Search for a location..."
+          placeholder="Search for your adventure"
           aria-autocomplete="list"
           aria-expanded={isOpen}
           aria-controls="location-search-results"

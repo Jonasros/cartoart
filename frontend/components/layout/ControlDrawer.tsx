@@ -171,7 +171,9 @@ export function ControlDrawer({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Search Location
+                    {config.location.name && config.location.name !== 'WHERE WE MET'
+                      ? `Adventure in ${config.location.name}`
+                      : 'Search Location'}
                   </h3>
                   <LocationSearch
                     onLocationSelect={updateLocation}
