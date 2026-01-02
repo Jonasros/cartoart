@@ -265,6 +265,176 @@ Expand into nautical niche with specialized features.
 
 ---
 
+## Phase 4: 3D Printed Route Sculptures
+
+Transform GPS routes into physical 3D sculptures — a tangible keepsake of adventures.
+
+### 🎯 Concept
+
+Instead of just 2D posters, users can order a **3D printed sculpture** of their route. The GPS track becomes a physical ribbon/line that captures the journey's path and elevation profile.
+
+### Target Customers
+
+| Customer | Use Case | Emotional Hook |
+|----------|----------|----------------|
+| **Hikers** | Personal achievement | "My summit in physical form" |
+| **Gift-givers** | Meaningful present | "I 3D printed our honeymoon hike" |
+| **Runners** | Race commemoration | "My marathon route as art" |
+| **Cyclists** | Epic ride memory | "My first century ride sculpture" |
+
+### Product Concepts
+
+**MVP: Route Sculpture (Recommended)**
+- GPS track extruded as a 3D ribbon/line
+- Z-axis represents actual elevation profile
+- Mounted on a stylized base (rectangular, circular, or custom)
+- Simpler to generate, unique visual, lower compute requirements
+
+**Future: Terrain Relief + Route**
+- Full topographical model of the surrounding area
+- Route etched or raised on terrain surface
+- More impressive but significantly more complex
+- Requires DEM (Digital Elevation Model) data integration
+
+### Product Specifications (MVP)
+
+| Attribute | Specification |
+|-----------|---------------|
+| **Size** | 10-15cm (desktop/shelf display) |
+| **Materials** | PLA plastic, wood-fill PLA, resin (user choice) |
+| **Base styles** | 2-3 options (rectangular, circular, organic) |
+| **Fulfillment** | Partner print service (not self-print STL) |
+| **Lead time** | 1-3 weeks (standard 3D print fulfillment) |
+
+### Pricing Strategy
+
+| Product | Price Range | Margin Notes |
+|---------|-------------|--------------|
+| **Small (10cm)** | €79-99 | Entry point, gift-friendly |
+| **Medium (15cm)** | €119-149 | Premium display piece |
+| **Large (20cm+)** | €179-249 | Statement piece, future option |
+
+Higher margins than posters — 3D prints command premium pricing for personalization.
+
+### Why This Stands Out
+
+| Factor | Advantage |
+|--------|-----------|
+| **Zero competition** | Nobody does route-specific 3D sculptures |
+| **Premium positioning** | €100+ price point vs €20-40 posters |
+| **Tactile value** | Physical object > flat print for many buyers |
+| **Gift appeal** | Exceptional for meaningful occasions |
+| **Upsell path** | Poster customers → 3D sculpture upgrade |
+
+### Data We Already Have
+
+From existing GPX upload:
+- ✅ Route coordinates (lat/lng for each point)
+- ✅ Elevation data at each point
+- ✅ Route statistics (distance, elevation gain/loss)
+- ✅ Bounding box for the area
+
+What we'd need to add:
+- ⚠️ Terrain DEM data (only if doing terrain relief, not needed for route-only)
+- 🔧 3D mesh generation (Three.js / server-side processing)
+- 🔧 STL export for print fulfillment
+- 🔧 3D preview in browser
+
+### Technical Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SHARED DATA LAYER                        │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Location / Route Selection (same for both modes)   │    │
+│  │  • GPX upload with elevation                         │    │
+│  │  • Coordinates, bounds, stats                        │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────┐
+│     POSTER MODE         │     │     3D PRINT MODE       │
+│  ┌───────────────────┐  │     │  ┌───────────────────┐  │
+│  │ Map Styles (11)   │  │     │  │ 3D Preview        │  │
+│  │ Color Palettes    │  │     │  │ (Three.js/R3F)    │  │
+│  │ Typography        │  │     │  │ Rotate/Zoom       │  │
+│  │ Export PNG        │  │     │  └───────────────────┘  │
+│  └───────────────────┘  │     │  ┌───────────────────┐  │
+│                         │     │  │ Model Style       │  │
+│                         │     │  │ • Base shape      │  │
+│                         │     │  │ • Size selection  │  │
+│                         │     │  │ • Material choice │  │
+│                         │     │  └───────────────────┘  │
+│                         │     │  ┌───────────────────┐  │
+│                         │     │  │ Order Flow        │  │
+│                         │     │  │ • Generate STL    │  │
+│                         │     │  │ • Send to partner │  │
+│                         │     │  │ • Checkout        │  │
+│                         │     │  └───────────────────┘  │
+└─────────────────────────┘     └─────────────────────────┘
+```
+
+### App Integration
+
+**Tab-Based Mode Switching:**
+```
+[ 🖼️ Poster ]    [ 🏔️ 3D Print ]
+```
+
+Both modes share the same location/route selection — user just switches output format.
+
+### Technical Requirements
+
+**Frontend:**
+- Three.js or React Three Fiber for 3D preview
+- Mesh generation from route coordinates + elevation
+- Interactive preview (rotate, zoom, pan)
+
+**Backend/Processing:**
+- STL file generation (may need server-side for complex meshes)
+- Integration with print fulfillment API
+- Order management and tracking
+
+**Fulfillment Partners (Options):**
+- Shapeways (API available)
+- i.materialise (API available)
+- Craftcloud (aggregator)
+- Local/regional 3D print services
+
+### MVP Feature Set
+
+- [ ] Tab to switch between Poster and 3D Print modes
+- [ ] 3D preview of route sculpture (rotatable)
+- [ ] 2-3 base style options
+- [ ] Size selection (10cm, 15cm)
+- [ ] Material selection (PLA, wood-fill, resin)
+- [ ] Generate printable mesh from route data
+- [ ] Integration with fulfillment partner API
+- [ ] Order checkout and payment
+- [ ] Order tracking/status
+
+### Challenges & Mitigations
+
+| Challenge | Mitigation |
+|-----------|------------|
+| **Processing power** | Start with route-only (no terrain), server-side generation for complex routes |
+| **Preview performance** | Level-of-detail (LOD) for smooth browser rendering |
+| **Print quality** | Validate mesh is "watertight" (manifold) before sending to printer |
+| **Lead times** | Set clear expectations (1-3 weeks), provide tracking |
+| **Returns/quality** | Partner with reliable fulfillment, quality samples first |
+
+### Success Metrics
+
+- 3D print orders per month
+- Conversion rate (route upload → 3D order)
+- Average order value
+- Customer satisfaction / repeat orders
+- Poster → 3D upsell rate
+
+---
+
 ## Implementation Roadmap
 
 ### Phase 1.1: Core Route MVP ✅ COMPLETE
