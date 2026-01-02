@@ -23,12 +23,14 @@ waymarker/
 │   │   ├── page.tsx              # Main page
 │   │   └── globals.css           # Global styles
 │   ├── components/
-│   │   ├── controls/    # ✅ All 6 control components
+│   │   ├── controls/    # ✅ All control components
 │   │   │   ├── ColorControls.tsx
 │   │   │   ├── ExportButton.tsx
 │   │   │   ├── FormatControls.tsx
 │   │   │   ├── LayerControls.tsx
 │   │   │   ├── LocationSearch.tsx
+│   │   │   ├── RouteStyleControls.tsx  # GPX route styling
+│   │   │   ├── RouteUpload.tsx         # GPX file upload
 │   │   │   ├── StyleSelector.tsx
 │   │   │   └── TypographyControls.tsx
 │   │   ├── layout/
@@ -42,6 +44,9 @@ waymarker/
 │   ├── lib/
 │   │   ├── export/      # ✅ Canvas export logic
 │   │   ├── geocoding/   # ✅ Nominatim integration
+│   │   ├── route/       # ✅ GPX parsing and route utilities
+│   │   │   ├── index.ts
+│   │   │   └── parseGPX.ts
 │   │   └── styles/      # ✅ 3 complete styles
 │   │       ├── minimal.ts
 │   │       ├── dark-mode.ts
@@ -127,6 +132,59 @@ interface PosterConfig {
     terrain: boolean;
     labels: boolean;
   };
+  route?: RouteConfig; // GPX route support
+}
+```
+
+### RouteConfig (GPX Route Support)
+```typescript
+interface RoutePoint {
+  lat: number;
+  lng: number;
+  elevation?: number;
+  time?: Date;
+}
+
+interface RouteStats {
+  distance: number;        // in meters
+  elevationGain: number;   // in meters
+  elevationLoss: number;   // in meters
+  minElevation: number;    // in meters
+  maxElevation: number;    // in meters
+  duration?: number;       // in seconds (if time data available)
+  startTime?: Date;
+  endTime?: Date;
+}
+
+interface RouteData {
+  name?: string;
+  description?: string;
+  points: RoutePoint[];
+  stats: RouteStats;
+  bounds: [[number, number], [number, number]]; // SW, NE corners [lng, lat]
+}
+
+interface RouteStyle {
+  color: string;
+  width: number;           // in pixels
+  opacity: number;         // 0-1
+  lineStyle: 'solid' | 'dashed' | 'dotted';
+  showStartEnd: boolean;   // Show start/end markers
+  startColor?: string;
+  endColor?: string;
+}
+
+interface PrivacyZone {
+  center: [number, number]; // [lng, lat]
+  radiusMeters: number;
+}
+
+interface RouteConfig {
+  data: RouteData | null;
+  style: RouteStyle;
+  privacyZones: PrivacyZone[];
+  showStats: boolean;
+  statsPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 ```
 
@@ -144,6 +202,7 @@ interface PosterConfig {
 - [x] Layer toggles (streets, buildings, water, parks, labels, terrain, marker)
 - [x] Format/aspect ratio options (5 ratios, portrait/landscape)
 - [x] Multiple color palettes per style (15 total palettes)
+- [x] GPX route support (upload, parse, display, style customization)
 
 **Current Task**: Testing and refinement
 
@@ -264,6 +323,11 @@ interface PosterConfig {
 - ✅ Layer visibility toggles
 - ✅ Aspect ratio and format options
 - ✅ PNG export at multiple resolutions
+- ✅ GPX route upload and display
+- ✅ Route styling (color, width, opacity, line style)
+- ✅ Start/end markers for routes
+- ✅ Route stats calculation (distance, elevation)
+- ✅ Route persistence in saved/published maps
 
 ### Next Steps
 1. **Test in browser** - Verify all features work
@@ -277,6 +341,15 @@ interface PosterConfig {
 - Canvas-based high-resolution export (up to 7200x10800px)
 - Comprehensive state management via hooks
 - Responsive UI with dark mode support
+- GPX route support with full persistence:
+  - Upload and parse GPX files (lib/route/parseGPX.ts)
+  - Display routes on map with MapLibre GL layers
+  - Customizable route styling (color, width, opacity, line style)
+  - Start/end point markers with configurable colors
+  - Automatic bounds fitting to route extent
+  - Route stats calculation (distance, elevation gain/loss)
+  - Zod schema validation for route persistence
+  - Routes display correctly on published/shared maps
 
 ---
 

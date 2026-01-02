@@ -646,6 +646,192 @@ Before exporting, verify:
 - [ ] Is it distinctive or generic?
 - [ ] Does it capture the spirit of the place?
 
+**Route-Specific (if applicable)**
+- [ ] Route color has sufficient contrast against all map elements
+- [ ] Route width appropriate for style (not too thin or dominant)
+- [ ] Start/end markers visible but not overwhelming
+- [ ] Route fits within margins with adequate padding
+- [ ] Line style matches overall poster aesthetic
+- [ ] Privacy zones don't create awkward visual cuts
+
+---
+
+## Part 8: GPX Route Styling
+
+Routes add a dynamic storytelling element to map posters - they show journeys, adventures, and personal experiences overlaid on geographic data.
+
+### Route Design Philosophy
+
+**Purpose**: Routes transform a static map into a narrative. The route should feel like a natural part of the composition, not a jarring addition.
+
+**Key Principle**: The route is the hero of the poster when present. Design choices should support this while maintaining harmony with the underlying map style.
+
+### Route Color Selection
+
+**Contrast is Essential**: The route must be clearly visible against all map elements it crosses (water, land, streets, parks).
+
+**Style-Appropriate Colors**:
+
+**Minimal Line Art**:
+- Use the accent color or a muted version of text color
+- Coral (#E07A5F), Terracotta (#C17767), Muted Red (#A85C50)
+- Avoid bright colors that break the minimal aesthetic
+
+**Dark Mode / Noir**:
+- Jewel tones work beautifully: Ruby (#E63946), Electric Blue (#00D4FF), Gold (#D4AF37)
+- High-contrast colors make routes pop dramatically
+- Can use gradients from start to end for elevation or time
+
+**Blueprint / Technical**:
+- Bright cyan (#7DF9FF) or white for primary route
+- Creates a "planned path" appearance
+- Consider dashed lines to match technical drawing conventions
+
+**Vintage / Antique**:
+- Warm, muted colors: Brick Red (#8B4513), Aged Coral (#C17767), Deep Rust (#9E5A4A)
+- Should look like hand-drawn ink on old paper
+- Avoid modern bright colors
+
+**Watercolor / Painted**:
+- Soft, slightly saturated: Rose (#D4A89A), Soft Coral (#E8B4A8), Muted Terracotta (#C9A78C)
+- Route should have same "soft" feeling as the style
+- Consider slightly irregular line edges
+
+**Topographic / Contour**:
+- Trail-marker colors work well: Trail Red (#C0392B), Blaze Orange (#E67E22)
+- Or use contour colors for consistency
+- Route becomes part of the terrain story
+
+### Route Line Styles
+
+**Solid Lines**:
+- Clean, modern, confident
+- Best for: Minimal, Dark Mode, Blueprint
+- Recommended width: 3-6px screen, 4-8pt print
+
+**Dashed Lines**:
+- Technical, planned, intentional
+- Best for: Blueprint, Topographic, Abstract
+- Dash pattern: 10-15px dash, 5-8px gap
+
+**Dotted Lines**:
+- Softer, more organic, exploratory
+- Best for: Watercolor, Vintage, hand-drawn styles
+- Dot spacing: 6-10px
+
+### Start/End Markers
+
+**Visual Hierarchy**:
+- Markers should be noticeable but not overwhelming
+- Typically 1.5-2x the route line width
+- Start and end can use different colors or same color
+
+**Color Recommendations**:
+- **Start**: Greens, teals - suggests beginning, nature, go
+- **End**: Reds, corals - suggests destination, achievement, stop
+- **Alternative**: Use route color for both, just different shapes
+
+**Shape Options**:
+- Circles: Universal, clean, works with all styles
+- Flags: More dynamic, suggests waypoints
+- Custom icons: For themed posters (hiking boot, bike, etc.)
+
+### Route Width Guidelines
+
+**Screen Display**:
+- Minimum: 2px (may be hard to see)
+- Recommended: 3-5px
+- Maximum: 8px (route becomes dominant)
+
+**Print Export** (at 300 DPI):
+- Minimum: 2pt (0.7mm)
+- Recommended: 4-6pt (1.4-2.1mm)
+- Maximum: 8pt (2.8mm)
+
+**Rule of Thumb**: Route width should be similar to or slightly thicker than major streets.
+
+### Route Opacity
+
+**Full Opacity (100%)**:
+- Route is clearly the focus
+- Works for minimal maps with less detail
+- Best for dark mode styles
+
+**Medium Opacity (70-85%)**:
+- Route is prominent but map shows through
+- Good balance for most styles
+- Helps route integrate with map
+
+**Lower Opacity (50-70%)**:
+- More subtle, artistic integration
+- Good for watercolor and vintage styles
+- May need thicker line to compensate
+
+### Composition with Routes
+
+**Route Placement**:
+- Unlike point locations, routes determine their own positioning
+- Ensure route fits entirely within margins
+- Auto-fit should center the route with appropriate padding
+
+**Text Placement**:
+- Avoid placing text directly over the route
+- If route crosses text area, consider text backdrop
+- Route statistics (distance, elevation) can complement main text
+
+**Visual Balance**:
+- Routes add visual weight
+- If route is in one corner, balance with text in opposite area
+- Dense route sections are "heavier" than sparse sections
+
+### Privacy Zones
+
+**Purpose**: Allow users to hide sensitive start/end points (home, workplace).
+
+**Visual Approach**:
+- Route fades or is clipped at privacy zone boundaries
+- Creates natural-looking endpoints
+- Privacy radius should be generous (200-1000m)
+
+**Design Consideration**: The "hidden" portion shouldn't look like an error - it should feel intentional, like the journey simply begins and ends at those points.
+
+### Route + Style Palette Examples
+
+```
+Style: Minimal + Route
+Route Color: #E07A5F (muted coral)
+Route Width: 4px
+Line Style: Solid
+Start Marker: #6B8E6B (sage green)
+End Marker: #E07A5F (coral)
+```
+
+```
+Style: Dark Mode + Route
+Route Color: #FFD700 (gold)
+Route Width: 4px
+Line Style: Solid
+Start Marker: #4ECDC4 (teal)
+End Marker: #FF6B6B (coral red)
+```
+
+```
+Style: Vintage + Route
+Route Color: #9E5A4A (rust)
+Route Width: 5px
+Line Style: Dotted
+Start Marker: #5C715E (forest sage)
+End Marker: #9E5A4A (rust)
+```
+
+```
+Style: Blueprint + Route
+Route Color: #7DF9FF (bright cyan)
+Route Width: 4px
+Line Style: Dashed
+Start/End: #FFFFFF (white circles)
+```
+
 ---
 
 ## Appendix: Color Values Quick Reference
@@ -694,6 +880,28 @@ Bright gold: #FFD700
 Rose gold: #E8B4B8
 Bronze: #CD7F32
 Silver: #C0C0C0
+```
+
+### Recommended Route Colors
+
+```
+Coral (versatile): #E07A5F
+Terracotta: #C17767
+Muted red: #A85C50
+Deep rust: #9E5A4A
+Trail red: #C0392B
+Blaze orange: #E67E22
+```
+
+### Route Marker Colors
+
+```
+Start green: #6B8E6B
+Start teal: #4ECDC4
+End coral: #FF6B6B
+End rust: #9E5A4A
+Universal white: #FFFFFF
+Universal gold: #FFD700
 ```
 
 ---

@@ -63,10 +63,14 @@ Phase 3: Sailing / Voyage Maps (nautical features)
 ✅ **11 beautiful map styles** (most competitors have 3-5)
 ✅ **15 color palettes** with real-time preview
 ✅ **Typography controls** (fonts, sizes, positioning)
-✅ **Privacy zones** for route protection
-✅ **Elevation gradients** for trail visualization
-✅ **Stats overlays** (distance, elevation, duration)
-✅ **High-res export** (up to 7200x10800px)
+✅ **GPX route upload** with drag-and-drop
+✅ **Route styling** (color, width, opacity, solid/dashed/dotted)
+✅ **Start/end markers** with customizable colors
+✅ **Privacy zones** for route protection (hide start/end)
+✅ **Route statistics** (distance, elevation gain/loss calculated)
+✅ **High-res export** (up to 7200x10800px) including routes
+✅ **Social features** (feed, likes, comments, sharing)
+✅ **Route persistence** (save, share, duplicate maps with routes)
 
 **Positioning**: "Adventure route art that looks like a design studio made it" — more opinionated, more premium, simpler workflow.
 
@@ -89,7 +93,7 @@ Best for solo founder — simple, no subscription friction, works with impulse g
 
 ---
 
-## Phase 1: Hiking Route Posters (MVP)
+## Phase 1: Hiking Route Posters (MVP) ✅ COMPLETE
 
 ### Target Use Cases
 
@@ -102,16 +106,20 @@ Best for solo founder — simple, no subscription friction, works with impulse g
 
 ### MVP Feature Set
 
-- [ ] **GPX file upload** with drag-and-drop
-- [ ] **Auto-parse** coordinates, bounds, distance, elevation
-- [ ] **Auto-fit map** to route bounds
-- [ ] **Route rendering** as styled GeoJSON line
-- [ ] **Basic styling** (color, width from palette)
-- [ ] **Start/end markers** (customizable icons)
-- [ ] **Privacy zone** (hide first/last 200m by default)
-- [ ] **Stats overlay** (distance, elevation gain, optional date)
-- [ ] **Works with all 11 existing styles**
-- [ ] **High-res export** includes route layer
+- [x] **GPX file upload** with drag-and-drop
+- [x] **Auto-parse** coordinates, bounds, distance, elevation
+- [x] **Auto-fit map** to route bounds
+- [x] **Route rendering** as styled GeoJSON line
+- [x] **Basic styling** (color, width, opacity, line style)
+- [x] **Start/end markers** (configurable colors)
+- [x] **Privacy zone** (hide first/last portion of route)
+- [x] **Route statistics** (distance, elevation gain/loss calculated)
+- [x] **Works with all 11 existing styles**
+- [x] **High-res export** includes route layer
+- [x] **Route persistence** in saved maps
+- [x] **Routes on published maps** display correctly
+- [x] **Duplication** preserves route data
+- [x] **Mode toggle** between single location and route mode
 
 ### Technical Architecture
 
@@ -135,50 +143,51 @@ Best for solo founder — simple, no subscription friction, works with impulse g
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Core Types
+### Core Types (Implemented)
 
 ```typescript
-// lib/gpx/types.ts
-interface ParsedRoute {
+// lib/route/index.ts - Actual implementation
+interface RoutePoint {
+  lat: number;
+  lng: number;
+  elevation?: number;
+  time?: string;
+}
+
+interface RouteStats {
+  distance: number;        // meters
+  elevationGain: number;   // meters
+  elevationLoss: number;   // meters
+  minElevation?: number;
+  maxElevation?: number;
+  duration?: number;       // seconds
+}
+
+interface RouteData {
   name?: string;
-  coordinates: [number, number][]; // [lng, lat]
-  bounds: [[number, number], [number, number]]; // SW, NE
-  distance: number; // meters
-  elevation?: {
-    gain: number;
-    loss: number;
-    min: number;
-    max: number;
-    profile: number[]; // for elevation chart
-  };
-  duration?: number; // seconds
-  startTime?: Date;
+  points: RoutePoint[];
+  stats: RouteStats;
+}
+
+interface RouteStyle {
+  color: string;
+  width: number;           // 2-8px
+  opacity: number;         // 0-1
+  lineStyle: 'solid' | 'dashed' | 'dotted';
 }
 
 interface RouteConfig {
-  gpxData?: ParsedRoute;
-
-  // Styling
-  routeColor: string;
-  routeWidth: number; // 2-12px
-  routeStyle: 'solid' | 'dashed' | 'dotted';
-
-  // Gradients (Phase 2)
-  useElevationGradient: boolean;
-  gradientColors?: [string, string];
-
-  // Markers
+  enabled: boolean;
+  data?: RouteData;
+  style: RouteStyle;
   showStartMarker: boolean;
   showEndMarker: boolean;
-  markerStyle: 'pin' | 'flag' | 'circle' | 'dot';
-
-  // Stats overlay
-  showStats: boolean;
-  statsPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  statsToShow: ('distance' | 'elevation' | 'duration' | 'date')[];
-
-  // Privacy
-  privacyZoneMeters: number; // 0 = off, 200 = default
+  startMarkerColor: string;
+  endMarkerColor: string;
+  privacyZone: {
+    enabled: boolean;
+    distance: number;      // meters
+  };
 }
 ```
 
@@ -258,25 +267,28 @@ Expand into nautical niche with specialized features.
 
 ## Implementation Roadmap
 
-### Phase 1.1: Core Route MVP (Current Priority)
-- [ ] Install `@we-gold/gpxjs` dependency
-- [ ] Create GPX parser utility (`lib/gpx/parser.ts`)
-- [ ] Add `RouteConfig` to poster types
-- [ ] Create `RouteLayer` component for MapPreview
-- [ ] Create `RouteControls` panel in editor
-- [ ] Implement privacy zone trimming
-- [ ] Add stats overlay component
-- [ ] Update export to include route layer
-- [ ] Test with sample GPX files from various sources
+### Phase 1.1: Core Route MVP ✅ COMPLETE
+- [x] GPX parser utility (`lib/route/parseGPX.ts`)
+- [x] Add `RouteConfig` to poster types with Zod validation
+- [x] Create route layer rendering in MapPreview
+- [x] Create `RouteControls` panel in editor
+- [x] Implement privacy zone trimming
+- [x] Calculate route statistics (distance, elevation)
+- [x] Update export to include route layer
+- [x] Route persistence in database (saved maps)
+- [x] Route display on published/shared maps
+- [x] Route duplication support
 
-### Phase 1.2: Enhanced Route Styling
+### Phase 1.2: Enhanced Route Styling (Partially Complete)
+- [x] Solid/dashed/dotted line styles
+- [x] Route opacity control
+- [x] Start/end marker colors
 - [ ] Elevation gradient coloring
-- [ ] Dashed/dotted line styles
 - [ ] Glow/shadow effects on route
 - [ ] Multiple route colors for segments
 - [ ] Mile/KM markers along route
 
-### Phase 1.3: Integrations (Optional)
+### Phase 1.3: Integrations (Future)
 - [ ] Strava OAuth integration
 - [ ] AllTrails integration
 - [ ] Garmin Connect integration
@@ -366,20 +378,27 @@ Expand into nautical niche with specialized features.
 
 ---
 
-## Next Steps (Immediate)
+## Next Steps
 
-1. Create branch: `feature/route-support`
-2. Install `@we-gold/gpxjs`
-3. Build GPX parser with TypeScript types
-4. Add RouteLayer component to MapPreview
-5. Create RouteControls panel
-6. Test with sample GPX files (hiking, cycling, running)
-7. Implement privacy zone
-8. Add stats overlay
-9. Update export to include route layer
-10. Test across all 11 map styles
+### Completed ✅
+1. ~~Create branch: `feature/route-support`~~
+2. ~~Build GPX parser with TypeScript types~~
+3. ~~Add RouteLayer component to MapPreview~~
+4. ~~Create RouteControls panel~~
+5. ~~Implement privacy zone~~
+6. ~~Update export to include route layer~~
+7. ~~Test across all 11 map styles~~
+8. ~~Route persistence in saved maps~~
+9. ~~Route display on published maps~~
+
+### Next Priority
+1. Add elevation gradient coloring
+2. Add stats overlay component (distance, elevation display)
+3. Test with more GPX sources (Strava, Garmin, AllTrails)
+4. Consider Strava OAuth integration
 
 ---
 
-**Status**: Planning Complete - Ready for Implementation
+**Status**: Phase 1 MVP Complete ✅ - Route support is live
 **Focus**: Hiking/Outdoor Adventure route posters as primary launch niche
+**Implemented**: GPX upload, route styling, privacy zones, persistence, sharing

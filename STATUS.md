@@ -1,6 +1,6 @@
 # Waymarker - Current Status
 
-**Last Updated**: 2026-01-01
+**Last Updated**: 2026-01-02
 
 ## Overview
 
@@ -21,6 +21,9 @@ Public feed, likes/voting, comments, map sharing, and duplication.
 
 ### Phase 4 - Style Expansion: ✅ COMPLETE
 Expanded from 3 styles to 11 unique map styles.
+
+### Phase 5 - GPX Route Support: ✅ COMPLETE
+Upload GPX files to display hiking, running, and cycling routes on map posters.
 
 ---
 
@@ -92,6 +95,21 @@ Expanded from 3 styles to 11 unique map styles.
 - ✅ Non-interactive map on detail view
 - ✅ Explore drawer for browsing while editing
 
+### GPX Route Support
+- ✅ GPX file upload with drag-and-drop
+- ✅ Route parsing with elevation and time data
+- ✅ Route display on map with MapLibre GL layers
+- ✅ Route styling (color, width, opacity, line style)
+- ✅ Solid, dashed, and dotted line styles
+- ✅ Start/end point markers with configurable colors
+- ✅ Automatic bounds fitting to route extent
+- ✅ Route statistics calculation (distance, elevation gain/loss)
+- ✅ Privacy zone support (hide route start/end)
+- ✅ Route persistence in saved maps
+- ✅ Routes display on published/shared maps
+- ✅ Duplication preserves route data
+- ✅ Toggle between single location and route mode
+
 ---
 
 ## 📁 Project Structure
@@ -131,8 +149,12 @@ frontend/
 │   ├── config/              # App configuration
 │   ├── constants/           # App constants
 │   ├── geocoding/           # Nominatim integration
+│   ├── route/               # GPX parsing and route utilities
+│   │   ├── index.ts
+│   │   └── parseGPX.ts
 │   ├── styles/              # 11 map style definitions
 │   ├── supabase/            # Supabase client
+│   ├── validation/          # Zod schemas for config validation
 │   └── utils/               # Utility functions
 └── types/                   # TypeScript definitions
 ```
