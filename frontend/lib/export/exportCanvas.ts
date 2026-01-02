@@ -107,8 +107,8 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
     exportCtx.drawImage(mapCanvas, marginPx, marginPx, drawWidth, drawHeight);
     exportCtx.restore();
 
-    // 5. DRAW MARKER
-    if (config.layers.marker) {
+    // 5. DRAW MARKER (only when there's no route - routes have their own start/end markers)
+    if (config.layers.marker && !config.route?.data) {
       const markerX = marginPx + drawWidth / 2;
       const markerY = marginPx + drawHeight / 2;
       const markerSize = exportResolution.width * 0.045;

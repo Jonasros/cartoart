@@ -2,7 +2,7 @@
 
 import { useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette } from '@/types/poster';
+import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette, RouteConfig } from '@/types/poster';
 import { DEFAULT_CONFIG } from '@/lib/config/defaults';
 import { useUserLocation } from './useUserLocation';
 import { encodeConfig, decodeConfig } from '@/lib/config/url-state';
@@ -16,6 +16,7 @@ type PosterAction =
   | { type: 'UPDATE_TYPOGRAPHY'; payload: Partial<PosterConfig['typography']> }
   | { type: 'UPDATE_FORMAT'; payload: Partial<PosterConfig['format']> }
   | { type: 'UPDATE_LAYERS'; payload: Partial<PosterConfig['layers']> }
+  | { type: 'UPDATE_ROUTE'; payload: RouteConfig | undefined }
   | { type: 'SET_LOCATION'; payload: PosterLocation }
   | { type: 'SET_CONFIG'; payload: PosterConfig };
 
@@ -70,6 +71,11 @@ function posterReducer(state: PosterConfig, action: PosterAction): PosterConfig 
       return {
         ...state,
         layers: { ...state.layers, ...action.payload },
+      };
+    case 'UPDATE_ROUTE':
+      return {
+        ...state,
+        route: action.payload,
       };
     default:
       return state;
@@ -261,6 +267,10 @@ export function usePosterConfig() {
     dispatch({ type: 'UPDATE_LAYERS', payload: layers });
   }, []);
 
+  const updateRoute = useCallback((route: RouteConfig | undefined) => {
+    dispatch({ type: 'UPDATE_ROUTE', payload: route });
+  }, []);
+
   const undo = useCallback(() => {
     if (historyIndexRef.current > 0) {
       historyIndexRef.current--;
@@ -295,6 +305,7 @@ export function usePosterConfig() {
     updateTypography,
     updateFormat,
     updateLayers,
+    updateRoute,
     setConfig,
     undo,
     redo,

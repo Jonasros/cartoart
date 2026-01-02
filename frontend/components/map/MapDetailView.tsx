@@ -107,6 +107,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                       showMarker={map.config.layers.marker}
                       markerColor={map.config.layers.markerColor || map.config.palette.primary || map.config.palette.accent || map.config.palette.text}
                       layers={map.config.layers}
+                      route={map.config.route}
                       interactive={false}
                     />
                   </div>

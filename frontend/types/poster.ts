@@ -72,6 +72,7 @@ export interface PosterConfig {
   location: PosterLocation;
   style: PosterStyle;
   palette: ColorPalette;
+  route?: RouteConfig; // Optional route/journey data
   typography: {
     titleFont: string;
     titleSize: number;
@@ -131,5 +132,55 @@ export interface SavedProject {
   name: string;
   config: PosterConfig;
   updatedAt: number;
+}
+
+// Route/Journey Types for GPX/GPS data
+export interface RoutePoint {
+  lat: number;
+  lng: number;
+  elevation?: number;
+  time?: Date;
+}
+
+export interface RouteStats {
+  distance: number; // in meters
+  elevationGain: number; // in meters
+  elevationLoss: number; // in meters
+  minElevation: number; // in meters
+  maxElevation: number; // in meters
+  duration?: number; // in seconds (if time data available)
+  startTime?: Date;
+  endTime?: Date;
+}
+
+export interface RouteData {
+  name?: string;
+  description?: string;
+  points: RoutePoint[];
+  stats: RouteStats;
+  bounds: [[number, number], [number, number]]; // SW, NE corners [lng, lat]
+}
+
+export interface RouteStyle {
+  color: string;
+  width: number; // in pixels
+  opacity: number; // 0-1
+  lineStyle: 'solid' | 'dashed' | 'dotted';
+  showStartEnd: boolean; // Show start/end markers
+  startColor?: string;
+  endColor?: string;
+}
+
+export interface PrivacyZone {
+  center: [number, number]; // [lng, lat]
+  radiusMeters: number;
+}
+
+export interface RouteConfig {
+  data: RouteData | null;
+  style: RouteStyle;
+  privacyZones: PrivacyZone[];
+  showStats: boolean;
+  statsPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 

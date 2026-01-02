@@ -1,13 +1,14 @@
 'use client';
 
-import { useRef, useCallback, useEffect, useState } from 'react';
-import Map, { type MapRef } from 'react-map-gl/maplibre';
+import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import Map, { Source, Layer, type MapRef } from 'react-map-gl/maplibre';
 import { Loader2 } from 'lucide-react';
-import type { PosterLocation, PosterConfig } from '@/types/poster';
+import type { PosterLocation, PosterConfig, RouteConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { MarkerIcon } from './MarkerIcon';
 import { MAP, TIMEOUTS, TEXTURE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
+import { routeToGeoJSON, routeEndpointsToGeoJSON } from '@/lib/route';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 interface MapPreviewProps {
@@ -19,6 +20,8 @@ interface MapPreviewProps {
   onMapLoad?: (map: any) => void;
   onMove?: (center: [number, number], zoom: number) => void;
   layers?: PosterConfig['layers'];
+  /** Route configuration for displaying GPX tracks */
+  route?: RouteConfig;
   /** When false, disables all map interactions (zoom, pan, rotate) for view-only mode */
   interactive?: boolean;
 }
@@ -32,6 +35,7 @@ export function MapPreview({
   onMapLoad,
   onMove,
   layers,
+  route,
   interactive = true,
 }: MapPreviewProps) {
   const mapRef = useRef<MapRef>(null);
@@ -59,6 +63,18 @@ export function MapPreview({
     });
   }, [location.center, location.zoom]);
 
+  // Fit map to route bounds when GPX is uploaded
+  useEffect(() => {
+    if (route?.data?.bounds && mapRef.current) {
+      const map = mapRef.current.getMap();
+      const [[west, south], [east, north]] = route.data.bounds;
+      map.fitBounds([[west, south], [east, north]], {
+        padding: 60,
+        duration: 1000,
+      });
+    }
+  }, [route?.data?.bounds]);
+
 
   const handleLoad = useCallback(() => {
     if (mapRef.current && onMapLoad) {
@@ -66,9 +82,10 @@ export function MapPreview({
       onMapLoad(map);
 
       // Create named handler functions for proper cleanup
-      const loadingHandler = () => setIsLoading(true);
+      // Use setTimeout to defer state updates and avoid "setState during render" warnings
+      const loadingHandler = () => setTimeout(() => setIsLoading(true), 0);
       const idleHandler = () => {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 0);
         // Clear any pending timeout when map becomes idle
         if (timeoutIdRef.current) {
           clearTimeout(timeoutIdRef.current);
@@ -159,6 +176,18 @@ export function MapPreview({
   // Check for edge cases (Antarctica, very remote locations)
   const isEdgeCase = location.center[1] < -60 || Math.abs(location.center[0]) > 170;
 
+  // Memoize GeoJSON data to prevent recreating objects on every render
+  // This fixes the "Cannot update a component while rendering" warning
+  const routeLineGeoJSON = useMemo(() => {
+    if (!route?.data) return null;
+    return routeToGeoJSON(route.data);
+  }, [route?.data]);
+
+  const routeEndpointsGeoJSON = useMemo(() => {
+    if (!route?.data) return null;
+    return routeEndpointsToGeoJSON(route.data);
+  }, [route?.data]);
+
   return (
     <div className="relative w-full h-full">
       {hasError || isEdgeCase ? (
@@ -213,14 +242,78 @@ export function MapPreview({
         touchZoomRotate={interactive}
         keyboard={interactive}
       >
-      {showMarker && (
+      {/* Show center marker only when there's no route - route has its own start/end markers */}
+      {showMarker && !route?.data && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-          <MarkerIcon 
-            type={layers?.markerType || 'crosshair'} 
-            color={markerColor} 
-            size={40} 
+          <MarkerIcon
+            type={layers?.markerType || 'crosshair'}
+            color={markerColor}
+            size={40}
           />
         </div>
+      )}
+
+      {/* Route Layer */}
+      {routeLineGeoJSON && (
+        <>
+          <Source
+            id="route-line"
+            type="geojson"
+            data={routeLineGeoJSON}
+          >
+            <Layer
+              id="route-line-layer"
+              type="line"
+              paint={{
+                'line-color': route?.style?.color || '#FF4444',
+                'line-width': route?.style?.width || 3,
+                'line-opacity': route?.style?.opacity || 0.9,
+                ...(route?.style?.lineStyle === 'dashed' && {
+                  'line-dasharray': [2, 2],
+                }),
+                ...(route?.style?.lineStyle === 'dotted' && {
+                  'line-dasharray': [0.5, 2],
+                }),
+              }}
+              layout={{
+                'line-cap': 'round',
+                'line-join': 'round',
+              }}
+            />
+          </Source>
+
+          {/* Start/End Markers */}
+          {route?.style?.showStartEnd && routeEndpointsGeoJSON && (
+            <Source
+              id="route-endpoints"
+              type="geojson"
+              data={routeEndpointsGeoJSON}
+            >
+              <Layer
+                id="route-start-layer"
+                type="circle"
+                filter={['==', ['get', 'type'], 'start']}
+                paint={{
+                  'circle-radius': 6,
+                  'circle-color': route?.style?.startColor || '#22C55E',
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#FFFFFF',
+                }}
+              />
+              <Layer
+                id="route-end-layer"
+                type="circle"
+                filter={['==', ['get', 'type'], 'end']}
+                paint={{
+                  'circle-radius': 6,
+                  'circle-color': route?.style?.endColor || '#EF4444',
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#FFFFFF',
+                }}
+              />
+            </Source>
+          )}
+        </>
       )}
       </Map>
 

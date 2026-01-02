@@ -34,14 +34,15 @@ export function PosterEditor() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
 
-  const { 
-    config, 
-    updateLocation, 
-    updateStyle, 
-    updatePalette, 
+  const {
+    config,
+    updateLocation,
+    updateStyle,
+    updatePalette,
     updateTypography,
     updateFormat,
     updateLayers,
+    updateRoute,
     setConfig,
     undo,
     redo,
@@ -283,6 +284,7 @@ export function PosterEditor() {
         updateTypography={updateTypography}
         updateFormat={updateFormat}
         updateLayers={updateLayers}
+        updateRoute={updateRoute}
         setConfig={setConfig}
         savedProjects={projects}
         deleteProject={deleteProject}
@@ -380,6 +382,7 @@ export function PosterEditor() {
                 onMapLoad={handleMapLoad}
                 onMove={handleMapMove}
                 layers={config.layers}
+                route={config.route}
               />
               
               {/* Floating Map Controls */}

@@ -1,6 +1,60 @@
 import { z } from 'zod';
 import type { PosterConfig } from '@/types/poster';
 
+// Route schemas for GPX/GPS data persistence
+// Note: Date fields use coerce to handle both Date objects and ISO strings from JSON
+const RoutePointSchema = z.object({
+  lat: z.number(),
+  lng: z.number(),
+  elevation: z.number().optional(),
+  time: z.coerce.date().optional(),
+});
+
+const RouteStatsSchema = z.object({
+  distance: z.number(),
+  elevationGain: z.number(),
+  elevationLoss: z.number(),
+  minElevation: z.number(),
+  maxElevation: z.number(),
+  duration: z.number().optional(),
+  startTime: z.coerce.date().optional(),
+  endTime: z.coerce.date().optional(),
+});
+
+const RouteDataSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  points: z.array(RoutePointSchema),
+  stats: RouteStatsSchema,
+  bounds: z.tuple([
+    z.tuple([z.number(), z.number()]),
+    z.tuple([z.number(), z.number()])
+  ]),
+});
+
+const RouteStyleSchema = z.object({
+  color: z.string(),
+  width: z.number(),
+  opacity: z.number(),
+  lineStyle: z.enum(['solid', 'dashed', 'dotted']),
+  showStartEnd: z.boolean(),
+  startColor: z.string().optional(),
+  endColor: z.string().optional(),
+});
+
+const PrivacyZoneSchema = z.object({
+  center: z.tuple([z.number(), z.number()]),
+  radiusMeters: z.number(),
+});
+
+const RouteConfigSchema = z.object({
+  data: RouteDataSchema.nullable(),
+  style: RouteStyleSchema,
+  privacyZones: z.array(PrivacyZoneSchema),
+  showStats: z.boolean(),
+  statsPosition: z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right']),
+});
+
 /**
  * Zod schema for validating PosterConfig
  * This ensures data integrity when saving/loading map configurations
@@ -114,6 +168,7 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
     markerColor: z.string().optional(),
     roadWeight: z.number(),
   }),
+  route: RouteConfigSchema.optional(),
 });
 
 /**
