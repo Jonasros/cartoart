@@ -352,7 +352,7 @@ Optional configuration for Nominatim geocoding API (in `frontend/.env.local`):
 ```bash
 # User-Agent header for Nominatim API requests
 # Format: "app-name (contact-url-or-email)"
-# Example: NOMINATIM_USER_AGENT=carto-art (https://yourdomain.com)
+# Example: NOMINATIM_USER_AGENT=waymarker (https://waymarker.eu)
 NOMINATIM_USER_AGENT=
 
 # From email header for Nominatim API requests (optional but recommended)

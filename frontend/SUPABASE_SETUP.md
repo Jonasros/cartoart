@@ -1,6 +1,6 @@
 # Supabase Setup Guide
 
-This guide will help you set up Supabase for the CartoArt social features.
+This guide will help you set up Supabase for the Waymarker social features.
 
 ## 1. Create Supabase Project
 

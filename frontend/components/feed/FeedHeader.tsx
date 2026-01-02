@@ -20,7 +20,7 @@ export function FeedHeader() {
           {/* Center - Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg" />
-            <span className="font-bold text-xl text-gray-900 dark:text-white">CartoArt</span>
+            <span className="font-bold text-xl text-gray-900 dark:text-white">Waymarker</span>
           </Link>
 
           {/* Right side - Create button */}

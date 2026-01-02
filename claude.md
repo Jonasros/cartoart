@@ -15,7 +15,7 @@ A web application that generates beautifully stylized map posters from real geog
 ## Project Structure
 
 ```
-carto-art/
+waymarker/
 ├── frontend/            # ✅ IMPLEMENTED
 │   ├── app/
 │   │   ├── api/tiles/[...path]/  # Tile proxy endpoint

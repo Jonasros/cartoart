@@ -230,7 +230,7 @@ function drawWatermark(
   width: number,
   height: number
 ): void {
-  const watermarkText = 'https://www.cartoart.net';
+  const watermarkText = 'https://www.waymarker.eu';
   
   // Calculate font size as a percentage of canvas width (small and subtle)
   const fontSize = Math.max(12, Math.round(width * 0.015));

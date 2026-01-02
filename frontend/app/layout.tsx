@@ -18,20 +18,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CartoArt | Map Poster Generator",
+  title: "Waymarker | Map Poster Generator",
   description: "Create beautifully stylized map posters from real geographic data",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "CartoArt | Map Poster Generator",
+    title: "Waymarker | Map Poster Generator",
     description: "Create beautifully stylized map posters from real geographic data",
     images: ["/hero.jpg"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CartoArt | Map Poster Generator",
+    title: "Waymarker | Map Poster Generator",
     description: "Create beautifully stylized map posters from real geographic data",
     images: ["/hero.jpg"],
   },

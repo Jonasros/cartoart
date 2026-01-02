@@ -1,10 +1,10 @@
-# CartoArt - Current Status
+# Waymarker - Current Status
 
 **Last Updated**: 2026-01-01
 
 ## Overview
 
-CartoArt is a web application for creating beautifully stylized map posters from real geographic data. Users can search locations, customize styles and colors, add typography, and export high-resolution images for printing.
+Waymarker is a web application for creating beautifully stylized map posters from real geographic data. Users can search locations, customize styles and colors, add typography, and export high-resolution images for printing.
 
 ---
 

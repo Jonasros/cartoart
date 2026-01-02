@@ -5,7 +5,7 @@ import { MyMapsList } from '@/components/profile/MyMapsList';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 
 export const metadata = {
-  title: 'My Maps | CartoArt',
+  title: 'My Maps | Waymarker',
   description: 'View and manage your saved map posters',
 };
 

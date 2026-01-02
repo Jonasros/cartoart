@@ -3,7 +3,7 @@ import { FeedHeader } from '@/components/feed/FeedHeader';
 import type { TimeRange } from '@/lib/actions/feed';
 
 export const metadata = {
-  title: 'Browse Maps | CartoArt',
+  title: 'Browse Maps | Waymarker',
   description: 'Discover beautiful map posters created by the community',
 };
 

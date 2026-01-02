@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Login | CartoArt',
+  title: 'Login | Waymarker',
   description: 'Sign in to save and share your map posters',
 };
 
@@ -33,7 +33,7 @@ export default async function LoginPage({
               Welcome Back
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Sign in to your CartoArt account
+              Sign in to your Waymarker account
             </p>
           </div>
 
