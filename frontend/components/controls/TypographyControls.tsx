@@ -1,7 +1,6 @@
 'use client';
 
 import type { PosterConfig } from '@/types/poster';
-import { cn } from '@/lib/utils';
 import { ControlSection, ControlSlider, ControlInput, ControlSelect, ControlLabel, ControlCheckbox, ControlGroup } from '@/components/ui/control-components';
 
 interface TypographyControlsProps {
@@ -12,6 +11,7 @@ interface TypographyControlsProps {
 
 export function TypographyControls({ config, onTypographyChange, onLocationChange }: TypographyControlsProps) {
   const { typography, style } = config;
+  const hasRoute = config.route?.data != null;
 
   // Use recommended fonts from the style or a general list
   const availableFonts = [
@@ -190,7 +190,7 @@ export function TypographyControls({ config, onTypographyChange, onLocationChang
             onChange={(e) => onTypographyChange({ titleAllCaps: e.target.checked })}
           />
           <ControlCheckbox
-            label="Show Coordinates"
+            label={hasRoute ? "Show Stats" : "Show Coordinates"}
             checked={typography.showCoordinates !== false}
             onChange={(e) => onTypographyChange({ showCoordinates: e.target.checked })}
           />

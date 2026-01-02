@@ -1,5 +1,5 @@
 import type { PosterConfig } from '@/types/poster';
-import { formatCoordinates, hexToRgba } from '../utils';
+import { formatCoordinates, formatDistance, formatElevation, hexToRgba } from '../utils';
 import { getScrimAlpha, calculateScrimHeight, getBackdropGradientStyles } from '../styles/backdrop';
 import { drawTextWithHalo } from './drawing';
 
@@ -19,7 +19,13 @@ export function drawTextOverlay(
   const rawTitleText = String(location.name || 'WHERE WE MET');
   const titleText = typography.titleAllCaps !== false ? rawTitleText.toUpperCase() : rawTitleText;
   const subtitleText = String(location.city || '').toUpperCase();
-  const coordsText = formatCoordinates(location.center);
+
+  // Show route stats if route data exists, otherwise show coordinates
+  const hasRoute = config.route?.data != null;
+  const stats = config.route?.data?.stats;
+  const infoText = hasRoute && stats
+    ? `${formatDistance(stats.distance)} • ${formatElevation(stats.elevationGain)}`
+    : formatCoordinates(location.center);
 
   const showTitle = typography.showTitle !== false;
   const showSubtitle = typography.showSubtitle !== false && !!subtitleText;
@@ -57,7 +63,7 @@ export function drawTextOverlay(
       }
       if (showCoords) {
         ctx.font = `${coordsSizePx}px ${typography.subtitleFont}`;
-        maxTextWidth = Math.max(maxTextWidth, ctx.measureText(coordsText).width);
+        maxTextWidth = Math.max(maxTextWidth, ctx.measureText(infoText).width);
       }
 
       const rectWidth = Math.min(exportWidth * 0.9, maxTextWidth * 1.2 + 40);
@@ -175,9 +181,9 @@ export function drawTextOverlay(
     });
   }
 
-  // Draw Coordinates
+  // Draw Coordinates/Stats
   if (showCoords) {
-    drawTextWithHalo(ctx, coordsText, exportWidth / 2, coordsY, coordsSizePx, {
+    drawTextWithHalo(ctx, infoText, exportWidth / 2, coordsY, coordsSizePx, {
       opacity: 0.6,
       letterSpacing: 0.1,
       fontFamily: typography.subtitleFont,

@@ -3,16 +3,17 @@
 import { useCallback, useRef, useState } from 'react';
 import { Upload, Route, X, Mountain, Clock, Ruler, TrendingUp, TrendingDown } from 'lucide-react';
 import { parseGPXFile, formatDistance, formatElevation, formatDuration } from '@/lib/route';
-import type { RouteConfig } from '@/types/poster';
+import type { RouteConfig, PosterLocation } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { ControlLabel } from '@/components/ui/control-components';
 
 interface RouteUploadProps {
   route: RouteConfig | undefined;
   onRouteChange: (route: RouteConfig | undefined) => void;
+  onLocationChange?: (location: Partial<PosterLocation>) => void;
 }
 
-export function RouteUpload({ route, onRouteChange }: RouteUploadProps) {
+export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,12 +54,21 @@ export function RouteUpload({ route, onRouteChange }: RouteUploadProps) {
       };
 
       onRouteChange(newRoute);
+
+      // Auto-populate title and subtitle from GPX metadata
+      if (onLocationChange && routeData.name) {
+        onLocationChange({
+          name: routeData.name,
+          // Use description as subtitle if available, otherwise clear it
+          city: routeData.description || '',
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse GPX file');
     } finally {
       setIsLoading(false);
     }
-  }, [route, onRouteChange]);
+  }, [route, onRouteChange, onLocationChange]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

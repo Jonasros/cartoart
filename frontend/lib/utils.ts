@@ -36,6 +36,47 @@ export function formatCoordinates(center: [number, number]): string {
 }
 
 /**
+ * Formats a distance in meters to a human-readable string.
+ * Uses km for distances >= 1000m, otherwise meters.
+ *
+ * @param meters - Distance in meters
+ * @returns Formatted string like "42.5 km" or "850 m"
+ *
+ * @example
+ * ```ts
+ * formatDistance(42500) // "42.5 km"
+ * formatDistance(850) // "850 m"
+ * ```
+ */
+export function formatDistance(meters: number): string {
+  if (meters >= 1000) {
+    const km = meters / 1000;
+    // Show one decimal for values < 100, no decimal for larger values
+    return km < 100 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`;
+  }
+  return `${Math.round(meters)} m`;
+}
+
+/**
+ * Formats elevation gain in meters to a human-readable string with up arrow.
+ *
+ * @param meters - Elevation gain in meters
+ * @returns Formatted string like "1,234 m ↑"
+ *
+ * @example
+ * ```ts
+ * formatElevation(1234) // "1,234 m ↑"
+ * formatElevation(50) // "50 m ↑"
+ * ```
+ */
+export function formatElevation(meters: number): string {
+  const rounded = Math.round(meters);
+  // Add thousands separator for readability
+  const formatted = rounded.toLocaleString('en-US');
+  return `${formatted} m ↑`;
+}
+
+/**
  * Converts a hex color string to rgba() CSS format.
  * Supports both 3-digit and 6-digit hex colors.
  * 

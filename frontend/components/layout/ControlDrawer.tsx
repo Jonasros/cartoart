@@ -189,6 +189,7 @@ export function ControlDrawer({
                 <RouteUpload
                   route={config.route}
                   onRouteChange={updateRoute}
+                  onLocationChange={updateLocation}
                 />
 
                 <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-xs text-green-800 dark:text-green-200">

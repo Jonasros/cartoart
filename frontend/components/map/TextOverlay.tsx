@@ -1,7 +1,7 @@
 'use client';
 
 import type { PosterConfig } from '@/types/poster';
-import { formatCoordinates, hexToRgba } from '@/lib/utils';
+import { formatCoordinates, formatDistance, formatElevation, hexToRgba } from '@/lib/utils';
 import { getScrimAlpha, calculateScrimHeight, getBackdropGradientStyles, stopsToCssGradient } from '@/lib/styles/backdrop';
 
 interface TextOverlayProps {
@@ -30,7 +30,13 @@ export function TextOverlay({ config }: TextOverlayProps) {
 
   const titleText = location.name || 'WHERE WE MET';
   const subtitleText = location.city || '';
-  const coordsText = formatCoordinates(location.center);
+
+  // Show route stats if route data exists, otherwise show coordinates
+  const hasRoute = config.route?.data != null;
+  const stats = config.route?.data?.stats;
+  const infoText = hasRoute && stats
+    ? `${formatDistance(stats.distance)} • ${formatElevation(stats.elevationGain)}`
+    : formatCoordinates(location.center);
 
   const positionClasses: Record<PosterConfig['typography']['position'], string> = {
     top: 'items-start',
@@ -146,7 +152,7 @@ export function TextOverlay({ config }: TextOverlayProps) {
 
           {(typography.showCoordinates !== false) && (
             <p style={coordsStyle}>
-              {coordsText}
+              {infoText}
             </p>
           )}
         </div>
