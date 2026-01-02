@@ -23,7 +23,9 @@ Based on market research, **hiking route posters** is the best starting niche be
 ### 📊 Phased Market Expansion
 
 ```
-Phase 1: Hiking Route Posters (GPX upload)
+Phase 1: Hiking Route Posters (GPX upload) ✅ COMPLETE
+    ↓
+Phase 4: 3D Printed Route Sculptures ← NEXT (zero competition, premium pricing)
     ↓
 Phase 2: Gift Modes (weddings, "our story" maps)
     ↓
@@ -385,19 +387,73 @@ What we'd need to add:
 
 Both modes share the same location/route selection — user just switches output format.
 
+### Technical Approach
+
+**MVP: Pure Algorithmic (No AI Required)**
+
+Route sculptures are geometry, not AI-generated:
+
+```
+GPS coordinates (lat, lng, elevation)
+         ↓
+    Convert to 3D points (x, y, z)
+         ↓
+    Extrude as tube/ribbon (Three.js TubeGeometry)
+         ↓
+    Add base plate
+         ↓
+    Export as STL file
+```
+
+Three.js has built-in functions for this — no external APIs, no compute costs, predictable results.
+
+**Route Required for MVP:**
+
+| Mode | 3D Print Available? | Reason |
+|------|---------------------|--------|
+| **GPX Route** | ✅ Yes | Path + elevation → ribbon sculpture |
+| **Single Address** | ❌ No (MVP) | No path to extrude; terrain relief is Phase 2 |
+
+The 3D tab only enables when a route is uploaded. Keeps MVP simple.
+
+**Future: AI Enhancements (Not MVP)**
+
+| AI Feature | What It Does | Complexity |
+|------------|--------------|------------|
+| **Stylized terrain** | AI-generated terrain texture around route | Medium |
+| **Single location relief** | Terrain model from DEM data (not really AI) | Medium |
+| **Decorative elements** | AI-suggested trees, landmarks, etc. | High |
+| **Text-to-3D styling** | "Make it look like a mountain range" | Experimental |
+
+AI can be Phase 2 if customers want more artistic/stylized versions.
+
 ### Technical Requirements
 
 **Frontend:**
+
 - Three.js or React Three Fiber for 3D preview
 - Mesh generation from route coordinates + elevation
 - Interactive preview (rotate, zoom, pan)
 
 **Backend/Processing:**
+
 - STL file generation (may need server-side for complex meshes)
 - Integration with print fulfillment API
 - Order management and tracking
 
+**Data & Supabase Logging:**
+
+| Data Point | Table | Purpose |
+|------------|-------|---------|
+| **3D print requests** | `print_orders` | Track orders, fulfillment status, customer info |
+| **Model configurations** | `print_orders.config` | Base style, size, material selections (JSONB) |
+| **Route reference** | `print_orders.map_id` | Link to saved map with route data |
+| **STL file URL** | `print_orders.stl_url` | Supabase Storage reference for generated mesh |
+| **Fulfillment status** | `print_orders.status` | pending → processing → shipped → delivered |
+| **Analytics events** | `analytics` | 3D tab views, preview interactions, cart abandonment |
+
 **Fulfillment Partners (Options):**
+
 - Shapeways (API available)
 - i.materialise (API available)
 - Craftcloud (aggregator)
@@ -561,14 +617,28 @@ Both modes share the same location/route selection — user just switches output
 8. ~~Route persistence in saved maps~~
 9. ~~Route display on published maps~~
 
-### Next Priority
-1. Add elevation gradient coloring
-2. Add stats overlay component (distance, elevation display)
-3. Test with more GPX sources (Strava, Garmin, AllTrails)
-4. Consider Strava OAuth integration
+### Next Priority: Phase 4 — 3D Printed Route Sculptures
+
+**Why this is next:**
+- Zero competition in route-specific 3D sculptures
+- Premium pricing (€79-249 vs €20-40 posters)
+- Leverages existing GPX + elevation data
+- Clear differentiation from crowded poster market
+
+**First implementation steps:**
+1. Install Three.js / React Three Fiber
+2. Create 3D preview component with route mesh
+3. Build route-to-mesh conversion (coordinates + elevation → 3D ribbon)
+4. Add tab-based mode switching (Poster / 3D Print)
+5. Research fulfillment partner APIs (Shapeways, i.materialise)
+
+**Deferred (Phase 1.2 enhancements):**
+- Elevation gradient coloring
+- Glow/shadow effects on route
+- Strava OAuth integration
 
 ---
 
-**Status**: Phase 1 MVP Complete ✅ - Route support is live
-**Focus**: Hiking/Outdoor Adventure route posters as primary launch niche
+**Status**: Phase 1 MVP Complete ✅ — Now prioritizing Phase 4 (3D Print)
+**Focus**: 3D Printed Route Sculptures as next major feature
 **Implemented**: GPX upload, route styling, privacy zones, persistence, sharing
