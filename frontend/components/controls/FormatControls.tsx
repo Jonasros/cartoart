@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { PosterConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { ControlSection, ControlSlider, ControlLabel, ControlRow } from '@/components/ui/control-components';
@@ -10,7 +9,7 @@ import { getMaxMargin } from '@/lib/utils/layoutLimits';
 import { LAYOUT } from '@/lib/constants/limits';
 
 interface FormatControlsProps {
-  config: PosterConfig; // Need full config for layout calculations
+  config: PosterConfig;
   onFormatChange: (format: Partial<PosterConfig['format']>) => void;
 }
 
@@ -41,9 +40,9 @@ const screenOptions = aspectRatioOptions.filter(o => o.category === 'screen');
 export function FormatControls({ config, onFormatChange }: FormatControlsProps) {
   const { format } = config;
   const isSquareAspectRatio = format.aspectRatio === '1:1';
-
-  // Calculate dynamic max margin based on current typography settings
-  const maxMargin = useMemo(() => getMaxMargin(config), [config]);
+  
+  // Calculate dynamic max margin based on current text sizes
+  const maxMargin = getMaxMargin(config);
 
   const handleAspectRatioChange = (newAspectRatio: PosterConfig['format']['aspectRatio']) => {
     // Auto-reset maskShape to rectangular if changing away from square while circular is active
@@ -157,22 +156,16 @@ export function FormatControls({ config, onFormatChange }: FormatControlsProps) 
           <div className="space-y-2">
             <div className="flex justify-between items-center mb-1">
               <ControlLabel className="mb-0">Margin</ControlLabel>
-              <span className="text-xs font-mono text-gray-500">
-                {format.margin.toFixed(1)}% / {maxMargin.toFixed(1)}%
-              </span>
+              <span className="text-xs font-mono text-gray-500">{format.margin}%</span>
             </div>
             <ControlSlider
-              min={String(LAYOUT.MARGIN_MIN)}
-              max={String(maxMargin)}
+              min={LAYOUT.MARGIN_MIN.toString()}
+              max={maxMargin.toFixed(1)}
               step="0.5"
-              value={Math.min(format.margin, maxMargin)}
+              value={format.margin}
               onChange={(e) => onFormatChange({ margin: parseFloat(e.target.value) })}
+              displayValue={`${format.margin.toFixed(1)}%`}
             />
-            {format.margin >= maxMargin * 0.95 && (
-              <p className="text-[10px] text-amber-600 dark:text-amber-400">
-                Near limit for current text size
-              </p>
-            )}
           </div>
 
           <div className="space-y-2">

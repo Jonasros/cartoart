@@ -24,38 +24,37 @@ export const MAP_TITLE_MAX_LENGTH = 200;
 // Map subtitle limits
 export const MAP_SUBTITLE_MAX_LENGTH = 500;
 
-// Layout constraints (in cqw/percentage units)
-export const LAYOUT = {
-  // Margin constraints
-  MARGIN_MIN: 0,
-  MARGIN_MAX: 20,
-  MARGIN_DEFAULT: 5,
-  
-  // Typography size constraints
-  TITLE_SIZE_MIN: 0.5,
-  TITLE_SIZE_MAX: 15,        // Absolute max (even with no margin)
-  TITLE_SIZE_DEFAULT: 5,
-  
-  SUBTITLE_SIZE_MIN: 0.2,
-  SUBTITLE_SIZE_MAX: 8,
-  SUBTITLE_SIZE_DEFAULT: 2.5,
-  
-  // The combined text area (title + subtitle + coords) shouldn't exceed
-  // this percentage of the available canvas height
-  MAX_TEXT_HEIGHT_PERCENT: 40,
-  
-  // Estimated height multipliers (cqw to effective height %)
-  // These account for line-height, letter-spacing, and stacking
-  TITLE_HEIGHT_MULTIPLIER: 1.2,
-  SUBTITLE_HEIGHT_MULTIPLIER: 1.0,
-  COORDS_HEIGHT_ESTIMATE: 1.5, // Fixed estimate in cqw equivalent
-} as const;
-
 // Rate limiting (requests per time window)
 export const RATE_LIMITS = {
   VOTES_PER_MINUTE: 10,
   COMMENTS_PER_MINUTE: 5,
   PUBLISH_PER_HOUR: 3,
   FEED_PER_MINUTE: 60,
+} as const;
+
+// Layout limits for typography and margins
+// These prevent text from overflowing the canvas
+export const LAYOUT = {
+  // Margin limits (percentage of container width)
+  MARGIN_MIN: 0,
+  MARGIN_MAX: 20,
+  
+  // Title size limits (cqw - container query width units)
+  TITLE_SIZE_MIN: 0.5,
+  TITLE_SIZE_MAX: 15,
+  
+  // Subtitle size limits (cqw)
+  SUBTITLE_SIZE_MIN: 0.2,
+  SUBTITLE_SIZE_MAX: 8,
+  
+  // Maximum percentage of canvas height that text should occupy
+  MAX_TEXT_HEIGHT_PERCENT: 40,
+  
+  // Approximate height multipliers for text (line-height factor)
+  TITLE_HEIGHT_MULTIPLIER: 1.3,
+  SUBTITLE_HEIGHT_MULTIPLIER: 1.2,
+  
+  // Estimated coordinate text height in cqw
+  COORDS_HEIGHT_ESTIMATE: 2,
 } as const;
 

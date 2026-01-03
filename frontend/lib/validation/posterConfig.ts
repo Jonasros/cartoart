@@ -128,7 +128,7 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
   typography: z.object({
     titleFont: z.string(),
     titleSize: z.number().min(LAYOUT.TITLE_SIZE_MIN).max(LAYOUT.TITLE_SIZE_MAX),
-    titleWeight: z.number().min(100).max(900),
+    titleWeight: z.number().min(0).max(900),
     titleLetterSpacing: z.number().optional(),
     titleAllCaps: z.boolean().optional(),
     subtitleFont: z.string(),

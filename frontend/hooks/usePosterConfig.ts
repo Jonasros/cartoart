@@ -9,7 +9,6 @@ import { encodeConfig, decodeConfig } from '@/lib/config/url-state';
 import { cloneConfig, isConfigEqual } from '@/lib/utils/configComparison';
 import { MAP, HISTORY, TIMEOUTS } from '@/lib/constants';
 import { getMaxTitleSize, getMaxSubtitleSize, getMaxMargin } from '@/lib/utils/layoutLimits';
-import { LAYOUT } from '@/lib/constants/limits';
 
 type PosterAction =
   | { type: 'UPDATE_LOCATION'; payload: Partial<PosterLocation> }
