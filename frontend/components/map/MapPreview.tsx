@@ -47,6 +47,25 @@ export function MapPreview({
   const timeoutHandlerRef = useRef<(() => void) | null>(null);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Suppress harmless AbortErrors from MapLibre during rapid prop changes
+  // These occur when tile requests are cancelled but are caught by window.onerror
+  useEffect(() => {
+    const handleGlobalError = (event: ErrorEvent) => {
+      if (
+        event.error?.name === 'AbortError' ||
+        event.message?.includes('aborted') ||
+        event.message?.includes('signal is aborted')
+      ) {
+        // Prevent the error from appearing in console
+        event.preventDefault();
+        return true;
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    return () => window.removeEventListener('error', handleGlobalError);
+  }, []);
+
   // Local viewState for smooth interaction without triggering full app re-renders on every frame
   // Pitch/bearing: Use manual value if set, else default to 45° if 3D buildings enabled, else 0
   const [viewState, setViewState] = useState({
@@ -178,13 +197,23 @@ export function MapPreview({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleError = useCallback((e: any) => {
+    const errorMessage = e.error?.message || e.message || '';
+    const errorName = e.error?.name || '';
+
+    // Ignore AbortErrors - these are harmless and occur when tile requests are
+    // cancelled due to rapid style/prop changes (e.g., user tweaking colors)
+    if (errorName === 'AbortError' || errorMessage.includes('aborted')) {
+      logger.debug('MapLibre tile request aborted (harmless):', errorMessage);
+      return;
+    }
+
     logger.error('MapLibre error details:', {
-      message: e.error?.message || e.message || 'Unknown map error',
+      message: errorMessage || 'Unknown map error',
       error: e.error,
       originalEvent: e
     });
     setHasError(true);
-    const msg = e.error?.message || e.message || 'Unable to load map data';
+    const msg = errorMessage || 'Unable to load map data';
     setErrorMessage(msg);
   }, []);
 
