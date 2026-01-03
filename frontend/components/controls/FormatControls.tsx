@@ -1,13 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
 import { PosterConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { ControlSection, ControlSlider, ControlLabel, ControlRow } from '@/components/ui/control-components';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Crop, Frame, Monitor, Printer } from 'lucide-react';
+import { getMaxMargin } from '@/lib/utils/layoutLimits';
+import { LAYOUT } from '@/lib/constants/limits';
 
 interface FormatControlsProps {
-  format: PosterConfig['format'];
+  config: PosterConfig; // Need full config for layout calculations
   onFormatChange: (format: Partial<PosterConfig['format']>) => void;
 }
 
@@ -35,8 +38,12 @@ const aspectRatioOptions: AspectRatioOption[] = [
 const printOptions = aspectRatioOptions.filter(o => o.category === 'print');
 const screenOptions = aspectRatioOptions.filter(o => o.category === 'screen');
 
-export function FormatControls({ format, onFormatChange }: FormatControlsProps) {
+export function FormatControls({ config, onFormatChange }: FormatControlsProps) {
+  const { format } = config;
   const isSquareAspectRatio = format.aspectRatio === '1:1';
+
+  // Calculate dynamic max margin based on current typography settings
+  const maxMargin = useMemo(() => getMaxMargin(config), [config]);
 
   const handleAspectRatioChange = (newAspectRatio: PosterConfig['format']['aspectRatio']) => {
     // Auto-reset maskShape to rectangular if changing away from square while circular is active
@@ -150,15 +157,22 @@ export function FormatControls({ format, onFormatChange }: FormatControlsProps) 
           <div className="space-y-2">
             <div className="flex justify-between items-center mb-1">
               <ControlLabel className="mb-0">Margin</ControlLabel>
-              <span className="text-xs font-mono text-gray-500">{format.margin}%</span>
+              <span className="text-xs font-mono text-gray-500">
+                {format.margin.toFixed(1)}% / {maxMargin.toFixed(1)}%
+              </span>
             </div>
             <ControlSlider
-              min="0"
-              max="20"
+              min={String(LAYOUT.MARGIN_MIN)}
+              max={String(maxMargin)}
               step="0.5"
-              value={format.margin}
+              value={Math.min(format.margin, maxMargin)}
               onChange={(e) => onFormatChange({ margin: parseFloat(e.target.value) })}
             />
+            {format.margin >= maxMargin * 0.95 && (
+              <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                Near limit for current text size
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

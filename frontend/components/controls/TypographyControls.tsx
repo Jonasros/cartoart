@@ -1,7 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import type { PosterConfig } from '@/types/poster';
 import { ControlSection, ControlSlider, ControlInput, ControlSelect, ControlLabel, ControlCheckbox, ControlGroup } from '@/components/ui/control-components';
+import { getMaxTitleSize, getMaxSubtitleSize } from '@/lib/utils/layoutLimits';
+import { LAYOUT } from '@/lib/constants/limits';
 
 interface TypographyControlsProps {
   config: PosterConfig;
@@ -12,6 +15,10 @@ interface TypographyControlsProps {
 export function TypographyControls({ config, onTypographyChange, onLocationChange }: TypographyControlsProps) {
   const { typography, style } = config;
   const hasRoute = config.route?.data != null;
+
+  // Calculate dynamic max values based on current layout
+  const maxTitleSize = useMemo(() => getMaxTitleSize(config), [config]);
+  const maxSubtitleSize = useMemo(() => getMaxSubtitleSize(config), [config]);
 
   // Use recommended fonts from the style or a general list
   const availableFonts = [
@@ -67,14 +74,24 @@ export function TypographyControls({ config, onTypographyChange, onLocationChang
 
           <div className="space-y-4">
             <div>
-              <ControlLabel>Title Size</ControlLabel>
+              <div className="flex justify-between items-center mb-1">
+                <ControlLabel className="mb-0">Title Size</ControlLabel>
+                <span className="text-xs font-mono text-gray-500">
+                  {typography.titleSize.toFixed(1)} / {maxTitleSize.toFixed(1)}
+                </span>
+              </div>
               <ControlSlider
-                min="0.5"
-                max="40"
+                min={String(LAYOUT.TITLE_SIZE_MIN)}
+                max={String(maxTitleSize)}
                 step="0.1"
-                value={typography.titleSize}
+                value={Math.min(typography.titleSize, maxTitleSize)}
                 onChange={(e) => onTypographyChange({ titleSize: parseFloat(e.target.value) })}
               />
+              {typography.titleSize >= maxTitleSize * 0.95 && (
+                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">
+                  Near limit for current layout
+                </p>
+              )}
             </div>
 
             <div>
@@ -100,12 +117,17 @@ export function TypographyControls({ config, onTypographyChange, onLocationChang
             </div>
 
             <div>
-              <ControlLabel>Subtitle Size</ControlLabel>
+              <div className="flex justify-between items-center mb-1">
+                <ControlLabel className="mb-0">Subtitle Size</ControlLabel>
+                <span className="text-xs font-mono text-gray-500">
+                  {typography.subtitleSize.toFixed(1)} / {maxSubtitleSize.toFixed(1)}
+                </span>
+              </div>
               <ControlSlider
-                min="0.2"
-                max="20"
+                min={String(LAYOUT.SUBTITLE_SIZE_MIN)}
+                max={String(maxSubtitleSize)}
                 step="0.1"
-                value={typography.subtitleSize}
+                value={Math.min(typography.subtitleSize, maxSubtitleSize)}
                 onChange={(e) => onTypographyChange({ subtitleSize: parseFloat(e.target.value) })}
               />
             </div>

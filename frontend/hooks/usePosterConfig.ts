@@ -8,6 +8,8 @@ import { useUserLocation } from './useUserLocation';
 import { encodeConfig, decodeConfig } from '@/lib/config/url-state';
 import { cloneConfig, isConfigEqual } from '@/lib/utils/configComparison';
 import { MAP, HISTORY, TIMEOUTS } from '@/lib/constants';
+import { getMaxTitleSize, getMaxSubtitleSize, getMaxMargin } from '@/lib/utils/layoutLimits';
+import { LAYOUT } from '@/lib/constants/limits';
 
 type PosterAction =
   | { type: 'UPDATE_LOCATION'; payload: Partial<PosterLocation> }
@@ -20,10 +22,42 @@ type PosterAction =
   | { type: 'SET_LOCATION'; payload: PosterLocation }
   | { type: 'SET_CONFIG'; payload: PosterConfig };
 
+/**
+ * Clamp layout values to prevent text/margin overflow
+ * Called after format or typography changes that might affect limits
+ */
+function clampLayoutValues(config: PosterConfig): PosterConfig {
+  const maxTitle = getMaxTitleSize(config);
+  const maxSubtitle = getMaxSubtitleSize(config);
+  const maxMargin = getMaxMargin(config);
+
+  const titleNeedsClamping = config.typography.titleSize > maxTitle;
+  const subtitleNeedsClamping = config.typography.subtitleSize > maxSubtitle;
+  const marginNeedsClamping = config.format.margin > maxMargin;
+
+  if (!titleNeedsClamping && !subtitleNeedsClamping && !marginNeedsClamping) {
+    return config; // No changes needed
+  }
+
+  return {
+    ...config,
+    typography: {
+      ...config.typography,
+      titleSize: Math.min(config.typography.titleSize, maxTitle),
+      subtitleSize: Math.min(config.typography.subtitleSize, maxSubtitle),
+    },
+    format: {
+      ...config.format,
+      margin: Math.min(config.format.margin, maxMargin),
+    },
+  };
+}
+
 function posterReducer(state: PosterConfig, action: PosterAction): PosterConfig {
   switch (action.type) {
     case 'SET_CONFIG':
-      return action.payload;
+      // Clamp layout values when loading a saved config to ensure validity
+      return clampLayoutValues(action.payload);
     case 'UPDATE_LOCATION':
       const zoom = action.payload.zoom !== undefined 
         ? Math.min(MAP.MAX_ZOOM_CLAMPED, Math.max(MAP.MIN_ZOOM_CLAMPED, action.payload.zoom))
@@ -57,16 +91,18 @@ function posterReducer(state: PosterConfig, action: PosterAction): PosterConfig 
       };
     case 'UPDATE_PALETTE':
       return { ...state, palette: action.payload };
-    case 'UPDATE_TYPOGRAPHY':
-      return {
-        ...state,
-        typography: { ...state.typography, ...action.payload },
-      };
-    case 'UPDATE_FORMAT':
-      return {
-        ...state,
-        format: { ...state.format, ...action.payload },
-      };
+    case 'UPDATE_TYPOGRAPHY': {
+      const newTypography = { ...state.typography, ...action.payload };
+      const configWithNewTypography = { ...state, typography: newTypography };
+      // Clamp layout values if typography changes affect limits
+      return clampLayoutValues(configWithNewTypography);
+    }
+    case 'UPDATE_FORMAT': {
+      const newFormat = { ...state.format, ...action.payload };
+      const configWithNewFormat = { ...state, format: newFormat };
+      // Clamp layout values if format changes affect limits
+      return clampLayoutValues(configWithNewFormat);
+    }
     case 'UPDATE_LAYERS':
       return {
         ...state,

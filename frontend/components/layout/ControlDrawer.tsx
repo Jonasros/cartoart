@@ -281,7 +281,7 @@ export function ControlDrawer({
                 Format & Layout
               </h3>
               <FormatControls
-                format={config.format}
+                config={config}
                 onFormatChange={updateFormat}
               />
             </div>

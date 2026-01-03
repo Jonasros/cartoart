@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { PosterConfig } from '@/types/poster';
+import { LAYOUT } from '@/lib/constants/limits';
 
 // Route schemas for GPX/GPS data persistence
 // Note: Date fields use coerce to handle both Date objects and ISO strings from JSON
@@ -126,12 +127,12 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
   }),
   typography: z.object({
     titleFont: z.string(),
-    titleSize: z.number().min(0),
-    titleWeight: z.number().min(0).max(900),
+    titleSize: z.number().min(LAYOUT.TITLE_SIZE_MIN).max(LAYOUT.TITLE_SIZE_MAX),
+    titleWeight: z.number().min(100).max(900),
     titleLetterSpacing: z.number().optional(),
     titleAllCaps: z.boolean().optional(),
     subtitleFont: z.string(),
-    subtitleSize: z.number().min(0),
+    subtitleSize: z.number().min(LAYOUT.SUBTITLE_SIZE_MIN).max(LAYOUT.SUBTITLE_SIZE_MAX),
     showTitle: z.boolean().optional(),
     showSubtitle: z.boolean().optional(),
     showCoordinates: z.boolean().optional(),
@@ -145,7 +146,7 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
   format: z.object({
     aspectRatio: z.enum(['2:3', '3:4', '4:5', '1:1', 'ISO', '16:9', '16:10', '9:16', '9:19.5']),
     orientation: z.enum(['portrait', 'landscape']),
-    margin: z.number().min(0).max(100),
+    margin: z.number().min(LAYOUT.MARGIN_MIN).max(LAYOUT.MARGIN_MAX),
     borderStyle: z.enum(['none', 'thin', 'thick', 'double', 'inset']),
     maskShape: z.enum(['rectangular', 'circular']).optional(),
     compassRose: z.boolean().optional(),
