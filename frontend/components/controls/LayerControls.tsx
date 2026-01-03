@@ -4,7 +4,7 @@ import { PosterConfig, LayerToggle, ColorPalette } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 import { useState, useMemo } from 'react';
-import { Type, Palette, Heart, Home, MapPin, Target, Circle, Radio, Check } from 'lucide-react';
+import { Heart, Home, MapPin, Target, Circle, Radio } from 'lucide-react';
 import { ControlSection, ControlCheckbox, ControlSlider, ControlLabel, ControlInput, CollapsibleSection } from '@/components/ui/control-components';
 import { Tooltip } from '@/components/ui/tooltip';
 
@@ -35,7 +35,6 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
     onLayersChange({ [key]: !layers[key] });
   };
 
-  const isTerrainToggleVisible = availableToggles.some(t => t.id === 'terrain');
   const isTerrainUnderWaterToggleVisible = availableToggles.some(t => t.id === 'terrainUnderWater');
 
   const handleLabelSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +56,29 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
 
   const handleRoadWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onLayersChange({ roadWeight: parseFloat(e.target.value) });
+  };
+
+  // 3D Buildings camera presets - compact labels for UI
+  const cameraPresets = [
+    { id: 'isometric', label: 'ISO', fullLabel: 'Isometric', pitch: 45, bearing: 45 },
+    { id: 'skyline', label: 'SKY', fullLabel: 'Skyline', pitch: 60, bearing: -15 },
+    { id: 'birdseye', label: 'BIRD', fullLabel: "Bird's Eye", pitch: 35, bearing: 0 },
+    { id: 'dramatic', label: 'DRAMA', fullLabel: 'Dramatic', pitch: 55, bearing: 30 },
+  ] as const;
+
+  // 3D Buildings style presets
+  const buildingStyles = [
+    { id: 'solid', label: 'Solid', description: 'Classic opaque' },
+    { id: 'glass', label: 'Glass', description: 'See-through' },
+    { id: 'wireframe', label: 'Wire', description: 'Sketch outline' },
+    { id: 'gradient', label: 'Fade', description: 'Height gradient' },
+  ] as const;
+
+  const applyPreset = (preset: typeof cameraPresets[number]) => {
+    onLayersChange({
+      buildings3dPitch: preset.pitch,
+      buildings3dBearing: preset.bearing,
+    });
   };
 
   // Categorize layers
@@ -203,6 +225,107 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
           </div>
         )}
 
+        {/* 3D Extrusion Control - only when buildings are enabled */}
+        {item.id === 'buildings' && layers.buildings && (
+          <div className="pl-8 pr-2 pb-2">
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
+              <ControlCheckbox
+                label="3D Extrusion"
+                checked={Boolean(layers.buildings3d)}
+                onChange={() => toggleLayer('buildings3d')}
+                className="text-[10px] font-medium"
+              />
+
+              {layers.buildings3d && (
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                  {/* Building Style Presets */}
+                  <div className="space-y-2">
+                    <ControlLabel className="text-[10px] uppercase text-gray-500">Style</ControlLabel>
+                    <div className="grid grid-cols-4 gap-1">
+                      {buildingStyles.map((style) => {
+                        const isActive = (layers.buildings3dStyle ?? 'solid') === style.id;
+                        return (
+                          <Tooltip key={style.id} content={style.description}>
+                            <button
+                              onClick={() => onLayersChange({ buildings3dStyle: style.id as any })}
+                              className={cn(
+                                "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
+                                isActive
+                                  ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
+                              )}
+                            >
+                              {style.label}
+                            </button>
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Opacity Slider */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-[9px] text-gray-400">Opacity</span>
+                      <span className="text-[9px] text-gray-500 font-medium">{Math.round((layers.buildings3dOpacity ?? 1) * 100)}%</span>
+                    </div>
+                    <ControlSlider
+                      min="0.1"
+                      max="1"
+                      step="0.05"
+                      value={layers.buildings3dOpacity ?? 1}
+                      onChange={(e) => onLayersChange({ buildings3dOpacity: parseFloat(e.target.value) })}
+                      displayValue={`${Math.round((layers.buildings3dOpacity ?? 1) * 100)}%`}
+                      onValueChange={(value) => onLayersChange({ buildings3dOpacity: value })}
+                      formatValue={(v) => `${Math.round(v * 100)}%`}
+                      parseValue={(s) => parseInt(s.replace('%', '')) / 100}
+                    />
+                  </div>
+
+                  {/* Height Scale */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-[9px] text-gray-400">Height Scale</span>
+                      <span className="text-[9px] text-gray-500 font-medium">{(layers.buildings3dHeightScale ?? 1).toFixed(1)}x</span>
+                    </div>
+                    <ControlSlider
+                      min="0.5"
+                      max="3"
+                      step="0.1"
+                      value={layers.buildings3dHeightScale ?? 1}
+                      onChange={(e) => onLayersChange({ buildings3dHeightScale: parseFloat(e.target.value) })}
+                      displayValue={`${(layers.buildings3dHeightScale ?? 1).toFixed(1)}x`}
+                      onValueChange={(value) => onLayersChange({ buildings3dHeightScale: value })}
+                      formatValue={(v) => `${v.toFixed(1)}x`}
+                      parseValue={(s) => parseFloat(s.replace('x', ''))}
+                    />
+                  </div>
+
+                  {/* Default Height */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-[9px] text-gray-400">Default Height</span>
+                      <span className="text-[9px] text-gray-500 font-medium">{layers.buildings3dDefaultHeight ?? 6}m</span>
+                    </div>
+                    <ControlSlider
+                      min="0"
+                      max="30"
+                      step="1"
+                      value={layers.buildings3dDefaultHeight ?? 6}
+                      onChange={(e) => onLayersChange({ buildings3dDefaultHeight: parseFloat(e.target.value) })}
+                      displayValue={`${layers.buildings3dDefaultHeight ?? 6}m`}
+                      onValueChange={(value) => onLayersChange({ buildings3dDefaultHeight: value })}
+                      formatValue={(v) => `${Math.round(v)}m`}
+                      parseValue={(s) => parseInt(s.replace('m', ''))}
+                    />
+                    <p className="text-[8px] text-gray-400 italic">For buildings without height data</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Contour Density Control */}
         {item.id === 'contours' && layers.contours && (
           <div className="pl-8 pr-2 pb-2">
@@ -326,6 +449,78 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
             </div>
           )}
         </div>
+
+        {/* Perspective / Camera Controls - independent of 3D buildings */}
+        <CollapsibleSection title="Perspective" defaultOpen={false}>
+          <div className="space-y-4">
+            {/* Camera Presets */}
+            <div className="space-y-2">
+              <ControlLabel className="text-[10px] uppercase text-gray-500">Camera Angle</ControlLabel>
+              <div className="grid grid-cols-4 gap-1">
+                {cameraPresets.map((preset) => {
+                  const isActive =
+                    (layers.buildings3dPitch ?? 0) === preset.pitch &&
+                    (layers.buildings3dBearing ?? 0) === preset.bearing;
+                  return (
+                    <Tooltip key={preset.id} content={preset.fullLabel}>
+                      <button
+                        onClick={() => applyPreset(preset)}
+                        className={cn(
+                          "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
+                          isActive
+                            ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
+                        )}
+                      >
+                        {preset.label}
+                      </button>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Camera Pitch */}
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="text-[9px] text-gray-400">Tilt</span>
+                <span className="text-[9px] text-gray-500 font-medium">{layers.buildings3dPitch ?? 0}°</span>
+              </div>
+              <ControlSlider
+                min="0"
+                max="60"
+                step="5"
+                value={layers.buildings3dPitch ?? 0}
+                onChange={(e) => onLayersChange({ buildings3dPitch: parseFloat(e.target.value) })}
+                displayValue={`${layers.buildings3dPitch ?? 0}°`}
+                onValueChange={(value) => onLayersChange({ buildings3dPitch: value })}
+                formatValue={(v) => `${Math.round(v)}°`}
+                parseValue={(s) => parseInt(s.replace('°', ''))}
+              />
+            </div>
+
+            {/* Camera Bearing */}
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="text-[9px] text-gray-400">Rotation</span>
+                <span className="text-[9px] text-gray-500 font-medium">{layers.buildings3dBearing ?? 0}°</span>
+              </div>
+              <ControlSlider
+                min="0"
+                max="360"
+                step="15"
+                value={layers.buildings3dBearing ?? 0}
+                onChange={(e) => onLayersChange({ buildings3dBearing: parseFloat(e.target.value) })}
+                displayValue={`${layers.buildings3dBearing ?? 0}°`}
+                onValueChange={(value) => onLayersChange({ buildings3dBearing: value })}
+                formatValue={(v) => `${Math.round(v)}°`}
+                parseValue={(s) => parseInt(s.replace('°', ''))}
+              />
+            </div>
+
+            <p className="text-[8px] text-gray-400 italic">Tilted views work best with 3D buildings enabled</p>
+          </div>
+        </CollapsibleSection>
 
         {/* Geographic Features */}
         {geographicLayers.length > 0 && (

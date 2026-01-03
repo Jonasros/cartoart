@@ -4,24 +4,36 @@ import { PosterConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { ControlSection, ControlSlider, ControlLabel, ControlRow } from '@/components/ui/control-components';
 import { Tooltip } from '@/components/ui/tooltip';
-import { Layout, Maximize, Crop, Frame } from 'lucide-react';
+import { Crop, Frame, Monitor, Printer } from 'lucide-react';
 
 interface FormatControlsProps {
   format: PosterConfig['format'];
   onFormatChange: (format: Partial<PosterConfig['format']>) => void;
 }
 
-const aspectRatioOptions: Array<{
+type AspectRatioOption = {
   value: PosterConfig['format']['aspectRatio'];
   label: string;
   description?: string;
-}> = [
-  { value: '2:3', label: '2:3', description: 'Standard' },
-  { value: '3:4', label: '3:4', description: 'Medium' },
-  { value: '4:5', label: '4:5', description: 'Compact' },
-  { value: '1:1', label: '1:1', description: 'Square' },
-  { value: 'ISO', label: 'ISO', description: 'A-series' },
+  category: 'print' | 'screen';
+};
+
+const aspectRatioOptions: AspectRatioOption[] = [
+  // Print & Classic
+  { value: '2:3', label: '2:3', description: 'Standard', category: 'print' },
+  { value: '3:4', label: '3:4', description: 'Medium', category: 'print' },
+  { value: '4:5', label: '4:5', description: 'Compact', category: 'print' },
+  { value: '1:1', label: '1:1', description: 'Square', category: 'print' },
+  { value: 'ISO', label: 'ISO', description: 'A-series', category: 'print' },
+  // Screen & Wallpaper
+  { value: '16:9', label: '16:9', description: 'Desktop', category: 'screen' },
+  { value: '16:10', label: '16:10', description: 'Laptop', category: 'screen' },
+  { value: '9:16', label: '9:16', description: 'Phone', category: 'screen' },
+  { value: '9:19.5', label: '9:19.5', description: 'Mobile', category: 'screen' },
 ];
+
+const printOptions = aspectRatioOptions.filter(o => o.category === 'print');
+const screenOptions = aspectRatioOptions.filter(o => o.category === 'screen');
 
 export function FormatControls({ format, onFormatChange }: FormatControlsProps) {
   const isSquareAspectRatio = format.aspectRatio === '1:1';
@@ -39,28 +51,63 @@ export function FormatControls({ format, onFormatChange }: FormatControlsProps) 
     <div className="space-y-6">
       <ControlSection title="Dimensions">
         <div className="space-y-4">
-          <div className="space-y-2">
-            <ControlLabel>Aspect Ratio</ControlLabel>
-            <div className="grid grid-cols-5 gap-2">
-              {aspectRatioOptions.map((option) => {
-                const isActive = format.aspectRatio === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleAspectRatioChange(option.value)}
-                    className={cn(
-                      'flex flex-col items-center justify-center p-2 rounded-lg border transition-all h-16',
-                      isActive
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-                    )}
-                  >
-                    <span className="text-sm font-bold">{option.label}</span>
-                    <span className="text-[10px] opacity-75">{option.description}</span>
-                  </button>
-                );
-              })}
+          <div className="space-y-4">
+            {/* Print & Classic */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Printer className="w-3.5 h-3.5 text-gray-500" />
+                <ControlLabel className="mb-0 text-xs uppercase tracking-wide text-gray-500">Print & Classic</ControlLabel>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {printOptions.map((option) => {
+                  const isActive = format.aspectRatio === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleAspectRatioChange(option.value)}
+                      className={cn(
+                        'flex flex-col items-center justify-center p-2 rounded-lg border transition-all h-14',
+                        isActive
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+                      )}
+                    >
+                      <span className="text-sm font-bold">{option.label}</span>
+                      <span className="text-[10px] opacity-75">{option.description}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Screen & Wallpaper */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Monitor className="w-3.5 h-3.5 text-gray-500" />
+                <ControlLabel className="mb-0 text-xs uppercase tracking-wide text-gray-500">Screen & Wallpaper</ControlLabel>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {screenOptions.map((option) => {
+                  const isActive = format.aspectRatio === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleAspectRatioChange(option.value)}
+                      className={cn(
+                        'flex flex-col items-center justify-center p-2 rounded-lg border transition-all h-14',
+                        isActive
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+                      )}
+                    >
+                      <span className="text-sm font-bold">{option.label}</span>
+                      <span className="text-[10px] opacity-75">{option.description}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

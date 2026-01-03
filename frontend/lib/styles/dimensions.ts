@@ -1,11 +1,17 @@
 import type { PosterConfig } from '@/types/poster';
 
 export const ASPECT_RATIOS: Record<string, number> = {
+  // Print & Classic
   '2:3': 2 / 3,
   '3:4': 3 / 4,
   '4:5': 4 / 5,
   '1:1': 1,
   'ISO': 1 / Math.sqrt(2),
+  // Screen & Wallpaper
+  '16:9': 16 / 9,
+  '16:10': 16 / 10,
+  '9:16': 9 / 16,
+  '9:19.5': 9 / 19.5,
 };
 
 export function getNumericRatio(

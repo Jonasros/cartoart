@@ -93,7 +93,10 @@ export async function saveMap(config: PosterConfig, title: string) {
   }
 
   revalidatePath('/profile');
-  return data as SavedMap;
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
 }
 
 /**
@@ -168,7 +171,10 @@ export async function saveMapWithThumbnail(
   }
 
   revalidatePath('/profile');
-  return data as SavedMap;
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
 }
 
 /**
@@ -249,7 +255,10 @@ export async function updateMap(
   logger.info('Map updated successfully', { mapId: id, userId: user.id });
   revalidatePath('/profile');
   revalidatePath(`/map/${id}`);
-  return data as SavedMap;
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
 }
 
 /**
@@ -403,7 +412,10 @@ export async function publishMap(
   revalidatePath('/profile');
   revalidatePath('/feed');
   revalidatePath(`/map/${id}`);
-  return data as SavedMap;
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
 }
 
 /**
@@ -447,7 +459,10 @@ export async function unpublishMap(id: string) {
   revalidatePath('/profile');
   revalidatePath('/feed');
   revalidatePath(`/map/${id}`);
-  return data as SavedMap;
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+  } as SavedMap;
 }
 
 /**

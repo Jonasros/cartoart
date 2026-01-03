@@ -49,6 +49,16 @@ export interface ColorPalette {
   secondary?: string; // Minor streets/features
   population?: string; // Color for population density
   parks?: string; // Alias for greenSpace
+
+  // 3D Buildings configuration
+  building3D?: {
+    colorLow: string;      // Color for low buildings
+    colorMid: string;      // Color for medium buildings
+    colorHigh: string;     // Color for tall buildings
+    opacity: number;       // Overall opacity
+    lightColor?: string;   // Light source color
+    lightIntensity?: number; // Light intensity
+  };
 }
 
 export interface LayerToggle {
@@ -92,7 +102,7 @@ export interface PosterConfig {
     maxWidth?: number; // New: max width percentage (0-100)
   };
   format: {
-    aspectRatio: '2:3' | '3:4' | '4:5' | '1:1' | 'ISO';
+    aspectRatio: '2:3' | '3:4' | '4:5' | '1:1' | 'ISO' | '16:9' | '16:10' | '9:16' | '9:19.5';
     orientation: 'portrait' | 'landscape';
     margin: number; // 0-100 (percentage based)
     borderStyle: 'none' | 'thin' | 'thick' | 'double' | 'inset';
@@ -104,6 +114,14 @@ export interface PosterConfig {
   layers: {
     streets: boolean;
     buildings: boolean;
+    // 3D Buildings
+    buildings3d?: boolean; // Toggle for 3D extruded buildings
+    buildings3dPitch?: number; // Camera pitch/tilt angle (0-60°)
+    buildings3dBearing?: number; // Camera bearing/rotation (0-360°)
+    buildings3dHeightScale?: number; // Height exaggeration multiplier (0.5-3.0)
+    buildings3dDefaultHeight?: number; // Fallback height for buildings without data (0-30m)
+    buildings3dStyle?: 'solid' | 'glass' | 'wireframe' | 'gradient'; // Artistic rendering style
+    buildings3dOpacity?: number; // Overall opacity (0-1)
     water: boolean;
     parks: boolean;
     terrain: boolean;

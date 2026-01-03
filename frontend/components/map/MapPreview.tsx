@@ -48,20 +48,35 @@ export function MapPreview({
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   // Local viewState for smooth interaction without triggering full app re-renders on every frame
+  // Pitch/bearing: Use manual value if set, else default to 45° if 3D buildings enabled, else 0
   const [viewState, setViewState] = useState({
     longitude: location.center[0],
     latitude: location.center[1],
     zoom: location.zoom,
+    pitch: layers?.buildings3dPitch ?? (layers?.buildings3d ? 45 : 0),
+    bearing: layers?.buildings3dBearing ?? 0,
   });
 
   // Sync with external location changes (e.g. search, button clicks)
   useEffect(() => {
-    setViewState({
+    setViewState(prev => ({
+      ...prev,
       longitude: location.center[0],
       latitude: location.center[1],
       zoom: location.zoom,
-    });
+    }));
   }, [location.center, location.zoom]);
+
+  // Sync pitch/bearing with layer settings
+  // Use manual value if set, else default to 45° when 3D buildings enabled, else 0
+  // Important: Also depend on `layers` reference to handle project loading (when setConfig replaces entire config)
+  useEffect(() => {
+    setViewState(prev => ({
+      ...prev,
+      pitch: layers?.buildings3dPitch ?? (layers?.buildings3d ? 45 : 0),
+      bearing: layers?.buildings3dBearing ?? 0,
+    }));
+  }, [layers, layers?.buildings3d, layers?.buildings3dPitch, layers?.buildings3dBearing]);
 
   // Fit map to route bounds when GPX is uploaded
   useEffect(() => {

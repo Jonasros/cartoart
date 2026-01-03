@@ -1,6 +1,7 @@
 import type { ColorPalette, PosterConfig, PosterStyle } from '@/types/poster';
 import { isColorDark } from '@/lib/utils';
 import { getContourTileJsonUrl } from '@/lib/styles/tileUrl';
+import { createBuilding3DLayer, createBuilding3DLight } from '@/lib/styles/layers/buildings3d';
 
 /**
  * Helper to scale a value that might be a number or a zoom interpolation expression
@@ -73,6 +74,33 @@ export function applyPaletteToStyle(
     updateLayerPaint(layer, palette, layers, labelAdjustment, roadWeightMultiplier);
     updateLayerLayout(layer, layers);
   });
+
+  // Inject 3D buildings layer if enabled
+  if (layers?.buildings3d) {
+    const buildings3DLayer = createBuilding3DLayer(palette, {
+      heightScale: layers.buildings3dHeightScale ?? 1.0,
+      opacity: layers.buildings3dOpacity,
+      minZoom: 8, // Low minZoom so buildings appear early and animate in
+      defaultHeight: layers.buildings3dDefaultHeight ?? 6,
+      style: layers.buildings3dStyle ?? 'solid',
+    });
+
+    // Find the right position to insert 3D buildings (after 2D buildings, before labels)
+    const labelIndex = updatedStyle.layers.findIndex((layer: any) =>
+      layer.id.includes('label') && layer.type === 'symbol'
+    );
+
+    if (labelIndex !== -1) {
+      // Insert before labels
+      updatedStyle.layers.splice(labelIndex, 0, buildings3DLayer);
+    } else {
+      // Append at the end if no labels found
+      updatedStyle.layers.push(buildings3DLayer);
+    }
+
+    // Add light source for 3D buildings shadows and depth
+    updatedStyle.light = createBuilding3DLight(palette);
+  }
 
   return updatedStyle;
 }

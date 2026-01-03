@@ -115,6 +115,14 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
     secondary: z.string().optional(),
     population: z.string().optional(),
     parks: z.string().optional(),
+    building3D: z.object({
+      colorLow: z.string(),
+      colorMid: z.string(),
+      colorHigh: z.string(),
+      opacity: z.number(),
+      lightColor: z.string().optional(),
+      lightIntensity: z.number().optional(),
+    }).optional(),
   }),
   typography: z.object({
     titleFont: z.string(),
@@ -135,7 +143,7 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
     maxWidth: z.number().min(0).max(100).optional(),
   }),
   format: z.object({
-    aspectRatio: z.enum(['2:3', '3:4', '4:5', '1:1', 'ISO']),
+    aspectRatio: z.enum(['2:3', '3:4', '4:5', '1:1', 'ISO', '16:9', '16:10', '9:16', '9:19.5']),
     orientation: z.enum(['portrait', 'landscape']),
     margin: z.number().min(0).max(100),
     borderStyle: z.enum(['none', 'thin', 'thick', 'double', 'inset']),
@@ -147,6 +155,13 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
   layers: z.object({
     streets: z.boolean(),
     buildings: z.boolean(),
+    buildings3d: z.boolean().optional(),
+    buildings3dPitch: z.number().min(0).max(60).optional(),
+    buildings3dBearing: z.number().min(-180).max(360).optional(),
+    buildings3dHeightScale: z.number().min(0.5).max(3.0).optional(),
+    buildings3dDefaultHeight: z.number().min(0).max(30).optional(),
+    buildings3dStyle: z.enum(['solid', 'glass', 'wireframe', 'gradient']).optional(),
+    buildings3dOpacity: z.number().min(0).max(1).optional(),
     water: z.boolean(),
     parks: z.boolean(),
     terrain: z.boolean(),
