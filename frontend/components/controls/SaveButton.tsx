@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, Check } from 'lucide-react';
+import { Save, Loader2, Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/tooltip';
 
 interface SaveButtonProps {
   onSave: (name: string) => Promise<void>;
+  onUpdate?: () => Promise<void>;
+  currentMapId?: string | null;
   currentMapName?: string | null;
   hasUnsavedChanges?: boolean;
   isAuthenticated: boolean;
@@ -16,6 +18,8 @@ interface SaveButtonProps {
 
 export function SaveButton({
   onSave,
+  onUpdate,
+  currentMapId,
   currentMapName,
   hasUnsavedChanges,
   isAuthenticated,
@@ -25,6 +29,7 @@ export function SaveButton({
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [showChoiceDialog, setShowChoiceDialog] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -34,15 +39,38 @@ export function SaveButton({
       return;
     }
 
-    if (currentMapName) {
-      // If editing existing map, save directly without dialog
-      handleSave(currentMapName);
+    if (currentMapId && currentMapName) {
+      // Editing existing map - show choice dialog
+      setShowChoiceDialog(true);
     } else {
-      // New project - show dialog
+      // New project - show name dialog
       setProjectName('');
       setError(null);
       setShowDialog(true);
     }
+  };
+
+  const handleUpdateExisting = async () => {
+    if (!onUpdate || isSaving) return;
+    setShowChoiceDialog(false);
+    setIsSaving(true);
+    setError(null);
+    try {
+      await onUpdate();
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAsNew = () => {
+    setShowChoiceDialog(false);
+    setProjectName(currentMapName ? `${currentMapName} (Copy)` : '');
+    setError(null);
+    setShowDialog(true);
   };
 
   const handleSave = async (name: string) => {
@@ -139,6 +167,64 @@ export function SaveButton({
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
         )}
       </button>
+
+      {/* Choice Dialog - Update or Save as New */}
+      {showChoiceDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowChoiceDialog(false)}
+          />
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 z-10">
+            <div className="p-6 space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Save Changes
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                You're editing "{currentMapName}". How would you like to save?
+              </p>
+
+              <div className="space-y-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleUpdateExisting}
+                  disabled={isSaving}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  <Save className="h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-medium">Update "{currentMapName}"</div>
+                    <div className="text-xs text-blue-200">Overwrite the existing project</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveAsNew}
+                  disabled={isSaving}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                >
+                  <Copy className="h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-medium">Save as New Copy</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Create a new project with these changes</div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowChoiceDialog(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Save Dialog */}
       {showDialog && (

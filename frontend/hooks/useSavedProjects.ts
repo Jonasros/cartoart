@@ -195,7 +195,7 @@ export function useSavedProjects() {
     if (isAuthenticated) {
       try {
         await updateMap(id, projects.find(p => p.id === id)!.config, name);
-        setProjects(prev => prev.map(p => 
+        setProjects(prev => prev.map(p =>
           p.id === id ? { ...p, name, updatedAt: Date.now() } : p
         ));
         setStorageError(null);
@@ -205,15 +205,69 @@ export function useSavedProjects() {
         throw error;
       }
     } else {
-      setProjects(prev => prev.map(p => 
+      setProjects(prev => prev.map(p =>
         p.id === id ? { ...p, name, updatedAt: Date.now() } : p
       ));
+    }
+  }, [isAuthenticated, projects]);
+
+  const updateProject = useCallback(async (id: string, config: PosterConfig, thumbnailBlob?: Blob): Promise<SavedProject> => {
+    if (isAuthenticated) {
+      try {
+        // Update the map config
+        const updatedMap = await updateMap(id, config);
+
+        // Update thumbnail if provided
+        if (thumbnailBlob) {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+            try {
+              const thumbnailUrl = await uploadThumbnail(id, user.id, thumbnailBlob);
+              await updateMapThumbnail(id, thumbnailUrl);
+            } catch (thumbnailError) {
+              logger.error('Failed to upload thumbnail:', thumbnailError);
+              // Continue without thumbnail update
+            }
+          }
+        }
+
+        const savedProject: SavedProject = {
+          id: updatedMap.id,
+          name: updatedMap.title,
+          config: updatedMap.config,
+          updatedAt: new Date(updatedMap.updated_at).getTime(),
+        };
+
+        setProjects(prev => prev.map(p => p.id === id ? savedProject : p));
+        setStorageError(null);
+        return savedProject;
+      } catch (error) {
+        logger.error('Failed to update map on server', error);
+        setStorageError('Failed to update map. Please try again.');
+        throw error;
+      }
+    } else {
+      // Update in localStorage
+      const existingProject = projects.find(p => p.id === id);
+      if (!existingProject) {
+        throw new Error('Project not found');
+      }
+      const updatedProject: SavedProject = {
+        ...existingProject,
+        config,
+        updatedAt: Date.now(),
+      };
+      setProjects(prev => prev.map(p => p.id === id ? updatedProject : p));
+      return updatedProject;
     }
   }, [isAuthenticated, projects]);
 
   return {
     projects,
     saveProject,
+    updateProject,
     deleteProject,
     renameProject,
     isLoaded,

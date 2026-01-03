@@ -53,6 +53,7 @@ export function PosterEditor() {
   const {
     projects,
     saveProject,
+    updateProject,
     deleteProject,
     renameProject,
     isAuthenticated
@@ -140,6 +141,30 @@ export function PosterEditor() {
   const handleSaveClick = useCallback(async (name: string) => {
     await handleSaveProject(name, config);
   }, [handleSaveProject, config]);
+
+  // Handler for updating existing project (overwrite)
+  const handleUpdateProject = useCallback(async () => {
+    if (!currentMapId || !isAuthenticated) return;
+
+    // Generate thumbnail if map is available
+    let thumbnailBlob: Blob | undefined;
+    if (mapInstanceRef.current) {
+      try {
+        const { generateThumbnail } = await import('@/lib/export/thumbnail');
+        thumbnailBlob = await generateThumbnail(mapInstanceRef.current, config);
+      } catch (error) {
+        console.error('Failed to generate thumbnail:', error);
+        // Continue without thumbnail
+      }
+    }
+
+    // Update the project
+    await updateProject(currentMapId, config, thumbnailBlob);
+
+    // Update the original config to reflect the saved state
+    setOriginalConfig(config);
+    setCurrentMapStatus(prev => prev ? { ...prev, hasUnsavedChanges: false } : null);
+  }, [currentMapId, isAuthenticated, config, updateProject]);
 
   // Handle publish success - refetch map status to get latest published state
   const handlePublishSuccess = useCallback(async () => {
@@ -244,6 +269,8 @@ export function PosterEditor() {
           </button>
           <SaveButton
             onSave={handleSaveClick}
+            onUpdate={handleUpdateProject}
+            currentMapId={currentMapId}
             currentMapName={currentMapName}
             hasUnsavedChanges={currentMapStatus?.hasUnsavedChanges}
             isAuthenticated={isAuthenticated}
@@ -340,6 +367,8 @@ export function PosterEditor() {
           </div>
           <SaveButton
             onSave={handleSaveClick}
+            onUpdate={handleUpdateProject}
+            currentMapId={currentMapId}
             currentMapName={currentMapName}
             hasUnsavedChanges={currentMapStatus?.hasUnsavedChanges}
             isAuthenticated={isAuthenticated}
