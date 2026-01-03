@@ -114,6 +114,7 @@ export interface PosterConfig {
   layers: {
     streets: boolean;
     buildings: boolean;
+    buildingsStyle?: 'fill' | 'sketch' | 'outline'; // 2D building rendering style
     // 3D Buildings
     buildings3d?: boolean; // Toggle for 3D extruded buildings
     buildings3dPitch?: number; // Camera pitch/tilt angle (0-60°)

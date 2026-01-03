@@ -155,6 +155,7 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
   layers: z.object({
     streets: z.boolean(),
     buildings: z.boolean(),
+    buildingsStyle: z.enum(['fill', 'sketch', 'outline']).optional(),
     buildings3d: z.boolean().optional(),
     buildings3dPitch: z.number().min(0).max(60).optional(),
     buildings3dBearing: z.number().min(-180).max(360).optional(),

@@ -67,11 +67,18 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
   ] as const;
 
   // 3D Buildings style presets
-  const buildingStyles = [
+  const building3DStyles = [
     { id: 'solid', label: 'Solid', description: 'Classic opaque' },
     { id: 'glass', label: 'Glass', description: 'See-through' },
     { id: 'wireframe', label: 'Wire', description: 'Sketch outline' },
     { id: 'gradient', label: 'Fade', description: 'Height gradient' },
+  ] as const;
+
+  // 2D Buildings style presets
+  const building2DStyles = [
+    { id: 'fill', label: 'Fill', description: 'Classic filled buildings' },
+    { id: 'sketch', label: 'Sketch', description: 'Hand-drawn pencil effect' },
+    { id: 'outline', label: 'Outline', description: 'Clean outline only' },
   ] as const;
 
   const applyPreset = (preset: typeof cameraPresets[number]) => {
@@ -229,6 +236,34 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
         {item.id === 'buildings' && layers.buildings && (
           <div className="pl-8 pr-2 pb-2">
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-3">
+              {/* 2D Building Style Selector - only when 3D is disabled */}
+              {!layers.buildings3d && (
+                <div className="space-y-2">
+                  <ControlLabel className="text-[10px] uppercase text-gray-500">Style</ControlLabel>
+                  <div className="grid grid-cols-3 gap-1">
+                    {building2DStyles.map((style) => {
+                      const isActive = (layers.buildingsStyle ?? 'fill') === style.id;
+                      return (
+                        <Tooltip key={style.id} content={style.description}>
+                          <button
+                            onClick={() => onLayersChange({ buildingsStyle: style.id as any })}
+                            className={cn(
+                              "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
+                              isActive
+                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
+                            )}
+                          >
+                            {style.label}
+                          </button>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[8px] text-gray-400 italic">Sketch style works best with paper texture</p>
+                </div>
+              )}
+
               <ControlCheckbox
                 label="3D Extrusion"
                 checked={Boolean(layers.buildings3d)}
@@ -242,7 +277,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                   <div className="space-y-2">
                     <ControlLabel className="text-[10px] uppercase text-gray-500">Style</ControlLabel>
                     <div className="grid grid-cols-4 gap-1">
-                      {buildingStyles.map((style) => {
+                      {building3DStyles.map((style) => {
                         const isActive = (layers.buildings3dStyle ?? 'solid') === style.id;
                         return (
                           <Tooltip key={style.id} content={style.description}>

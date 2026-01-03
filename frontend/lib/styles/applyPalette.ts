@@ -2,6 +2,7 @@ import type { ColorPalette, PosterConfig, PosterStyle } from '@/types/poster';
 import { isColorDark } from '@/lib/utils';
 import { getContourTileJsonUrl } from '@/lib/styles/tileUrl';
 import { createBuilding3DLayer, createBuilding3DLight } from '@/lib/styles/layers/buildings3d';
+import { building2DStylePresets, type Building2DStyle } from '@/lib/styles/layers/buildings2d';
 
 /**
  * Helper to scale a value that might be a number or a zoom interpolation expression
@@ -100,6 +101,63 @@ export function applyPaletteToStyle(
 
     // Add light source for 3D buildings shadows and depth
     updatedStyle.light = createBuilding3DLight(palette);
+  }
+
+  // Inject 2D building outline layer for sketch/outline styles
+  const buildingsStyle = (layers?.buildingsStyle ?? 'fill') as Building2DStyle;
+  if (layers?.buildings && (buildingsStyle === 'sketch' || buildingsStyle === 'outline')) {
+    const preset = building2DStylePresets[buildingsStyle];
+    const buildingColor = palette.buildings || palette.primary || palette.text;
+    const isDark = isColorDark(palette.background);
+    const strokeColor = isDark ? (palette.text || '#ffffff') : buildingColor;
+
+    const outlineLayer = {
+      id: 'buildings-outline',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round',
+      },
+      paint: {
+        'line-color': strokeColor,
+        'line-width': [
+          'interpolate', ['linear'], ['zoom'],
+          10, preset.strokeWidth * 0.3,
+          12, preset.strokeWidth * 0.5,
+          14, preset.strokeWidth * 0.8,
+          16, preset.strokeWidth,
+          18, preset.strokeWidth * 1.2,
+        ],
+        'line-opacity': [
+          'interpolate', ['linear'], ['zoom'],
+          10, preset.strokeOpacity * 0.3,
+          12, preset.strokeOpacity * 0.6,
+          14, preset.strokeOpacity * 0.8,
+          16, preset.strokeOpacity,
+        ],
+      },
+    };
+
+    // Find the building fill layer and insert outline right after it
+    const buildingFillIndex = updatedStyle.layers.findIndex((layer: any) =>
+      layer.id === 'building' || (layer.id.includes('building') && layer.type === 'fill' && !layer.id.includes('3d'))
+    );
+
+    if (buildingFillIndex !== -1) {
+      updatedStyle.layers.splice(buildingFillIndex + 1, 0, outlineLayer);
+    } else {
+      // Fallback: insert before labels if building layer not found
+      const labelIndex = updatedStyle.layers.findIndex((layer: any) =>
+        layer.id.includes('label') && layer.type === 'symbol'
+      );
+      if (labelIndex !== -1) {
+        updatedStyle.layers.splice(labelIndex, 0, outlineLayer);
+      } else {
+        updatedStyle.layers.push(outlineLayer);
+      }
+    }
   }
 
   return updatedStyle;
@@ -363,18 +421,25 @@ function updateLayerPaint(
     return;
   }
 
-  // Buildings
-  if (id.includes('building')) {
+  // Buildings (2D) - apply style presets
+  if (id.includes('building') && !id.includes('3d')) {
+    const buildingsStyle = (layers?.buildingsStyle ?? 'fill') as Building2DStyle;
+    const preset = building2DStylePresets[buildingsStyle];
+    const buildingColor = palette.buildings || palette.primary || palette.text;
+
     if (type === 'fill') {
       layer.paint = {
         ...layer.paint,
-        'fill-color': palette.buildings || palette.primary || palette.text,
-        'fill-opacity': layer.paint?.['fill-opacity'] ?? 0.5,
+        'fill-color': buildingColor,
+        'fill-opacity': preset.fillOpacity,
       };
     } else if (type === 'line') {
+      // Handle existing outline layers (from the injected 'buildings-outline' layer)
+      const isDark = isColorDark(palette.background);
+      const strokeColor = isDark ? (palette.text || '#ffffff') : buildingColor;
       layer.paint = {
         ...layer.paint,
-        'line-color': palette.buildings || palette.primary || palette.text,
+        'line-color': strokeColor,
       };
     }
     return;
