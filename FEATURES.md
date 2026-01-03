@@ -1,6 +1,6 @@
 # Waymarker - Feature Roadmap & Strategy
 
-**Last Updated**: 2026-01-02
+**Last Updated**: 2026-01-03
 
 ---
 
@@ -70,6 +70,8 @@ Phase 3: Sailing / Voyage Maps (nautical features)
 ✅ **Start/end markers** with customizable colors
 ✅ **Privacy zones** for route protection (hide start/end)
 ✅ **Route statistics** (distance, elevation gain/loss calculated)
+✅ **3D buildings** with artistic styles (solid, glass, wireframe, gradient)
+✅ **Perspective controls** (camera presets, tilt, rotation)
 ✅ **High-res export** (up to 7200x10800px) including routes
 ✅ **Social features** (feed, likes, comments, sharing)
 ✅ **Route persistence** (save, share, duplicate maps with routes)
@@ -506,6 +508,7 @@ AI can be Phase 2 if customers want more artistic/stylized versions.
 - [x] Route duplication support
 
 ### Phase 1.2: Enhanced Route Styling (Partially Complete)
+
 - [x] Solid/dashed/dotted line styles
 - [x] Route opacity control
 - [x] Start/end marker colors
@@ -514,7 +517,21 @@ AI can be Phase 2 if customers want more artistic/stylized versions.
 - [ ] Multiple route colors for segments
 - [ ] Mile/KM markers along route
 
-### Phase 1.3: Integrations (Future)
+### Phase 1.3: 3D Buildings ✅ COMPLETE
+
+- [x] 3D extruded buildings using MapLibre `fill-extrusion` layer
+- [x] Building style presets (Solid, Glass, Wireframe, Gradient)
+- [x] Opacity control for transparent building effects
+- [x] Height scale multiplier for exaggerated skylines
+- [x] Default height for buildings without OSM height data
+- [x] Independent "Perspective" section for camera controls
+- [x] Camera presets (Isometric, Skyline, Bird's Eye, Dramatic)
+- [x] Manual pitch (0-60°) and bearing (-180° to 360°) sliders
+- [x] Perspective settings persist in saved/published/duplicated maps
+- [x] Height-based color gradients using palette building colors
+
+### Phase 1.4: Integrations (Future)
+
 - [ ] Strava OAuth integration
 - [ ] AllTrails integration
 - [ ] Garmin Connect integration

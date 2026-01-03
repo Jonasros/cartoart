@@ -1,6 +1,6 @@
 # Waymarker - Current Status
 
-**Last Updated**: 2026-01-02
+**Last Updated**: 2026-01-03
 
 ## Overview
 
@@ -109,6 +109,19 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Routes display on published/shared maps
 - ✅ Duplication preserves route data
 - ✅ Toggle between single location and route mode
+
+### 3D Buildings
+
+- ✅ 3D extruded buildings using MapLibre fill-extrusion layer
+- ✅ Building style presets (Solid, Glass, Wireframe, Gradient)
+- ✅ Opacity control for transparent building effects
+- ✅ Height scale multiplier for exaggerated skylines
+- ✅ Default height setting for buildings without height data
+- ✅ Independent Perspective section for camera controls
+- ✅ Camera presets (Isometric, Skyline, Bird's Eye, Dramatic)
+- ✅ Manual pitch (tilt) and bearing (rotation) sliders
+- ✅ Perspective settings persist in saved/published maps
+- ✅ Height-based color gradients using palette colors
 
 ---
 

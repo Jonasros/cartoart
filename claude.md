@@ -127,6 +127,14 @@ interface PosterConfig {
   layers: {
     streets: boolean;
     buildings: boolean;
+    // 3D Buildings
+    buildings3d?: boolean;
+    buildings3dPitch?: number;      // Camera tilt 0-60°
+    buildings3dBearing?: number;    // Camera rotation -180° to 360°
+    buildings3dHeightScale?: number; // Height multiplier 0.5-3.0
+    buildings3dDefaultHeight?: number; // Fallback height 0-30m
+    buildings3dStyle?: 'solid' | 'glass' | 'wireframe' | 'gradient';
+    buildings3dOpacity?: number;    // 0-1
     water: boolean;
     parks: boolean;
     terrain: boolean;
@@ -340,6 +348,8 @@ interface RouteConfig {
 - ✅ Route persistence in saved/published maps
 - ✅ Social features (feed, likes, comments, sharing)
 - ✅ User authentication with Supabase
+- ✅ 3D building extrusion with style presets (solid, glass, wireframe, gradient)
+- ✅ Camera perspective controls (presets, pitch, bearing)
 
 ### Next Priority: Phase 4 — 3D Printed Route Sculptures
 1. Install Three.js / React Three Fiber
