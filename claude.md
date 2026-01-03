@@ -1,8 +1,8 @@
-# Map Poster Generator - Development Context
+# Waymarker - Development Context
 
 ## Project Summary
 
-A web application that generates beautifully stylized map posters from real geographic data. Users select a location, choose an artistic style, customize colors and typography, then export high-resolution images suitable for large-format printing.
+A web application that transforms real geographic data and GPS routes into beautifully stylized map posters. Users search locations or upload GPX files, choose from 11 artistic styles, customize colors and typography, then export high-resolution images suitable for large-format printing. **Brand name: Waymarker** (waymarker.eu)
 
 ## Tech Stack
 
@@ -47,7 +47,7 @@ waymarker/
 │   │   ├── route/       # ✅ GPX parsing and route utilities
 │   │   │   ├── index.ts
 │   │   │   └── parseGPX.ts
-│   │   └── styles/      # ✅ 3 complete styles
+│   │   └── styles/      # ✅ 11 complete styles
 │   │       ├── minimal.ts
 │   │       ├── dark-mode.ts
 │   │       ├── blueprint.ts
@@ -190,49 +190,57 @@ interface RouteConfig {
 
 ## Development Phases
 
-### Phase 1: Core MVP ✅ COMPLETE
+### Phase 1: Hiking Route Posters (MVP) ✅ COMPLETE
 - [x] Set up Next.js project with TypeScript and Tailwind
 - [x] Integrate MapLibre GL JS with React
 - [x] Implement location search with Nominatim API
-- [x] Create 3 initial styles (Minimal, Dark Mode, Blueprint)
+- [x] Create 11 map styles with 15+ color palettes
 - [x] Build complete UI with all control panels
 - [x] Implement text overlay system with full customization
 - [x] Add PNG export functionality with high-res support
 - [x] Typography customization (fonts, sizes, spacing, all-caps)
 - [x] Layer toggles (streets, buildings, water, parks, labels, terrain, marker)
 - [x] Format/aspect ratio options (5 ratios, portrait/landscape)
-- [x] Multiple color palettes per style (15 total palettes)
 - [x] GPX route support (upload, parse, display, style customization)
+- [x] Route persistence in saved/published maps
+- [x] Social features (feed, likes, comments, sharing)
 
-**Current Task**: Testing and refinement
+### Phase 4: 3D Printed Route Sculptures ← NEXT PRIORITY
+- [ ] Tab-based mode switching (Poster / 3D Print)
+- [ ] Three.js / React Three Fiber 3D preview
+- [ ] Route-to-mesh conversion (GPS → 3D ribbon)
+- [ ] Base style options (rectangular, circular, organic)
+- [ ] Size/material selection
+- [ ] Fulfillment partner API integration
+- [ ] Order checkout and tracking
 
-### Phase 2: Style Expansion (Future)
-- [ ] Add remaining 5 styles (Topographic, Vintage, Watercolor, Isometric, Abstract)
-- [ ] Add more color palettes
-- [ ] Style-specific customizations
+**Why 3D Print is next**: Zero competition, premium pricing (€79-249), leverages existing GPX data.
 
-### Phase 3: High-Res Export
-- [ ] Multi-resolution export options
-- [ ] Progress indicator for large exports
-- [ ] PDF export
-- [ ] Tiled rendering for very large outputs
+### Phase 2: Wedding / Gift Modes (Future)
+- [ ] "Met / Engaged / Married" templates
+- [ ] Heart-shaped route connector option
+- [ ] Romantic font presets
+- [ ] Custom date formatting
 
-### Phase 4: Polish & Features
-- [ ] Save/load poster configurations
-- [ ] Share links (URL-based state)
-- [ ] Gallery of examples
-- [ ] Print partner integration (optional)
+### Phase 3: Sailing / Voyage Maps (Future)
+- [ ] Nautical mile display
+- [ ] Port markers for stops
+- [ ] Nautical chart styling
+- [ ] Ocean-themed color palettes
 
-## Style Library
+## Style Library (11 Implemented)
 
-1. **Minimal Line Art** - Streets only, monochromatic, clean
-2. **Topographic/Contour** - Elevation contours, terrain-focused
-3. **Vintage/Antique** - Parchment, sepia tones, hand-drawn feel
-4. **Blueprint/Technical** - Cyan lines on blue, architectural
-5. **Watercolor/Painted** - Soft edges, color washes, organic
-6. **Dark Mode/Noir** - Dark backgrounds, luminous streets
-7. **Isometric/3D** - Buildings with height, diorama appearance
-8. **Abstract/Artistic** - Stylized, expressive interpretation
+1. **Minimal** - Clean lines, monochromatic, elegant simplicity
+2. **Dark Mode** - Dark backgrounds, luminous streets
+3. **Midnight** - Deep dark theme with subtle detail
+4. **Blueprint** - Technical cyan on blue, architectural feel
+5. **Vintage** - Parchment, sepia tones, hand-drawn aesthetic
+6. **Topographic** - Elevation contours, terrain-focused
+7. **Watercolor** - Soft edges, painted appearance, organic
+8. **Abstract** - Stylized, artistic interpretation
+9. **Atmospheric** - Moody, atmospheric rendering
+10. **Organic** - Natural, flowing aesthetic
+11. **Retro** - Classic vintage styling
 
 ## Key Technical Considerations
 
@@ -310,46 +318,44 @@ interface RouteConfig {
 
 ## Current Status
 
-**Phase**: Phase 1 MVP - ✅ **COMPLETE** (Ready for Testing)
+**Phase**: Phase 1 ✅ COMPLETE — Next: Phase 4 (3D Print)
 **Location**: All implementation in `frontend/` directory
-**Dev Server**: Should be running on http://localhost:3000
+**Dev Server**: http://localhost:3000
+**Brand**: Waymarker (waymarker.eu)
 
 ### What's Working
-- ✅ Complete UI with 6 control panels
-- ✅ 3 map styles with 15 color palettes total
+- ✅ Complete UI with all control panels
+- ✅ 11 map styles with 15+ color palettes
 - ✅ Real-time preview with pan/zoom
 - ✅ Location search with Nominatim
 - ✅ Full typography controls
 - ✅ Layer visibility toggles
 - ✅ Aspect ratio and format options
-- ✅ PNG export at multiple resolutions
+- ✅ PNG export at multiple resolutions (up to 7200x10800px)
 - ✅ GPX route upload and display
-- ✅ Route styling (color, width, opacity, line style)
-- ✅ Start/end markers for routes
-- ✅ Route stats calculation (distance, elevation)
+- ✅ Route styling (color, width, opacity, solid/dashed/dotted)
+- ✅ Start/end markers with configurable colors
+- ✅ Route stats calculation (distance, elevation gain/loss)
+- ✅ Privacy zones for route protection
 - ✅ Route persistence in saved/published maps
+- ✅ Social features (feed, likes, comments, sharing)
+- ✅ User authentication with Supabase
 
-### Next Steps
-1. **Test in browser** - Verify all features work
-2. **Test export** - Try exporting at different resolutions
-3. **Bug fixes** - Address any issues found
-4. **Enhancement** - Consider adding shadcn/ui components for polish
+### Next Priority: Phase 4 — 3D Printed Route Sculptures
+1. Install Three.js / React Three Fiber
+2. Create 3D preview component with route mesh
+3. Build route-to-mesh conversion (coordinates + elevation → 3D ribbon)
+4. Add tab-based mode switching (Poster / 3D Print)
+5. Research fulfillment partner APIs (Shapeways, i.materialise)
 
-### Recent Implementation
-- All Phase 1 features built in `frontend/` directory
-- MapLibre styles with dynamic color swapping
-- Canvas-based high-resolution export (up to 7200x10800px)
-- Comprehensive state management via hooks
-- Responsive UI with dark mode support
-- GPX route support with full persistence:
-  - Upload and parse GPX files (lib/route/parseGPX.ts)
-  - Display routes on map with MapLibre GL layers
-  - Customizable route styling (color, width, opacity, line style)
-  - Start/end point markers with configurable colors
-  - Automatic bounds fitting to route extent
-  - Route stats calculation (distance, elevation gain/loss)
-  - Zod schema validation for route persistence
-  - Routes display correctly on published/shared maps
+See **FEATURES.md** for complete Phase 4 specifications.
+
+### Technical Implementation Notes
+- MapLibre styles with dynamic color swapping via `applyPalette()`
+- Canvas-based high-resolution export
+- GPX parsing with `@we-gold/gpxjs`
+- Zod schema validation for route persistence
+- Supabase for auth, storage, and database
 
 ---
 
