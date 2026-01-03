@@ -63,6 +63,64 @@ waymarker/
 └── STATUS.md            # ✅ Implementation status
 ```
 
+## Site Map & User Journeys
+
+### Public Pages
+
+| Route | Purpose | Layout | Design Notes |
+|-------|---------|--------|--------------|
+| `/` | Main editor - create/edit map posters | Standalone | Full-screen editor with side panels |
+| `/login` | Sign in page | Auth layout | Minimal, focused on auth form |
+| `/signup` | Create account | Auth layout | Matches login styling |
+| `/feed` | Explore published maps | Main layout | Grid of map cards, filters |
+| `/map/[id]` | View single published map | Main layout | Full preview, comments, sharing |
+| `/profile` | User's saved maps | Main layout | Grid of user's maps, publish controls |
+
+### Layout Groups
+
+- **`(auth)`**: Login/signup pages - minimal header, centered content
+- **`(main)`**: Feed, profile, map detail - full header with navigation
+
+### User Journeys
+
+```text
+New Visitor Flow:
+Landing → Editor (browse) → Sign up → Save map → Profile
+
+Returning User Flow:
+Login → Profile (my maps) → Edit existing OR Create new → Export/Publish
+
+Discovery Flow:
+Feed (explore) → Map detail → Duplicate to library → Edit → Export
+
+Social Flow:
+Feed → Map detail → Like/Comment → Follow creator (future)
+```
+
+### API Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/api/geocode` | Location search via Nominatim |
+| `/api/tiles/[...path]` | Tile proxy for map rendering |
+| `/api/publish` | Map publishing endpoint |
+| `/api/spaceports` | Spaceport data for markers |
+| `/auth/callback` | OAuth callback handler |
+
+### Design Consistency Checklist
+
+When doing frontend optimization, ensure consistency across:
+
+- [ ] **Navigation**: Header appears on feed, profile, map detail (not editor)
+- [ ] **Card styling**: Map cards in feed and profile use same component
+- [ ] **Typography**: Headings, body text, labels consistent
+- [ ] **Spacing**: Consistent padding/margins across pages
+- [ ] **Colors**: Dark mode works on all pages
+- [ ] **Loading states**: Skeleton loaders match across pages
+- [ ] **Empty states**: Consistent messaging when no content
+- [ ] **Error states**: Consistent error display
+- [ ] **Mobile responsiveness**: All pages work on mobile
+
 ## Core Types
 
 ### PosterLocation
