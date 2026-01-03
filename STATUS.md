@@ -1,41 +1,34 @@
-# Waymarker - Current Status
+# Waymarker - Implementation Status
+
+> Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
 **Last Updated**: 2026-01-03
 
-## Overview
+---
 
-Waymarker is a web application for creating beautifully stylized map posters from real geographic data. Users can search locations, customize styles and colors, add typography, and export high-resolution images for printing.
+## Phases Completed
+
+| Phase | Description | Status |
+| ----- | ----------- | ------ |
+| 1 | Core MVP (editor, styles, export) | ✅ Complete |
+| 2 | User Accounts & Persistence | ✅ Complete |
+| 3 | Social Features | ✅ Complete |
+| 4 | Style Expansion (3→11 styles) | ✅ Complete |
+| 5 | GPX Route Support | ✅ Complete |
 
 ---
 
-## Project Phases
-
-### Phase 1 - Core MVP: ✅ COMPLETE
-Map editor with styles, palettes, typography, layer controls, and PNG export.
-
-### Phase 2 - User Accounts & Persistence: ✅ COMPLETE
-Authentication, map saving, cloud storage, and user profiles.
-
-### Phase 3 - Social Features: ✅ COMPLETE
-Public feed, likes/voting, comments, map sharing, and duplication.
-
-### Phase 4 - Style Expansion: ✅ COMPLETE
-Expanded from 3 styles to 11 unique map styles.
-
-### Phase 5 - GPX Route Support: ✅ COMPLETE
-Upload GPX files to display hiking, running, and cycling routes on map posters.
-
----
-
-## ✅ Completed Features
+## Completed Features
 
 ### Authentication & Users
+
 - ✅ Email/password authentication
 - ✅ OAuth sign-in (Google - temporarily disabled)
 - ✅ Protected routes with middleware
 - ✅ User sessions via Supabase Auth
 
 ### Map Editor
+
 - ✅ Real-time map preview with pan/zoom
 - ✅ Location search via Nominatim geocoding
 - ✅ 11 unique map styles with multiple palettes each
@@ -49,8 +42,9 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Text backdrop/gradient options
 
 ### Map Styles (11 total)
+
 | Style | Description |
-|-------|-------------|
+| ----- | ----------- |
 | Minimal | Clean monochromatic line art |
 | Dark Mode | Dramatic dark backgrounds |
 | Midnight | Deep blue noir aesthetic |
@@ -64,6 +58,7 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 | Retro | Classic vintage cartography |
 
 ### Export & Storage
+
 - ✅ PNG export at multiple resolutions (up to 7200x10800px)
 - ✅ Canvas-based composition with text overlay
 - ✅ Map saving to Supabase database
@@ -71,6 +66,7 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Auto-save detection for unsaved changes
 
 ### Social Features
+
 - ✅ Public feed with published maps
 - ✅ Feed filtering (newest, popular, trending)
 - ✅ Upvote/downvote system
@@ -80,6 +76,7 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Share links for published maps
 
 ### Profile & Management
+
 - ✅ My Maps page with grid view
 - ✅ Publish/unpublish controls
 - ✅ Delete maps with confirmation
@@ -87,6 +84,7 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Navigation header across all pages
 
 ### UX & Polish
+
 - ✅ Dark mode support throughout
 - ✅ Responsive layout (desktop & mobile)
 - ✅ Loading states and error handling
@@ -96,6 +94,7 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 - ✅ Explore drawer for browsing while editing
 
 ### GPX Route Support
+
 - ✅ GPX file upload with drag-and-drop
 - ✅ Route parsing with elevation and time data
 - ✅ Route display on map with MapLibre GL layers
@@ -125,104 +124,10 @@ Upload GPX files to display hiking, running, and cycling routes on map posters.
 
 ---
 
-## 📁 Project Structure
-
-```
-frontend/
-├── app/
-│   ├── (auth)/              # Login & signup pages
-│   ├── (main)/              # Protected routes
-│   │   ├── feed/            # Public feed
-│   │   ├── map/[id]/        # Map detail view
-│   │   └── profile/         # User's maps
-│   ├── api/                 # API routes
-│   │   ├── geocode/         # Location search
-│   │   ├── publish/         # Map publishing
-│   │   └── tiles/           # Tile proxy
-│   ├── auth/callback/       # OAuth callback
-│   └── page.tsx             # Main editor
-├── components/
-│   ├── auth/                # Auth forms & buttons
-│   ├── comments/            # Comment system
-│   ├── controls/            # Editor controls
-│   ├── feed/                # Feed components
-│   ├── layout/              # Editor layout
-│   ├── map/                 # Map components
-│   ├── profile/             # Profile components
-│   ├── ui/                  # Shared UI components
-│   └── voting/              # Vote buttons
-├── hooks/                   # Custom React hooks
-├── lib/
-│   ├── actions/             # Server actions
-│   │   ├── comments.ts
-│   │   ├── feed.ts
-│   │   ├── maps.ts
-│   │   ├── storage.ts
-│   │   └── votes.ts
-│   ├── config/              # App configuration
-│   ├── constants/           # App constants
-│   ├── geocoding/           # Nominatim integration
-│   ├── route/               # GPX parsing and route utilities
-│   │   ├── index.ts
-│   │   └── parseGPX.ts
-│   ├── styles/              # 11 map style definitions
-│   ├── supabase/            # Supabase client
-│   ├── validation/          # Zod schemas for config validation
-│   └── utils/               # Utility functions
-└── types/                   # TypeScript definitions
-```
-
----
-
-## 🔧 Tech Stack
-
-- **Framework**: Next.js 15+ with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 4.x
-- **Map**: MapLibre GL JS + React Map GL
-- **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth
-- **Storage**: Supabase Storage (thumbnails)
-- **Tiles**: OpenFreeMap / MapTiler
-
----
-
-## 🚀 Potential Next Steps
-
-### Features
-- [ ] PDF export for vector output
-- [ ] SVG export for certain styles
-- [ ] More border/frame styles (double, decorative)
-- [ ] Preset location library (famous cities)
-- [ ] Custom subtitle text field
-- [ ] Undo/redo functionality
-- [ ] URL-based state for sharing editor configs
-- [ ] User profiles with bio/avatar
-- [ ] Follow users
-- [ ] Collections/folders for organizing maps
-
-### Technical
-- [ ] Add more map styles
-- [ ] Performance optimization for large exports
-- [ ] Progressive image loading in feed
-- [ ] Infinite scroll in feed
-- [ ] Search within feed
-- [ ] Rate limiting improvements
-- [ ] Error reporting service integration
-
-### Polish
-- [ ] Onboarding tutorial
-- [ ] Keyboard shortcuts
-- [ ] Accessibility improvements
-- [ ] Mobile editor optimization
-- [ ] Print partner integration
-
----
-
-## 📊 Codebase Health
+## Codebase Health
 
 | Metric | Status |
-|--------|--------|
+| ------ | ------ |
 | TypeScript | ✅ Compiles without errors |
 | Git | ✅ Clean (all committed) |
 | ESLint | ⚠️ 143 warnings (mostly `any` types) |
@@ -231,14 +136,14 @@ frontend/
 
 ---
 
-## 📚 Documentation Files
+## Documentation Files
 
-- `STATUS.md` - This file (current status)
-- `CLAUDE.md` - Development context for AI
-- `design.md` - Original design specification
-- `readme.md` - Project overview
+- `CLAUDE.md` - Development context for AI (single source of truth)
+- `STATUS.md` - This file (historical record)
+- `FEATURES.md` - Roadmap and strategy
 - `SUPABASE_SETUP.md` - Database setup guide
+- `readme.md` - Project overview
 
 ---
 
-**Status**: Production-ready for current feature set. All core features implemented and working.
+**Status**: Production-ready. All core features implemented and working.

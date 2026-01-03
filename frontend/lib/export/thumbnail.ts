@@ -11,38 +11,15 @@ export async function generateThumbnail(
   map: MapLibreGL.Map,
   config: PosterConfig
 ): Promise<Blob> {
-  // Calculate thumbnail resolution based on aspect ratio
-  const aspectRatio = config.format.aspectRatio === '2:3' 
-    ? 2/3 
-    : config.format.aspectRatio === '3:4'
-    ? 3/4
-    : config.format.aspectRatio === '4:5'
-    ? 4/5
-    : config.format.aspectRatio === '1:1'
-    ? 1
-    : 210/297; // ISO A4
-
-  const maxDimension = THUMBNAIL_MAX_DIMENSION;
-  let width: number;
-  let height: number;
-
-  if (config.format.orientation === 'portrait') {
-    height = maxDimension;
-    width = Math.round(height * aspectRatio);
-  } else {
-    width = maxDimension;
-    height = Math.round(width / aspectRatio);
-  }
-
-  // Generate PNG blob using existing export function with custom resolution
+  // Generate PNG blob using existing export function with thumbnail resolution
+  // longEdge is the max dimension - calculateTargetResolution handles aspect ratio
   const blob = await exportMapToPNG({
     map,
     config,
     resolution: {
-      width,
-      height,
-      dpi: THUMBNAIL_DPI,
       name: 'thumbnail',
+      longEdge: THUMBNAIL_MAX_DIMENSION,
+      dpi: THUMBNAIL_DPI,
     },
   });
 

@@ -1,6 +1,6 @@
 import type MapLibreGL from 'maplibre-gl';
 import type { PosterConfig } from '@/types/poster';
-import { DEFAULT_EXPORT_RESOLUTION } from './constants';
+import { DEFAULT_EXPORT_RESOLUTION, type BaseExportResolution } from './constants';
 import { calculateTargetResolution } from './resolution';
 import { drawMarker, applyTexture, drawCompassRose } from './drawing';
 import { drawTextOverlay } from './text-overlay';
@@ -10,12 +10,7 @@ import { createError } from '@/lib/errors/ServerActionError';
 interface ExportOptions {
   map: MapLibreGL.Map;
   config: PosterConfig;
-  resolution?: {
-    width: number;
-    height: number;
-    dpi: number;
-    name: string;
-  };
+  resolution?: BaseExportResolution;
 }
 
 export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {

@@ -76,9 +76,9 @@ export function PosterEditor() {
   const mapInstanceRef = useRef<MapLibreGL.Map | null>(null);
   
   // Wrap exportToPNG to handle errors
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (resolutionKey: import('@/lib/export/constants').ExportResolutionKey) => {
     try {
-      await exportToPNG();
+      await exportToPNG(resolutionKey);
     } catch (error) {
       handleError(error);
     }
@@ -256,7 +256,7 @@ export function PosterEditor() {
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          <ExportButton onExport={handleExport} isExporting={isExporting} />
+          <ExportButton onExport={handleExport} isExporting={isExporting} format={config.format} />
         </div>
       </div>
 
@@ -345,7 +345,7 @@ export function PosterEditor() {
             isAuthenticated={isAuthenticated}
             disabled={isExporting}
           />
-          <ExportButton onExport={handleExport} isExporting={isExporting} />
+          <ExportButton onExport={handleExport} isExporting={isExporting} format={config.format} />
         </div>
 
         {/* Map Canvas */}

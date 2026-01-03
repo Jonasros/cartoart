@@ -1,661 +1,273 @@
 # Waymarker - Feature Roadmap & Strategy
 
+> Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
+
 **Last Updated**: 2026-01-03
 
 ---
 
 ## Strategic Summary
 
-Waymarker is expanding from location-based map posters to **journey-based map art** — turning GPS activity data into gallery-worthy wall art. This is an **incremental enhancement** to our existing 11 styles, 15 palettes, and high-res export capabilities.
+Waymarker transforms GPS activity data into gallery-worthy wall art. Starting with hiking route posters, expanding to 3D printed sculptures.
 
-### 🎯 Primary Launch Niche: Hiking / Outdoor Adventure
+### Market Position
 
-Based on market research, **hiking route posters** is the best starting niche because:
+**Primary niche**: Hiking / Outdoor Adventure
+- Strong buy readiness ("custom hike route print" is searched actively)
+- Expands naturally to trail runners, cyclists, skiers
+- Emotional hook: "I conquered this trail"
 
-| Factor | Why Hiking Wins |
-|--------|-----------------|
-| **Buy Readiness** | People actively search for and buy "custom hike route print" — multiple dedicated sites exist |
-| **Market Size** | Naturally expands into trail runners, cyclists, skiers, climbers, national park visitors |
-| **Emotional Hook** | "I did this trail / summit / thru-hike" — strong achievement + memory trigger |
-| **Differentiation** | We can win with features (11+ styles, privacy zones, gradient, stats), not just aesthetics |
-| **Support Load** | Lower than weddings — outdoor buyers accept "upload GPX → tweak → buy" workflow |
+### Competitive Advantage
 
-### 📊 Phased Market Expansion
+| Feature | Waymarker | Competitors |
+| ------- | --------- | ----------- |
+| Map styles | 11 | 3-5 typically |
+| Color palettes | 15+ | Limited |
+| 3D buildings | ✅ 4 presets | ❌ |
+| 3D terrain | ✅ (coming) | ❌ |
+| Privacy zones | ✅ | Some |
+| High-res export | 7200x10800px | Varies |
+| Social features | ✅ | ❌ |
 
-```
-Phase 1: Hiking Route Posters (GPX upload) ✅ COMPLETE
-    ↓
-Phase 4: 3D Printed Route Sculptures ← NEXT (zero competition, premium pricing)
-    ↓
-Phase 2: Gift Modes (weddings, "our story" maps)
-    ↓
-Phase 3: Sailing / Voyage Maps (nautical features)
-```
+**Positioning**: "Adventure route art that looks like a design studio made it"
 
 ---
 
-## Competitive Landscape
+## Immediate: 3D Terrain Support
 
-### Route Poster Competitors (Hiking/Outdoor Focus)
+Add 3D terrain rendering to poster editor. Enables dramatic mountain/valley visualization for both posters and future 3D printing.
 
-| Competitor | Price | GPX Support | Strengths | Weaknesses |
-|------------|-------|-------------|-----------|------------|
-| **OutdoorArtPrint** | $40+ | GPX + Strava | High quality prints, "hikes, bike rides, adventures" | Expensive, less customization |
-| **Mappy Moments** | €25+ | GPX/KML + AllTrails/Strava/Komoot | Multi-format, stats | Generic styling |
-| **TrailMaps** | $30+ | Strava + GPX | Many sports support | Less stylistic variety |
-| **MixPlaces** | €25+ | Limited | Feature-rich broadly | Not niche-focused |
-| **PathPosters** | $7 | GPX | Privacy-first, simple | Limited styles (5), single size |
+### Implementation (MapLibre Native)
 
-### Wedding/Gift Map Competitors
-
-| Competitor | Price | Focus | Notes |
-|------------|-------|-------|-------|
-| **Positive Prints** | €30+ | "Met Engaged Married" | Heavy Etsy presence |
-| **Mark Your Moment** | €35+ | Wedding gifts | Template-based |
-| **Etsy sellers** | €15-50 | Various | Crowded, price competition |
-
-### Similar Open Source
-
-| Project | Notes |
-|---------|-------|
-| [kkingsbe/carto-art](https://github.com/kkingsbe/carto-art) | 32 stars. Same tech stack (Next.js, MapLibre). City-focused, no route support. Validates concept. |
-
-### Our Competitive Advantage
-
-✅ **11 beautiful map styles** (most competitors have 3-5)
-✅ **15 color palettes** with real-time preview
-✅ **Typography controls** (fonts, sizes, positioning)
-✅ **GPX route upload** with drag-and-drop
-✅ **Route styling** (color, width, opacity, solid/dashed/dotted)
-✅ **Start/end markers** with customizable colors
-✅ **Privacy zones** for route protection (hide start/end)
-✅ **Route statistics** (distance, elevation gain/loss calculated)
-✅ **3D buildings** with artistic styles (solid, glass, wireframe, gradient)
-✅ **Perspective controls** (camera presets, tilt, rotation)
-✅ **High-res export** (up to 7200x10800px) including routes
-✅ **Social features** (feed, likes, comments, sharing)
-✅ **Route persistence** (save, share, duplicate maps with routes)
-
-**Positioning**: "Adventure route art that looks like a design studio made it" — more opinionated, more premium, simpler workflow.
-
----
-
-## Monetization Strategy
-
-### Recommended Model: One-Time Purchase Per Export
-
-Best for solo founder — simple, no subscription friction, works with impulse gift buyers.
-
-| Product | Price Range | Margin |
-|---------|-------------|--------|
-| **Digital Download** | €19–€29 | High (instant delivery) |
-| **Print Delivered** | €49–€89 | Medium (fulfillment costs) |
-
-### Future Options
-- Premium tier for multiple exports, saved designs, collections
-- Print partnerships (Printful, Gelato, etc.)
-
----
-
-## Phase 1: Hiking Route Posters (MVP) ✅ COMPLETE
-
-### Target Use Cases
-
-| Use Case | Audience | Emotional Hook |
-|----------|----------|----------------|
-| **Trail Completion Art** | Thru-hikers, day hikers | "I conquered this trail" |
-| **National Park Memories** | Park visitors | "Our adventure at Yosemite" |
-| **Race Commemoration** | Trail runners, ultras | "My first 50K" |
-| **Cycling Routes** | Road cyclists, gravel riders | "My century ride" |
-
-### MVP Feature Set
-
-- [x] **GPX file upload** with drag-and-drop
-- [x] **Auto-parse** coordinates, bounds, distance, elevation
-- [x] **Auto-fit map** to route bounds
-- [x] **Route rendering** as styled GeoJSON line
-- [x] **Basic styling** (color, width, opacity, line style)
-- [x] **Start/end markers** (configurable colors)
-- [x] **Privacy zone** (hide first/last portion of route)
-- [x] **Route statistics** (distance, elevation gain/loss calculated)
-- [x] **Works with all 11 existing styles**
-- [x] **High-res export** includes route layer
-- [x] **Route persistence** in saved maps
-- [x] **Routes on published maps** display correctly
-- [x] **Duplication** preserves route data
-- [x] **Mode toggle** between single location and route mode
-
-### Technical Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    EXISTING WAYMARKER                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ Map Styles  │  │  Palettes   │  │  Typography/Export  │  │
-│  │  (11 total) │  │  (15 total) │  │   (High-res PNG)    │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    NEW: ROUTE LAYER                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │ GPX Parser  │  │  GeoJSON    │  │  Route Styling      │  │
-│  │ (@we-gold/  │  │  LineString │  │  (color, width,     │  │
-│  │  gpxjs)     │  │             │  │   gradient, glow)   │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Core Types (Implemented)
-
-```typescript
-// lib/route/index.ts - Actual implementation
-interface RoutePoint {
-  lat: number;
-  lng: number;
-  elevation?: number;
-  time?: string;
-}
-
-interface RouteStats {
-  distance: number;        // meters
-  elevationGain: number;   // meters
-  elevationLoss: number;   // meters
-  minElevation?: number;
-  maxElevation?: number;
-  duration?: number;       // seconds
-}
-
-interface RouteData {
-  name?: string;
-  points: RoutePoint[];
-  stats: RouteStats;
-}
-
-interface RouteStyle {
-  color: string;
-  width: number;           // 2-8px
-  opacity: number;         // 0-1
-  lineStyle: 'solid' | 'dashed' | 'dotted';
-}
-
-interface RouteConfig {
-  enabled: boolean;
-  data?: RouteData;
-  style: RouteStyle;
-  showStartMarker: boolean;
-  showEndMarker: boolean;
-  startMarkerColor: string;
-  endMarkerColor: string;
-  privacyZone: {
-    enabled: boolean;
-    distance: number;      // meters
-  };
-}
-```
-
-### MapLibre Route Layer
-
-```typescript
-// Route rendering with MapLibre GL JS
-map.addSource('route', {
-  type: 'geojson',
-  lineMetrics: true, // Required for gradients
-  data: {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: routeCoordinates
-    }
-  }
+```javascript
+// Add terrain source
+map.addSource('terrain', {
+  type: 'raster-dem',
+  url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=API_KEY',
+  tileSize: 256
 });
 
-map.addLayer({
-  id: 'route-line',
-  type: 'line',
-  source: 'route',
-  paint: {
-    'line-color': routeColor,
-    'line-width': routeWidth,
-    'line-gradient': elevationGradient, // Optional
-  },
-  layout: {
-    'line-cap': 'round',
-    'line-join': 'round'
-  }
+// Enable 3D terrain
+map.setTerrain({
+  source: 'terrain',
+  exaggeration: 1.5  // 1.0 = realistic, 2-3 = dramatic
 });
+
+// Query elevation at point
+const elevation = map.queryTerrainElevation([lng, lat]);
 ```
 
----
+### MapTiler Elevation API (for 3D Print Mesh)
 
-## Phase 2: Wedding / Gift Modes
+```typescript
+// Single point elevation
+const point = await maptilersdk.elevation.at([lng, lat]);
+// Returns: { lng, lat, elevation }
 
-Add templates and features for gift-oriented use cases **after** core route system is solid.
+// Batch elevation for route
+const lineWithElevation = await maptilersdk.elevation.fromLineString(routeGeoJSON);
+// Returns: LineString with Z coordinates
+```
 
-### Features
-- [ ] "Met / Engaged / Married" templates (dual/triple locations)
-- [ ] Heart-shaped route connector option
-- [ ] Romantic font presets
-- [ ] Coordinates display (40.7128°N, 74.0060°W style)
-- [ ] Custom date formatting
-- [ ] Gift wrapping option for prints
+### Layer Controls Addition
 
-### Why Wait?
-- Wedding customers expect heavy customization + handholding
-- Higher support burden per sale
-- Need smoother design experience first
-- Brand credibility helps in gift market
+| Control | Type | Default | Description |
+| ------- | ---- | ------- | ----------- |
+| `terrain3d` | boolean | false | Enable 3D terrain rendering |
+| `terrain3dExaggeration` | number | 1.5 | Vertical exaggeration (0.5-3.0) |
 
----
+### Applies To
 
-## Phase 3: Sailing / Voyage Maps
-
-Expand into nautical niche with specialized features.
-
-### Features
-- [ ] Nautical mile display
-- [ ] Compass rose overlay (already have!)
-- [ ] Port markers for stops
-- [ ] Nautical chart styling
-- [ ] Wind direction indicators (if in GPX)
-- [ ] Ocean-themed color palettes
-
-### Why This Niche?
-- Less crowded than hiking/running
-- Higher price tolerance (yacht owners)
-- Core product already supports routes
-- Differentiation through specialized features
+- Single point locations (city/landmark posters)
+- Multiple points (coming soon)
+- GPX routes (especially mountain trails)
 
 ---
 
-## Phase 4: 3D Printed Route Sculptures
+## Next Priority: Phase 4 — 3D Printed Route Sculptures
 
-Transform GPS routes into physical 3D sculptures — a tangible keepsake of adventures.
+Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
-### 🎯 Concept
-
-Instead of just 2D posters, users can order a **3D printed sculpture** of their route. The GPS track becomes a physical ribbon/line that captures the journey's path and elevation profile.
-
-### Target Customers
-
-| Customer | Use Case | Emotional Hook |
-|----------|----------|----------------|
-| **Hikers** | Personal achievement | "My summit in physical form" |
-| **Gift-givers** | Meaningful present | "I 3D printed our honeymoon hike" |
-| **Runners** | Race commemoration | "My marathon route as art" |
-| **Cyclists** | Epic ride memory | "My first century ride sculpture" |
-
-### Product Concepts
-
-**MVP: Route Sculpture (Recommended)**
-- GPS track extruded as a 3D ribbon/line
-- Z-axis represents actual elevation profile
-- Mounted on a stylized base (rectangular, circular, or custom)
-- Simpler to generate, unique visual, lower compute requirements
-
-**Future: Terrain Relief + Route**
-- Full topographical model of the surrounding area
-- Route etched or raised on terrain surface
-- More impressive but significantly more complex
-- Requires DEM (Digital Elevation Model) data integration
-
-### Product Specifications (MVP)
-
-| Attribute | Specification |
-|-----------|---------------|
-| **Size** | 10-15cm (desktop/shelf display) |
-| **Materials** | PLA plastic, wood-fill PLA, resin (user choice) |
-| **Base styles** | 2-3 options (rectangular, circular, organic) |
-| **Fulfillment** | Partner print service (not self-print STL) |
-| **Lead time** | 1-3 weeks (standard 3D print fulfillment) |
-
-### Pricing Strategy
-
-| Product | Price Range | Margin Notes |
-|---------|-------------|--------------|
-| **Small (10cm)** | €79-99 | Entry point, gift-friendly |
-| **Medium (15cm)** | €119-149 | Premium display piece |
-| **Large (20cm+)** | €179-249 | Statement piece, future option |
-
-Higher margins than posters — 3D prints command premium pricing for personalization.
-
-### Why This Stands Out
+### Why This Is Next
 
 | Factor | Advantage |
-|--------|-----------|
-| **Zero competition** | Nobody does route-specific 3D sculptures |
-| **Premium positioning** | €100+ price point vs €20-40 posters |
-| **Tactile value** | Physical object > flat print for many buyers |
-| **Gift appeal** | Exceptional for meaningful occasions |
-| **Upsell path** | Poster customers → 3D sculpture upgrade |
+| ------ | --------- |
+| Zero competition | Nobody does route-specific 3D sculptures |
+| Premium pricing | €79-249 vs €20-40 posters |
+| Tactile value | Physical object > flat print |
+| Data ready | Already have GPX + elevation |
 
-### Data We Already Have
+### Product Concept
 
-From existing GPX upload:
-- ✅ Route coordinates (lat/lng for each point)
-- ✅ Elevation data at each point
-- ✅ Route statistics (distance, elevation gain/loss)
-- ✅ Bounding box for the area
-
-What we'd need to add:
-- ⚠️ Terrain DEM data (only if doing terrain relief, not needed for route-only)
-- 🔧 3D mesh generation (Three.js / server-side processing)
-- 🔧 STL export for print fulfillment
-- 🔧 3D preview in browser
-
-### Technical Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SHARED DATA LAYER                        │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  Location / Route Selection (same for both modes)   │    │
-│  │  • GPX upload with elevation                         │    │
-│  │  • Coordinates, bounds, stats                        │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────┐     ┌─────────────────────────┐
-│     POSTER MODE         │     │     3D PRINT MODE       │
-│  ┌───────────────────┐  │     │  ┌───────────────────┐  │
-│  │ Map Styles (11)   │  │     │  │ 3D Preview        │  │
-│  │ Color Palettes    │  │     │  │ (Three.js/R3F)    │  │
-│  │ Typography        │  │     │  │ Rotate/Zoom       │  │
-│  │ Export PNG        │  │     │  └───────────────────┘  │
-│  └───────────────────┘  │     │  ┌───────────────────┐  │
-│                         │     │  │ Model Style       │  │
-│                         │     │  │ • Base shape      │  │
-│                         │     │  │ • Size selection  │  │
-│                         │     │  │ • Material choice │  │
-│                         │     │  └───────────────────┘  │
-│                         │     │  ┌───────────────────┐  │
-│                         │     │  │ Order Flow        │  │
-│                         │     │  │ • Generate STL    │  │
-│                         │     │  │ • Send to partner │  │
-│                         │     │  │ • Checkout        │  │
-│                         │     │  └───────────────────┘  │
-└─────────────────────────┘     └─────────────────────────┘
-```
-
-### App Integration
-
-**Tab-Based Mode Switching:**
-```
-[ 🖼️ Poster ]    [ 🏔️ 3D Print ]
-```
-
-Both modes share the same location/route selection — user just switches output format.
+- GPS track extruded as 3D ribbon/line
+- Z-axis = actual elevation profile
+- Mounted on stylized base
+- Sizes: 10cm (€79-99), 15cm (€119-149), 20cm+ (€179-249)
+- Materials: PLA, wood-fill PLA, resin
 
 ### Technical Approach
 
-**MVP: Pure Algorithmic (No AI Required)**
+#### Option A: Route Ribbon (simpler)
 
-Route sculptures are geometry, not AI-generated:
-
-```
-GPS coordinates (lat, lng, elevation)
-         ↓
-    Convert to 3D points (x, y, z)
-         ↓
-    Extrude as tube/ribbon (Three.js TubeGeometry)
-         ↓
-    Add base plate
-         ↓
-    Export as STL file
+```text
+GPS + elevation → TubeGeometry (Three.js) → Add base → Export STL
 ```
 
-Three.js has built-in functions for this — no external APIs, no compute costs, predictable results.
+#### Option B: Route on Terrain (premium)
 
-**Route Required for MVP:**
+```javascript
+// Three.js terrain mesh generation
+const geometry = new THREE.PlaneGeometry(width, depth, segments, segments);
+geometry.rotateX(-Math.PI / 2);
 
-| Mode | 3D Print Available? | Reason |
-|------|---------------------|--------|
-| **GPX Route** | ✅ Yes | Path + elevation → ribbon sculpture |
-| **Single Address** | ❌ No (MVP) | No path to extrude; terrain relief is Phase 2 |
+// Apply heightmap from MapTiler elevation API
+const vertices = geometry.attributes.position.array;
+for (let i = 0, j = 0; i < vertices.length; i++, j += 3) {
+  vertices[j + 1] = heightData[i] * exaggeration;
+}
+geometry.computeVertexNormals();
 
-The 3D tab only enables when a route is uploaded. Keeps MVP simple.
+// Add route line on terrain surface
+const routeMesh = new THREE.TubeGeometry(routeCurve, segments, radius, 8, false);
+```
 
-**Future: AI Enhancements (Not MVP)**
+#### Elevation Data Pipeline
 
-| AI Feature | What It Does | Complexity |
-|------------|--------------|------------|
-| **Stylized terrain** | AI-generated terrain texture around route | Medium |
-| **Single location relief** | Terrain model from DEM data (not really AI) | Medium |
-| **Decorative elements** | AI-suggested trees, landmarks, etc. | High |
-| **Text-to-3D styling** | "Make it look like a mountain range" | Experimental |
-
-AI can be Phase 2 if customers want more artistic/stylized versions.
-
-### Technical Requirements
-
-**Frontend:**
-
-- Three.js or React Three Fiber for 3D preview
-- Mesh generation from route coordinates + elevation
-- Interactive preview (rotate, zoom, pan)
-
-**Backend/Processing:**
-
-- STL file generation (may need server-side for complex meshes)
-- Integration with print fulfillment API
-- Order management and tracking
-
-**Data & Supabase Logging:**
-
-| Data Point | Table | Purpose |
-|------------|-------|---------|
-| **3D print requests** | `print_orders` | Track orders, fulfillment status, customer info |
-| **Model configurations** | `print_orders.config` | Base style, size, material selections (JSONB) |
-| **Route reference** | `print_orders.map_id` | Link to saved map with route data |
-| **STL file URL** | `print_orders.stl_url` | Supabase Storage reference for generated mesh |
-| **Fulfillment status** | `print_orders.status` | pending → processing → shipped → delivered |
-| **Analytics events** | `analytics` | 3D tab views, preview interactions, cart abandonment |
-
-**Fulfillment Partners (Options):**
-
-- Shapeways (API available)
-- i.materialise (API available)
-- Craftcloud (aggregator)
-- Local/regional 3D print services
+1. MapTiler `elevation.fromLineString()` → route with Z coords
+2. MapTiler terrain tiles → heightmap grid for terrain base
+3. Three.js PlaneGeometry + vertex displacement → 3D mesh
+4. STL/OBJ export for 3D printing
 
 ### MVP Feature Set
 
 - [ ] Tab to switch between Poster and 3D Print modes
 - [ ] 3D preview of route sculpture (rotatable)
-- [ ] 2-3 base style options
+- [ ] 2-3 base style options (rectangular, circular, organic)
 - [ ] Size selection (10cm, 15cm)
-- [ ] Material selection (PLA, wood-fill, resin)
+- [ ] Material selection
 - [ ] Generate printable mesh from route data
-- [ ] Integration with fulfillment partner API
-- [ ] Order checkout and payment
-- [ ] Order tracking/status
+- [ ] Fulfillment partner API integration (Shapeways, i.materialise)
+- [ ] Order checkout and tracking
 
-### Challenges & Mitigations
+### First Implementation Steps
 
-| Challenge | Mitigation |
-|-----------|------------|
-| **Processing power** | Start with route-only (no terrain), server-side generation for complex routes |
-| **Preview performance** | Level-of-detail (LOD) for smooth browser rendering |
-| **Print quality** | Validate mesh is "watertight" (manifold) before sending to printer |
-| **Lead times** | Set clear expectations (1-3 weeks), provide tracking |
-| **Returns/quality** | Partner with reliable fulfillment, quality samples first |
-
-### Success Metrics
-
-- 3D print orders per month
-- Conversion rate (route upload → 3D order)
-- Average order value
-- Customer satisfaction / repeat orders
-- Poster → 3D upsell rate
+1. Install Three.js / React Three Fiber
+2. Create 3D preview component with route mesh
+3. Build route-to-mesh conversion (coordinates + elevation → 3D ribbon)
+4. Add tab-based mode switching (Poster / 3D Print)
+5. Research fulfillment partner APIs
 
 ---
 
-## Implementation Roadmap
+## Future Phases
 
-### Phase 1.1: Core Route MVP ✅ COMPLETE
-- [x] GPX parser utility (`lib/route/parseGPX.ts`)
-- [x] Add `RouteConfig` to poster types with Zod validation
-- [x] Create route layer rendering in MapPreview
-- [x] Create `RouteControls` panel in editor
-- [x] Implement privacy zone trimming
-- [x] Calculate route statistics (distance, elevation)
-- [x] Update export to include route layer
-- [x] Route persistence in database (saved maps)
-- [x] Route display on published/shared maps
-- [x] Route duplication support
+### Phase 2: Wedding / Gift Modes
 
-### Phase 1.2: Enhanced Route Styling (Partially Complete)
+- "Met / Engaged / Married" templates (dual/triple locations)
+- Heart-shaped route connector
+- Romantic font presets
+- Custom date formatting
+- Gift wrapping for prints
 
-- [x] Solid/dashed/dotted line styles
-- [x] Route opacity control
-- [x] Start/end marker colors
+**Why wait**: Higher support burden, need brand credibility first.
+
+### Phase 3: Sailing / Voyage Maps
+
+- Nautical mile display
+- Port markers for stops
+- Nautical chart styling
+- Ocean-themed palettes
+
+**Why this niche**: Less crowded, higher price tolerance, already supports routes.
+
+---
+
+## Feature Backlog
+
+### Route Enhancements
+
 - [ ] Elevation gradient coloring
 - [ ] Glow/shadow effects on route
-- [ ] Multiple route colors for segments
 - [ ] Mile/KM markers along route
-
-### Phase 1.3: 3D Buildings ✅ COMPLETE
-
-- [x] 3D extruded buildings using MapLibre `fill-extrusion` layer
-- [x] Building style presets (Solid, Glass, Wireframe, Gradient)
-- [x] Opacity control for transparent building effects
-- [x] Height scale multiplier for exaggerated skylines
-- [x] Default height for buildings without OSM height data
-- [x] Independent "Perspective" section for camera controls
-- [x] Camera presets (Isometric, Skyline, Bird's Eye, Dramatic)
-- [x] Manual pitch (0-60°) and bearing (-180° to 360°) sliders
-- [x] Perspective settings persist in saved/published/duplicated maps
-- [x] Height-based color gradients using palette building colors
-
-### Phase 1.4: Integrations (Future)
-
 - [ ] Strava OAuth integration
 - [ ] AllTrails integration
 - [ ] Garmin Connect integration
-- [ ] Route sharing via URL
-
----
-
-## Future Features (Backlog)
 
 ### Export & Formats
-| Feature | Priority | Complexity | Notes |
-|---------|----------|------------|-------|
-| PDF export | High | Medium | Vector output for print shops |
-| Multiple sizes | Medium | Low | A4, A3, A2, A1, custom |
-| Print partnership | Medium | Medium | Printful, Gelato integration |
+
+- [ ] PDF export (vector output)
+- [ ] SVG export for certain styles
+- [ ] Print partnership (Printful, Gelato)
+- [ ] Multiple print sizes (A4, A3, A2, A1)
 
 ### Editor Enhancements
-| Feature | Priority | Complexity | Notes |
-|---------|----------|------------|-------|
-| Undo/redo | High | Medium | State history stack |
-| Keyboard shortcuts | Medium | Low | Zoom, pan, style switching |
-| Preset location library | Medium | Low | Famous trails/cities dropdown |
+
+- [ ] Undo/redo
+- [ ] Keyboard shortcuts
+- [ ] Preset location library (famous trails/cities)
+- [ ] URL-based state for sharing configs
 
 ### Social & Sharing
-| Feature | Priority | Complexity | Notes |
-|---------|----------|------------|-------|
-| Collections/folders | Medium | Low | Organize saved maps |
-| Search in feed | Medium | Low | By location, style, route type |
+
+- [ ] Collections/folders for organizing maps
+- [ ] Search within feed
+- [ ] User profiles with bio/avatar
+- [ ] Follow users
+
+### Polish
+
+- [ ] Onboarding tutorial
+- [ ] Accessibility improvements
+- [ ] Mobile editor optimization
 
 ---
 
 ## Technical Debt
 
-### Current Issues
-- ESLint: 143 warnings (mostly `any` types)
-- No test coverage
-- Some console.log statements in production
+| Issue | Priority |
+| ----- | -------- |
+| ESLint warnings (143, mostly `any`) | Medium |
+| No test coverage | Medium |
+| Console.log in production | Low |
 
-### Recommended Improvements
+### Recommended
+
 1. Add TypeScript strict mode
 2. Add unit tests for GPX parser
-3. Add E2E tests for route upload flow
+3. Add E2E tests for route upload
 4. Add Sentry for error monitoring
 
 ---
 
-## Dependencies
+## Monetization
 
-### New NPM Packages for Phase 1
-```json
-{
-  "@we-gold/gpxjs": "^1.0.0"
-}
-```
+### Current Model: One-Time Purchase Per Export
 
-### Optional for Later
-```json
-{
-  "@turf/turf": "^7.0.0",  // Geospatial utilities
-  "@turf/length": "^7.0.0" // Distance calculations
-}
-```
+| Product | Price | Margin |
+| ------- | ----- | ------ |
+| Digital Download | €19-29 | High |
+| Print Delivered | €49-89 | Medium |
+| 3D Sculpture (future) | €79-249 | High |
+
+### Future Options
+
+- Premium tier (multiple exports, saved designs)
+- Print partnerships
+- Subscription for power users
 
 ---
 
 ## Success Metrics
 
-### Phase 1 KPIs
-- Route uploads per week
-- Conversion rate (upload → export)
-- Average session duration
-- Privacy zone usage rate
+| Metric | Target |
+| ------ | ------ |
+| Route uploads/week | Track growth |
+| Upload → export conversion | >20% |
+| 3D print orders/month | TBD |
+| Poster → 3D upsell rate | >5% |
 
 ---
 
-## Branding Notes
+**Brand**: Waymarker (waymarker.eu)
 
-### Name Considerations
-
-| Name | Fit | Notes |
-|------|-----|-------|
-| **Waymark** | Hiking-first | Literal trail connection, works for navigation themes |
-| **Meridian** | Premium/global | Less literal, good for multi-vertical expansion |
-| **Waymarker** | ✅ Selected | Trail-focused, European market, premium positioning |
-
-**Domain**: waymarker.eu (European market focus)
-
----
-
-## Next Steps
-
-### Completed ✅
-1. ~~Create branch: `feature/route-support`~~
-2. ~~Build GPX parser with TypeScript types~~
-3. ~~Add RouteLayer component to MapPreview~~
-4. ~~Create RouteControls panel~~
-5. ~~Implement privacy zone~~
-6. ~~Update export to include route layer~~
-7. ~~Test across all 11 map styles~~
-8. ~~Route persistence in saved maps~~
-9. ~~Route display on published maps~~
-
-### Next Priority: Phase 4 — 3D Printed Route Sculptures
-
-**Why this is next:**
-- Zero competition in route-specific 3D sculptures
-- Premium pricing (€79-249 vs €20-40 posters)
-- Leverages existing GPX + elevation data
-- Clear differentiation from crowded poster market
-
-**First implementation steps:**
-1. Install Three.js / React Three Fiber
-2. Create 3D preview component with route mesh
-3. Build route-to-mesh conversion (coordinates + elevation → 3D ribbon)
-4. Add tab-based mode switching (Poster / 3D Print)
-5. Research fulfillment partner APIs (Shapeways, i.materialise)
-
-**Deferred (Phase 1.2 enhancements):**
-- Elevation gradient coloring
-- Glow/shadow effects on route
-- Strava OAuth integration
-
----
-
-**Status**: Phase 1 MVP Complete ✅ — Now prioritizing Phase 4 (3D Print)
 **Focus**: 3D Printed Route Sculptures as next major feature
-**Implemented**: GPX upload, route styling, privacy zones, persistence, sharing

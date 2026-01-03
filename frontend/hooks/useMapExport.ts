@@ -4,26 +4,27 @@ import { useState, useRef } from 'react';
 import type MapLibreGL from 'maplibre-gl';
 import type { PosterConfig } from '@/types/poster';
 import { exportMapToPNG, downloadBlob } from '@/lib/export/exportCanvas';
+import { EXPORT_RESOLUTIONS, type ExportResolutionKey } from '@/lib/export/constants';
 import { logger } from '@/lib/logger';
 
 /**
  * Hook for exporting the map as a high-resolution PNG image.
  * Handles map reference management and export state.
- * 
+ *
  * @param config - Current poster configuration for export settings
  * @returns Object containing:
  * - isExporting: Whether an export is currently in progress
- * - exportToPNG: Function to trigger PNG export
+ * - exportToPNG: Function to trigger PNG export with resolution key
  * - setMapRef: Set the MapLibre map instance reference
  * - fitToLocation: Fit map to original location bounds
  * - zoomIn: Zoom in on the map
  * - zoomOut: Zoom out on the map
- * 
+ *
  * @example
  * ```tsx
  * const { isExporting, exportToPNG, setMapRef } = useMapExport(config);
  * <MapPreview onMapLoad={setMapRef} />
- * <button onClick={exportToPNG} disabled={isExporting}>Export</button>
+ * <button onClick={() => exportToPNG('MEDIUM')} disabled={isExporting}>Export</button>
  * ```
  */
 export function useMapExport(config: PosterConfig) {
@@ -34,18 +35,19 @@ export function useMapExport(config: PosterConfig) {
     mapRef.current = map;
   };
 
-  const exportToPNG = async (filenameOrEvent?: string | React.MouseEvent) => {
+  const exportToPNG = async (resolutionKey: ExportResolutionKey = 'SMALL', filename?: string) => {
     if (!mapRef.current) {
       throw new Error('Map instance not available');
     }
 
-    const filename = typeof filenameOrEvent === 'string' ? filenameOrEvent : undefined;
+    const resolution = EXPORT_RESOLUTIONS[resolutionKey];
 
     setIsExporting(true);
     try {
       const blob = await exportMapToPNG({
         map: mapRef.current,
         config,
+        resolution,
       });
 
       const exportFilename = filename || `${(config.location.name || 'poster').toString().replace(/[^a-z0-9]/gi, '-').toLowerCase()}-poster.png`;
