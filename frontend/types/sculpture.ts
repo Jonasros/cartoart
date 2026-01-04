@@ -11,9 +11,14 @@
 export type ProductMode = 'poster' | 'sculpture';
 
 /**
- * Base style for the sculpture platform
+ * Base shape for the sculpture platform
  */
-export type SculptureBaseStyle = 'rectangular' | 'circular' | 'organic' | 'terrain';
+export type SculptureShape = 'rectangular' | 'circular';
+
+/**
+ * Route rendering style
+ */
+export type SculptureRouteStyle = 'raised' | 'engraved';
 
 /**
  * Material options for 3D printing
@@ -21,45 +26,78 @@ export type SculptureBaseStyle = 'rectangular' | 'circular' | 'organic' | 'terra
 export type SculptureMaterial = 'pla' | 'wood' | 'resin';
 
 /**
+ * Text configuration for engraved typography
+ */
+export interface SculptureTextConfig {
+  /** Main title text (e.g., route name) */
+  title: string;
+  /** Subtitle/stats text (e.g., "79.3 km · 3,887 m↑") */
+  subtitle: string;
+  /** Whether to show text on sculpture */
+  enabled: boolean;
+  /** Engraving depth in mm */
+  depth: number;
+}
+
+/**
  * Sculpture configuration for 3D preview and export
  */
 export interface SculptureConfig {
-  /** Base platform style */
-  baseStyle: SculptureBaseStyle;
+  /** Base platform shape */
+  shape: SculptureShape;
   /** Physical size in cm (10, 15, 20) */
   size: number;
   /** 3D printing material */
   material: SculptureMaterial;
-  /** Route tube thickness in mm */
+  /** Route rendering style */
+  routeStyle: SculptureRouteStyle;
+  /** Route thickness in mm */
   routeThickness: number;
-  /** Elevation scale multiplier for terrain and route height */
+  /** Elevation scale multiplier for terrain height */
   elevationScale: number;
   /** Whether to show the base platform */
   showBase: boolean;
   /** Base platform height in mm */
   baseHeight: number;
+  /** Rim height in mm (raised border around edge) */
+  rimHeight: number;
   /** Terrain mesh resolution (grid segments) */
   terrainResolution: number;
   /** Terrain color */
   terrainColor: string;
-  /** Route tube color */
+  /** Route color */
   routeColor: string;
+  /** Text configuration */
+  text: SculptureTextConfig;
 }
+
+/**
+ * Default text configuration
+ */
+export const DEFAULT_TEXT_CONFIG: SculptureTextConfig = {
+  title: '',
+  subtitle: '',
+  enabled: true,
+  depth: 0.8,
+};
 
 /**
  * Default sculpture configuration
  */
 export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
-  baseStyle: 'rectangular',
+  shape: 'circular',
   size: 15,
   material: 'pla',
+  routeStyle: 'engraved',
   routeThickness: 2,
   elevationScale: 1.5,
   showBase: true,
   baseHeight: 5,
-  terrainResolution: 64,
+  rimHeight: 2,
+  terrainResolution: 128, // Higher resolution for smoother terrain
   terrainColor: '#8b7355',
   routeColor: '#4ade80',
+  text: DEFAULT_TEXT_CONFIG,
 };
 
 /**
@@ -75,16 +113,25 @@ export const SCULPTURE_MATERIALS: Record<
 };
 
 /**
- * Base style display information for UI
+ * Shape display information for UI
  */
-export const SCULPTURE_BASE_STYLES: Record<
-  SculptureBaseStyle,
+export const SCULPTURE_SHAPES: Record<
+  SculptureShape,
   { label: string; description: string }
 > = {
-  rectangular: { label: 'Rectangular', description: 'Clean square platform' },
-  circular: { label: 'Circular', description: 'Round platform' },
-  organic: { label: 'Organic', description: 'Follows route bounds' },
-  terrain: { label: 'Terrain', description: 'Full 3D terrain base' },
+  circular: { label: 'Medallion', description: 'Round coin-style with rim' },
+  rectangular: { label: 'Plaque', description: 'Rectangular with border' },
+};
+
+/**
+ * Route style display information for UI
+ */
+export const SCULPTURE_ROUTE_STYLES: Record<
+  SculptureRouteStyle,
+  { label: string; description: string }
+> = {
+  engraved: { label: 'Engraved', description: 'Carved groove in surface' },
+  raised: { label: 'Raised', description: 'Elevated tube above terrain' },
 };
 
 /**

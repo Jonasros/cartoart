@@ -7,6 +7,8 @@ import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
 import { TerrainMesh } from './TerrainMesh';
 import { RouteMesh, RouteStartMarker, RouteEndMarker } from './RouteMesh';
+import { CircularBase } from './CircularBase';
+import { RectangularBase } from './RectangularBase';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
 
 interface SculpturePreviewProps {
@@ -50,6 +52,18 @@ function LoadingFallback() {
 }
 
 /**
+ * Base platform component - renders circular or rectangular base
+ */
+function BasePlatform({ config }: { config: SculptureConfig }) {
+  if (!config.showBase) return null;
+
+  if (config.shape === 'circular') {
+    return <CircularBase config={config} />;
+  }
+  return <RectangularBase config={config} />;
+}
+
+/**
  * The actual sculpture scene with terrain and route
  */
 function SculptureScene({
@@ -64,6 +78,9 @@ function SculptureScene({
 
   return (
     <group>
+      {/* Base platform (circular or rectangular) */}
+      <BasePlatform config={config} />
+
       {/* Terrain mesh with height displacement */}
       <TerrainMesh
         routeData={routeData}

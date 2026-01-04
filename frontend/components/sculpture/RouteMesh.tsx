@@ -23,7 +23,7 @@ interface RouteMeshProps {
 export function RouteMesh({ routeData, config }: RouteMeshProps) {
   const geometry = useMemo(() => {
     const { points, stats, bounds } = routeData;
-    const { size, routeThickness, elevationScale } = config;
+    const { size, routeThickness, elevationScale, shape } = config;
 
     // Calculate bounds for normalization
     const [[minLng, minLat], [maxLng, maxLat]] = bounds;
@@ -36,6 +36,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 
     // Offset to lift tube above terrain surface
     const tubeOffset = 0.02;
+
+    // Mesh size and circular boundary (for clipping)
+    const meshSize = size / 10;
+    const circleRadius = meshSize / 2 * 0.92; // Slightly inside the rim
 
     // Simplify points if there are too many (for performance)
     const maxPoints = 500;
@@ -58,8 +62,19 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
       const normalizedZ = (point.lat - minLat) / latRange;
 
       // Convert to mesh coordinates (centered at origin)
-      const x = (normalizedX - 0.5) * (size / 10);
-      const z = (normalizedZ - 0.5) * (size / 10);
+      let x = (normalizedX - 0.5) * meshSize;
+      let z = (normalizedZ - 0.5) * meshSize;
+
+      // For circular shape, clamp points to stay within the circle
+      if (shape === 'circular') {
+        const distFromCenter = Math.sqrt(x * x + z * z);
+        if (distFromCenter > circleRadius) {
+          // Scale point to be on the circle edge
+          const scale = circleRadius / distFromCenter;
+          x *= scale;
+          z *= scale;
+        }
+      }
 
       // Calculate height from elevation (or use minimum if not available)
       const elevation = point.elevation ?? stats.minElevation;
@@ -118,7 +133,7 @@ export function RouteStartMarker({
 }) {
   const position = useMemo(() => {
     const { points, stats, bounds } = routeData;
-    const { size, elevationScale } = config;
+    const { size, elevationScale, shape } = config;
 
     if (points.length === 0) return new THREE.Vector3(0, 0, 0);
 
@@ -127,12 +142,25 @@ export function RouteStartMarker({
     const latRange = maxLat - minLat || 0.001;
     const elevRange = stats.maxElevation - stats.minElevation || 1;
     const heightScale = elevationScale * (size / 100);
+    const meshSize = size / 10;
+    const circleRadius = meshSize / 2 * 0.92;
 
     const point = points[0];
     const normalizedX = (point.lng - minLng) / lngRange;
     const normalizedZ = (point.lat - minLat) / latRange;
-    const x = (normalizedX - 0.5) * (size / 10);
-    const z = (normalizedZ - 0.5) * (size / 10);
+    let x = (normalizedX - 0.5) * meshSize;
+    let z = (normalizedZ - 0.5) * meshSize;
+
+    // Clamp to circle boundary if circular shape
+    if (shape === 'circular') {
+      const distFromCenter = Math.sqrt(x * x + z * z);
+      if (distFromCenter > circleRadius) {
+        const scale = circleRadius / distFromCenter;
+        x *= scale;
+        z *= scale;
+      }
+    }
+
     const elevation = point.elevation ?? stats.minElevation;
     const normalizedElev = (elevation - stats.minElevation) / elevRange;
     const y = normalizedElev * heightScale + 0.05;
@@ -160,7 +188,7 @@ export function RouteEndMarker({
 }) {
   const position = useMemo(() => {
     const { points, stats, bounds } = routeData;
-    const { size, elevationScale } = config;
+    const { size, elevationScale, shape } = config;
 
     if (points.length === 0) return new THREE.Vector3(0, 0, 0);
 
@@ -169,12 +197,25 @@ export function RouteEndMarker({
     const latRange = maxLat - minLat || 0.001;
     const elevRange = stats.maxElevation - stats.minElevation || 1;
     const heightScale = elevationScale * (size / 100);
+    const meshSize = size / 10;
+    const circleRadius = meshSize / 2 * 0.92;
 
     const point = points[points.length - 1];
     const normalizedX = (point.lng - minLng) / lngRange;
     const normalizedZ = (point.lat - minLat) / latRange;
-    const x = (normalizedX - 0.5) * (size / 10);
-    const z = (normalizedZ - 0.5) * (size / 10);
+    let x = (normalizedX - 0.5) * meshSize;
+    let z = (normalizedZ - 0.5) * meshSize;
+
+    // Clamp to circle boundary if circular shape
+    if (shape === 'circular') {
+      const distFromCenter = Math.sqrt(x * x + z * z);
+      if (distFromCenter > circleRadius) {
+        const scale = circleRadius / distFromCenter;
+        x *= scale;
+        z *= scale;
+      }
+    }
+
     const elevation = point.elevation ?? stats.minElevation;
     const normalizedElev = (elevation - stats.minElevation) / elevRange;
     const y = normalizedElev * heightScale + 0.05;
