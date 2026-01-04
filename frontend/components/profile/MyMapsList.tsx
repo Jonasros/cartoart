@@ -94,6 +94,7 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
                   alt={map.title}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
             </Link>
