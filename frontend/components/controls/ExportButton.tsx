@@ -1,25 +1,49 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Box } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { KofiTipModal } from './KofiTipModal';
 import { ExportOptionsModal } from './ExportOptionsModal';
+import { SculptureExportModal } from './SculptureExportModal';
 import type { ExportResolutionKey } from '@/lib/export/constants';
-import type { PosterConfig } from '@/types/poster';
+import type { PosterConfig, RouteData } from '@/types/poster';
+import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 
 interface ExportButtonProps {
   onExport: (resolutionKey: ExportResolutionKey) => void;
   isExporting: boolean;
   format: PosterConfig['format'];
+  // Sculpture mode props
+  productMode?: ProductMode;
+  sculptureConfig?: SculptureConfig;
+  routeData?: RouteData | null;
+  elevationGrid?: number[][];
+  routeName?: string;
 }
 
-export function ExportButton({ onExport, isExporting, format }: ExportButtonProps) {
+export function ExportButton({
+  onExport,
+  isExporting,
+  format,
+  productMode = 'poster',
+  sculptureConfig,
+  routeData,
+  elevationGrid,
+  routeName,
+}: ExportButtonProps) {
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showSculptureModal, setShowSculptureModal] = useState(false);
   const [showTipModal, setShowTipModal] = useState(false);
 
+  const isSculptureMode = productMode === 'sculpture';
+
   const handleButtonClick = () => {
-    setShowExportModal(true);
+    if (isSculptureMode) {
+      setShowSculptureModal(true);
+    } else {
+      setShowExportModal(true);
+    }
   };
 
   const handleExport = (resolutionKey: ExportResolutionKey) => {
@@ -33,16 +57,23 @@ export function ExportButton({ onExport, isExporting, format }: ExportButtonProp
     setShowExportModal(false);
   };
 
+  const handleCloseSculptureModal = () => {
+    setShowSculptureModal(false);
+  };
+
   const handleCloseTipModal = () => {
     setShowTipModal(false);
   };
+
+  // Sculpture mode: disable if no route data
+  const isDisabled = isSculptureMode ? (!routeData || isExporting) : isExporting;
 
   return (
     <>
       <button
         type="button"
         onClick={handleButtonClick}
-        disabled={isExporting}
+        disabled={isDisabled}
         className={cn(
           'group relative flex items-center gap-2 px-5 py-2.5 rounded-full font-medium shadow-lg transition-all duration-300',
           'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
@@ -54,7 +85,11 @@ export function ExportButton({ onExport, isExporting, format }: ExportButtonProp
           "transition-transform duration-300",
           isExporting ? "scale-0 w-0" : "scale-100"
         )}>
-          <Download className="h-4 w-4" />
+          {isSculptureMode ? (
+            <Box className="h-4 w-4" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
         </div>
 
         {isExporting && (
@@ -67,10 +102,15 @@ export function ExportButton({ onExport, isExporting, format }: ExportButtonProp
           "transition-all duration-300",
           isExporting && "translate-x-4"
         )}>
-          {isExporting ? 'Exporting...' : 'Export Poster'}
+          {isExporting
+            ? 'Exporting...'
+            : isSculptureMode
+              ? 'Export STL'
+              : 'Export Poster'}
         </span>
       </button>
 
+      {/* Poster Export Modal */}
       <ExportOptionsModal
         isOpen={showExportModal}
         onClose={handleCloseExportModal}
@@ -78,6 +118,18 @@ export function ExportButton({ onExport, isExporting, format }: ExportButtonProp
         isExporting={isExporting}
         format={format}
       />
+
+      {/* Sculpture Export Modal */}
+      {sculptureConfig && (
+        <SculptureExportModal
+          isOpen={showSculptureModal}
+          onClose={handleCloseSculptureModal}
+          routeData={routeData ?? null}
+          config={sculptureConfig}
+          elevationGrid={elevationGrid}
+          routeName={routeName}
+        />
+      )}
 
       <KofiTipModal
         isOpen={showTipModal}

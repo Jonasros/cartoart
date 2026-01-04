@@ -10,6 +10,9 @@ import {
   ControlLabel,
   ControlInput,
 } from '@/components/ui/control-components';
+import { SculptureExportModal } from './SculptureExportModal';
+import { useElevationGrid } from '@/hooks/useElevationGrid';
+import type { RouteData } from '@/types/poster';
 import type {
   SculptureConfig,
   SculptureShape,
@@ -27,10 +30,16 @@ import {
 interface SculptureControlsProps {
   config: SculptureConfig;
   onConfigChange: (updates: Partial<SculptureConfig>) => void;
+  routeData?: RouteData | null;
+  routeName?: string;
 }
 
-export function SculptureControls({ config, onConfigChange }: SculptureControlsProps) {
+export function SculptureControls({ config, onConfigChange, routeData, routeName }: SculptureControlsProps) {
   const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Get elevation grid for export
+  const { grid: elevationGrid } = useElevationGrid(routeData ?? null, config.terrainResolution);
 
   const updateText = (updates: Partial<SculptureTextConfig>) => {
     onConfigChange({ text: { ...config.text, ...updates } });
@@ -38,6 +47,15 @@ export function SculptureControls({ config, onConfigChange }: SculptureControlsP
 
   return (
     <div className="space-y-6">
+      {/* Export Modal */}
+      <SculptureExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        routeData={routeData ?? null}
+        config={config}
+        elevationGrid={elevationGrid ?? undefined}
+        routeName={routeName}
+      />
       {/* Shape Selection */}
       <ControlSection title="Shape">
         <div className="grid grid-cols-2 gap-3">
@@ -409,6 +427,7 @@ export function SculptureControls({ config, onConfigChange }: SculptureControlsP
           )}
         </div>
       </ControlSection>
+
     </div>
   );
 }

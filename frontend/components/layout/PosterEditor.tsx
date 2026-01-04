@@ -6,6 +6,7 @@ import { usePosterConfig } from '@/hooks/usePosterConfig';
 import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
 import { useSculptureConfig } from '@/hooks/useSculptureConfig';
+import { useElevationGrid } from '@/hooks/useElevationGrid';
 import type { ProductMode } from '@/types/sculpture';
 import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
@@ -45,6 +46,7 @@ export function PosterEditor() {
     resetConfig: resetSculptureConfig,
   } = useSculptureConfig();
 
+  // Get poster config first so we can use route data
   const {
     config,
     updateLocation,
@@ -71,6 +73,9 @@ export function PosterEditor() {
   } = useSavedProjects();
 
   const { errors, handleError, clearError } = useErrorHandler();
+
+  // Elevation grid for sculpture mode STL export
+  const { grid: elevationGrid } = useElevationGrid(config.route?.data ?? null);
 
   // Track currently loaded saved map
   const [currentMapId, setCurrentMapId] = useState<string | null>(null);
@@ -298,7 +303,16 @@ export function PosterEditor() {
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          <ExportButton onExport={handleExport} isExporting={isExporting} format={config.format} />
+          <ExportButton
+            onExport={handleExport}
+            isExporting={isExporting}
+            format={config.format}
+            productMode={productMode}
+            sculptureConfig={sculptureConfig}
+            routeData={config.route?.data}
+            elevationGrid={elevationGrid ?? undefined}
+            routeName={config.route?.data?.name || config.location?.name}
+          />
         </div>
       </div>
 
@@ -395,7 +409,16 @@ export function PosterEditor() {
             isAuthenticated={isAuthenticated}
             disabled={isExporting}
           />
-          <ExportButton onExport={handleExport} isExporting={isExporting} format={config.format} />
+          <ExportButton
+            onExport={handleExport}
+            isExporting={isExporting}
+            format={config.format}
+            productMode={productMode}
+            sculptureConfig={sculptureConfig}
+            routeData={config.route?.data}
+            elevationGrid={elevationGrid ?? undefined}
+            routeName={config.route?.data?.name || config.location?.name}
+          />
         </div>
 
         {/* Preview Area - Poster or Sculpture based on mode */}

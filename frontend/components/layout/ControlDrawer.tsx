@@ -301,6 +301,8 @@ export function ControlDrawer({
           <SculptureControls
             config={sculptureConfig}
             onConfigChange={updateSculptureConfig}
+            routeData={config.route?.data}
+            routeName={config.route?.data?.name || config.location?.name}
           />
         )}
 
