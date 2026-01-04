@@ -191,13 +191,14 @@ export function SculpturePreview({ routeData, config }: SculpturePreviewProps) {
       )}
 
       <Canvas
-        camera={{ position: [10, 8, 10], fov: 50 }}
+        camera={{ position: [3.5, 0.8, 3.5], fov: 45 }}
         shadows
         dpr={[1, 2]}
         gl={{ preserveDrawingBuffer: true }}
       >
         <Suspense fallback={<LoadingFallback />}>
           <Stage
+            adjustCamera={false}
             environment="city"
             intensity={0.5}
             shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
@@ -210,16 +211,17 @@ export function SculpturePreview({ routeData, config }: SculpturePreviewProps) {
           </Stage>
         </Suspense>
 
-        {/* Camera controls */}
+        {/* Camera controls - target center of sculpture, frontal view */}
         <OrbitControls
           makeDefault
+          target={[0, 0, 0]}
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={3}
-          maxDistance={30}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI / 2.2}
+          minDistance={2}
+          maxDistance={8}
+          minPolarAngle={Math.PI / 12}
+          maxPolarAngle={Math.PI / 1.8}
         />
 
         {/* Reference grid */}

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { SculptureConfig } from '@/types/sculpture';
+import { getMaterialProperties, getRimMaterialProperties } from './materials';
 
 interface CircularBaseProps {
   config: SculptureConfig;
@@ -13,7 +14,7 @@ interface CircularBaseProps {
  * Creates a coin-like platform for the terrain relief.
  */
 export function CircularBase({ config }: CircularBaseProps) {
-  const { size, baseHeight, rimHeight, terrainColor } = config;
+  const { size, baseHeight, rimHeight, terrainColor, material } = config;
 
   // Convert cm to scene units (10 cm = 1 unit, matching TerrainMesh scale)
   const sceneSize = size / 10;
@@ -29,15 +30,22 @@ export function CircularBase({ config }: CircularBaseProps) {
     return color;
   }, [terrainColor]);
 
+  // Get material properties based on selected material
+  const materialProps = getMaterialProperties(material);
+  const rimMaterialProps = getRimMaterialProperties(material);
+
   return (
     <group>
       {/* Main base cylinder */}
       <mesh position={[0, -baseThickness / 2, 0]} receiveShadow castShadow>
         <cylinderGeometry args={[radius, radius, baseThickness, 64]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={terrainColor}
-          roughness={0.7}
-          metalness={0.1}
+          roughness={materialProps.roughness}
+          metalness={materialProps.metalness}
+          clearcoat={materialProps.clearcoat ?? 0}
+          clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+          envMapIntensity={materialProps.envMapIntensity ?? 0.5}
         />
       </mesh>
 
@@ -50,10 +58,13 @@ export function CircularBase({ config }: CircularBaseProps) {
           castShadow
         >
           <torusGeometry args={[radius - rimWidth / 2, rimWidth / 2, 16, 64]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color={rimColor}
-            roughness={0.6}
-            metalness={0.15}
+            roughness={rimMaterialProps.roughness}
+            metalness={rimMaterialProps.metalness}
+            clearcoat={rimMaterialProps.clearcoat ?? 0}
+            clearcoatRoughness={rimMaterialProps.clearcoatRoughness ?? 0}
+            envMapIntensity={rimMaterialProps.envMapIntensity ?? 0.5}
           />
         </mesh>
       )}
@@ -66,10 +77,13 @@ export function CircularBase({ config }: CircularBaseProps) {
           receiveShadow
         >
           <ringGeometry args={[radius - rimWidth, radius, 64]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color={terrainColor}
-            roughness={0.7}
-            metalness={0.1}
+            roughness={materialProps.roughness}
+            metalness={materialProps.metalness}
+            clearcoat={materialProps.clearcoat ?? 0}
+            clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+            envMapIntensity={materialProps.envMapIntensity ?? 0.5}
           />
         </mesh>
       )}

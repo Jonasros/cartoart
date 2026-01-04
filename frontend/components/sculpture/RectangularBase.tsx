@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { SculptureConfig } from '@/types/sculpture';
+import { getMaterialProperties, getRimMaterialProperties } from './materials';
 
 interface RectangularBaseProps {
   config: SculptureConfig;
@@ -13,7 +14,7 @@ interface RectangularBaseProps {
  * Creates a classic rectangular platform for the terrain relief.
  */
 export function RectangularBase({ config }: RectangularBaseProps) {
-  const { size, baseHeight, rimHeight, terrainColor } = config;
+  const { size, baseHeight, rimHeight, terrainColor, material } = config;
 
   // Convert cm to scene units (10 cm = 1 unit, matching TerrainMesh scale)
   const sceneSize = size / 10;
@@ -27,6 +28,10 @@ export function RectangularBase({ config }: RectangularBaseProps) {
     color.multiplyScalar(0.85);
     return color;
   }, [terrainColor]);
+
+  // Get material properties based on selected material
+  const materialProps = getMaterialProperties(material);
+  const rimMaterialProps = getRimMaterialProperties(material);
 
   // Frame geometry using individual box segments
   const frameSegments = useMemo(() => {
@@ -51,10 +56,13 @@ export function RectangularBase({ config }: RectangularBaseProps) {
       {/* Main base box */}
       <mesh position={[0, -baseThickness / 2, 0]} receiveShadow castShadow>
         <boxGeometry args={[sceneSize, baseThickness, sceneSize]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={terrainColor}
-          roughness={0.7}
-          metalness={0.1}
+          roughness={materialProps.roughness}
+          metalness={materialProps.metalness}
+          clearcoat={materialProps.clearcoat ?? 0}
+          clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+          envMapIntensity={materialProps.envMapIntensity ?? 0.5}
         />
       </mesh>
 
@@ -67,10 +75,13 @@ export function RectangularBase({ config }: RectangularBaseProps) {
           castShadow
         >
           <boxGeometry args={segment.size as [number, number, number]} />
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             color={rimColor}
-            roughness={0.6}
-            metalness={0.15}
+            roughness={rimMaterialProps.roughness}
+            metalness={rimMaterialProps.metalness}
+            clearcoat={rimMaterialProps.clearcoat ?? 0}
+            clearcoatRoughness={rimMaterialProps.clearcoatRoughness ?? 0}
+            envMapIntensity={rimMaterialProps.envMapIntensity ?? 0.5}
           />
         </mesh>
       ))}

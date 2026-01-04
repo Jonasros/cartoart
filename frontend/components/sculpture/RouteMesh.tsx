@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
+import { getMaterialProperties } from './materials';
 
 interface RouteMeshProps {
   routeData: RouteData;
@@ -105,6 +106,9 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     return new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
   }, [routeData, config]);
 
+  // Get material properties based on selected material
+  const materialProps = getMaterialProperties(config.material);
+
   // Early return for empty geometry
   if (geometry.attributes.position?.count === 0) {
     return null;
@@ -112,10 +116,13 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 
   return (
     <mesh geometry={geometry} castShadow>
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         color={config.routeColor}
-        roughness={0.4}
-        metalness={0.15}
+        roughness={materialProps.roughness * 0.7}
+        metalness={materialProps.metalness + 0.1}
+        clearcoat={materialProps.clearcoat ?? 0}
+        clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+        envMapIntensity={materialProps.envMapIntensity ?? 0.5}
       />
     </mesh>
   );
@@ -168,10 +175,20 @@ export function RouteStartMarker({
     return new THREE.Vector3(x, y, z);
   }, [routeData, config]);
 
+  const materialProps = getMaterialProperties(config.material);
+
   return (
     <mesh position={position} castShadow>
       <sphereGeometry args={[0.03, 16, 16]} />
-      <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.3} />
+      <meshPhysicalMaterial
+        color="#22c55e"
+        emissive="#22c55e"
+        emissiveIntensity={0.2}
+        roughness={materialProps.roughness * 0.6}
+        metalness={materialProps.metalness + 0.1}
+        clearcoat={materialProps.clearcoat ?? 0}
+        clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+      />
     </mesh>
   );
 }
@@ -223,10 +240,20 @@ export function RouteEndMarker({
     return new THREE.Vector3(x, y, z);
   }, [routeData, config]);
 
+  const materialProps = getMaterialProperties(config.material);
+
   return (
     <mesh position={position} castShadow>
       <boxGeometry args={[0.04, 0.06, 0.04]} />
-      <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.3} />
+      <meshPhysicalMaterial
+        color="#ef4444"
+        emissive="#ef4444"
+        emissiveIntensity={0.2}
+        roughness={materialProps.roughness * 0.6}
+        metalness={materialProps.metalness + 0.1}
+        clearcoat={materialProps.clearcoat ?? 0}
+        clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+      />
     </mesh>
   );
 }

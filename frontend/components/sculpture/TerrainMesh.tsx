@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
+import { getMaterialProperties } from './materials';
 
 interface TerrainMeshProps {
   routeData: RouteData;
@@ -140,13 +141,19 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     return geo;
   }, [routeData, config, elevationGrid]);
 
+  // Get material properties based on selected material
+  const materialProps = getMaterialProperties(config.material);
+
   return (
     <mesh geometry={geometry} receiveShadow castShadow>
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         color={config.terrainColor}
-        roughness={0.85}
-        metalness={0.05}
-        flatShading={true}
+        roughness={materialProps.roughness}
+        metalness={materialProps.metalness}
+        clearcoat={materialProps.clearcoat ?? 0}
+        clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+        envMapIntensity={materialProps.envMapIntensity ?? 0.5}
+        flatShading={config.material === 'wood'}
       />
     </mesh>
   );
