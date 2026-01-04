@@ -16,6 +16,7 @@ import { SavedProjects } from '@/components/controls/SavedProjects';
 import { AccountPanel } from '@/components/controls/AccountPanel';
 import type { Tab } from './TabNavigation';
 import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette, SavedProject, RouteConfig } from '@/types/poster';
+import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 
 interface ControlDrawerProps {
   activeTab: Tab;
@@ -42,6 +43,10 @@ interface ControlDrawerProps {
   } | null;
   onLoadProject: (project: SavedProject) => void;
   onPublishSuccess: () => void;
+  // Sculpture mode props
+  productMode: ProductMode;
+  sculptureConfig: SculptureConfig;
+  updateSculptureConfig: (updates: Partial<SculptureConfig>) => void;
 }
 
 export function ControlDrawer({
@@ -65,6 +70,9 @@ export function ControlDrawer({
   currentMapStatus,
   onLoadProject,
   onPublishSuccess,
+  productMode,
+  sculptureConfig,
+  updateSculptureConfig,
 }: ControlDrawerProps) {
   const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('examples');
   const [locationMode, setLocationMode] = useState<'point' | 'route'>(config.route?.data ? 'route' : 'point');
@@ -284,6 +292,41 @@ export function ControlDrawer({
                 config={config}
                 onFormatChange={updateFormat}
               />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'sculpture' && (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                3D Sculpture Settings
+              </h3>
+              {/* Placeholder - SculptureControls will be added in Step 13 */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-xs text-blue-800 dark:text-blue-200">
+                <p className="font-medium mb-1">3D Sculpture Mode</p>
+                <p className="opacity-90">
+                  Customize your 3D printed route sculpture. Adjust terrain elevation, route thickness, and material settings.
+                </p>
+              </div>
+              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex justify-between">
+                  <span>Base Style:</span>
+                  <span className="font-medium text-gray-900 dark:text-white capitalize">{sculptureConfig.baseStyle}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Size:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{sculptureConfig.size} cm</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Elevation Scale:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{sculptureConfig.elevationScale}x</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Route Thickness:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{sculptureConfig.routeThickness} mm</span>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -1,0 +1,66 @@
+'use client';
+
+import { Image, Box } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { ProductMode } from '@/types/sculpture';
+
+interface ModeToggleProps {
+  mode: ProductMode;
+  onModeChange: (mode: ProductMode) => void;
+  /** Sculpture mode requires a route to be loaded */
+  hasRoute: boolean;
+}
+
+/**
+ * Toggle between Poster (2D) and Sculpture (3D) modes.
+ * Placed below logo in TabNavigation.
+ */
+export function ModeToggle({ mode, onModeChange, hasRoute }: ModeToggleProps) {
+  const sculptureDisabled = !hasRoute;
+
+  return (
+    <div className="w-full px-2 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-0.5">
+        {/* Poster Mode Button */}
+        <button
+          onClick={() => onModeChange('poster')}
+          className={cn(
+            'flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all',
+            mode === 'poster'
+              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          )}
+          title="Create 2D poster print"
+        >
+          <Image className="w-4 h-4" />
+          <span className="text-[10px] font-medium mt-1 hidden md:block">Poster</span>
+        </button>
+
+        {/* Sculpture Mode Button */}
+        <button
+          onClick={() => !sculptureDisabled && onModeChange('sculpture')}
+          disabled={sculptureDisabled}
+          className={cn(
+            'flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-md transition-all',
+            mode === 'sculpture'
+              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+              : sculptureDisabled
+                ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+          )}
+          title={sculptureDisabled ? 'Upload a GPX route to enable 3D sculpture mode' : 'Create 3D printed sculpture'}
+        >
+          <Box className="w-4 h-4" />
+          <span className="text-[10px] font-medium mt-1 hidden md:block">3D</span>
+        </button>
+      </div>
+
+      {/* Tooltip for disabled state */}
+      {sculptureDisabled && mode === 'poster' && (
+        <p className="text-[9px] text-gray-400 dark:text-gray-500 text-center mt-1.5 hidden md:block">
+          Upload GPX for 3D
+        </p>
+      )}
+    </div>
+  );
+}

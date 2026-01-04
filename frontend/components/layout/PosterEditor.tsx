@@ -5,9 +5,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { usePosterConfig } from '@/hooks/usePosterConfig';
 import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
+import { useSculptureConfig } from '@/hooks/useSculptureConfig';
+import type { ProductMode } from '@/types/sculpture';
 import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
 import { TextOverlay } from '@/components/map/TextOverlay';
+import { SculpturePreview } from '@/components/sculpture';
 import { ExportButton } from '@/components/controls/ExportButton';
 import { SaveButton } from '@/components/controls/SaveButton';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
@@ -33,6 +36,14 @@ export function PosterEditor() {
   const [activeTab, setActiveTab] = useState<Tab>('location');
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
+  const [productMode, setProductMode] = useState<ProductMode>('poster');
+
+  // Sculpture configuration (separate from poster config)
+  const {
+    config: sculptureConfig,
+    updateConfig: updateSculptureConfig,
+    resetConfig: resetSculptureConfig,
+  } = useSculptureConfig();
 
   const {
     config,
@@ -230,9 +241,13 @@ export function PosterEditor() {
     // Reset config to default
     setConfig(DEFAULT_CONFIG);
 
+    // Reset sculpture config and mode
+    resetSculptureConfig();
+    setProductMode('poster');
+
     // Clear URL state parameter by navigating to clean URL
     router.replace(pathname, { scroll: false });
-  }, [setConfig, router, pathname]);
+  }, [setConfig, router, pathname, resetSculptureConfig]);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -293,6 +308,9 @@ export function PosterEditor() {
         onTabChange={setActiveTab}
         onToggleDrawer={setIsDrawerOpen}
         onOpenExplore={() => setIsExploreOpen(true)}
+        productMode={productMode}
+        onModeChange={setProductMode}
+        hasRoute={!!config.route?.data}
       />
 
       <ExploreDrawer
@@ -321,6 +339,9 @@ export function PosterEditor() {
         currentMapStatus={currentMapStatus}
         onLoadProject={handleLoadProject}
         onPublishSuccess={handlePublishSuccess}
+        productMode={productMode}
+        sculptureConfig={sculptureConfig}
+        updateSculptureConfig={updateSculptureConfig}
       />
 
       {/* Main Content */}
@@ -377,71 +398,73 @@ export function PosterEditor() {
           <ExportButton onExport={handleExport} isExporting={isExporting} format={config.format} />
         </div>
 
-        {/* Map Canvas */}
+        {/* Preview Area - Poster or Sculpture based on mode */}
         <div className="flex-1 relative flex items-center justify-center p-4 md:p-8">
-          <div 
-            className="relative shadow-2xl bg-white flex flex-col transition-all duration-300 ease-in-out ring-1 ring-black/5"
-            style={{ 
-              aspectRatio: getAspectRatioCSS(config.format.aspectRatio, config.format.orientation),
-              backgroundColor: config.palette.background,
-              width: `min(calc(100% - 2rem), calc((100cqh - 2rem) * ${numericRatio}))`,
-              height: 'auto',
-              maxHeight: 'calc(100cqh - 2rem)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              containerType: 'size',
-            }}
-          >
-            {/* The Map Window */}
-            <div 
-              className="absolute overflow-hidden min-h-0 min-w-0"
+          {productMode === 'poster' ? (
+            /* Poster Mode - Map Canvas */
+            <div
+              className="relative shadow-2xl bg-white flex flex-col transition-all duration-300 ease-in-out ring-1 ring-black/5"
               style={{
-                top: `${config.format.margin}cqw`,
-                left: `${config.format.margin}cqw`,
-                right: `${config.format.margin}cqw`,
-                bottom: `${config.format.margin}cqw`,
-                borderRadius: (config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
+                aspectRatio: getAspectRatioCSS(config.format.aspectRatio, config.format.orientation),
+                backgroundColor: config.palette.background,
+                width: `min(calc(100% - 2rem), calc((100cqh - 2rem) * ${numericRatio}))`,
+                height: 'auto',
+                maxHeight: 'calc(100cqh - 2rem)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                containerType: 'size',
               }}
             >
-              <MapPreview
-                mapStyle={mapStyle}
-                location={config.location}
-                format={config.format}
-                showMarker={config.layers.marker}
-                markerColor={config.layers.markerColor || config.palette.primary || config.palette.accent || config.palette.text}
-                onMapLoad={handleMapLoad}
-                onMove={handleMapMove}
-                layers={config.layers}
-                route={config.route}
-              />
-              
-              {/* Floating Map Controls */}
-              <div className="absolute bottom-4 right-4 flex flex-row gap-2 z-10">
-                <button
-                  onClick={zoomOut}
-                  className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
-                  title="Zoom Out"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={zoomIn}
-                  className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
-                  title="Zoom In"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={fitToLocation}
-                  className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
-                  title="Snap map to original bounds"
-                >
-                  <Maximize className="h-4 w-4" />
-                </button>
+              {/* The Map Window */}
+              <div
+                className="absolute overflow-hidden min-h-0 min-w-0"
+                style={{
+                  top: `${config.format.margin}cqw`,
+                  left: `${config.format.margin}cqw`,
+                  right: `${config.format.margin}cqw`,
+                  bottom: `${config.format.margin}cqw`,
+                  borderRadius: (config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
+                }}
+              >
+                <MapPreview
+                  mapStyle={mapStyle}
+                  location={config.location}
+                  format={config.format}
+                  showMarker={config.layers.marker}
+                  markerColor={config.layers.markerColor || config.palette.primary || config.palette.accent || config.palette.text}
+                  onMapLoad={handleMapLoad}
+                  onMove={handleMapMove}
+                  layers={config.layers}
+                  route={config.route}
+                />
+
+                {/* Floating Map Controls */}
+                <div className="absolute bottom-4 right-4 flex flex-row gap-2 z-10">
+                  <button
+                    onClick={zoomOut}
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    title="Zoom Out"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={zoomIn}
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    title="Zoom In"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={fitToLocation}
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    title="Snap map to original bounds"
+                  >
+                    <Maximize className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-            
-            {/* Text Overlay */}
-            <TextOverlay config={config} />
+
+              {/* Text Overlay */}
+              <TextOverlay config={config} />
 
             {/* Border Overlay - Now drawn AFTER TextOverlay to stay on top of gradients */}
             {config.format.borderStyle !== 'none' && (
@@ -561,7 +584,16 @@ export function PosterEditor() {
                 )}
               </div>
             )}
-          </div>
+            </div>
+          ) : (
+            /* Sculpture Mode - 3D Preview */
+            <div className="w-full h-full max-w-4xl max-h-[80vh] aspect-square">
+              <SculpturePreview
+                routeData={config.route?.data ?? null}
+                config={sculptureConfig}
+              />
+            </div>
+          )}
         </div>
       </main>
     </div>
