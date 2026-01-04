@@ -228,6 +228,41 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                   />
                 </div>
               )}
+
+              {/* 3D Terrain Elevation */}
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                <ControlCheckbox
+                  label="3D Elevation"
+                  checked={Boolean(layers.terrain3d)}
+                  onChange={() => toggleLayer('terrain3d')}
+                  className="text-[10px] font-medium"
+                />
+
+                {layers.terrain3d && (
+                  <div className="mt-3 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-[9px] text-gray-400">Height Exaggeration</span>
+                      <span className="text-[9px] text-gray-500 font-medium">{(layers.terrain3dExaggeration ?? 1.0).toFixed(1)}x</span>
+                    </div>
+                    <ControlSlider
+                      min="0.5"
+                      max="3.0"
+                      step="0.1"
+                      value={layers.terrain3dExaggeration ?? 1.0}
+                      onChange={(e) => onLayersChange({ terrain3dExaggeration: parseFloat(e.target.value) })}
+                      displayValue={`${(layers.terrain3dExaggeration ?? 1.0).toFixed(1)}x`}
+                      onValueChange={(value) => onLayersChange({ terrain3dExaggeration: value })}
+                      formatValue={(v) => `${v.toFixed(1)}x`}
+                      parseValue={(s) => parseFloat(s.replace('x', ''))}
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                      <span>Subtle</span>
+                      <span>Dramatic</span>
+                    </div>
+                    <p className="text-[8px] text-gray-400 italic pt-1">Tilt the map for best 3D effect</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

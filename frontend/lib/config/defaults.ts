@@ -55,6 +55,8 @@ export const DEFAULT_CONFIG: PosterConfig = {
     terrain: true,
     terrainUnderWater: true,
     hillshadeExaggeration: 0.5,
+    terrain3d: false, // 3D terrain off by default
+    terrain3dExaggeration: 1.0, // Default exaggeration (1.0 = realistic)
     contours: false,
     contourDensity: 50,
     population: false,

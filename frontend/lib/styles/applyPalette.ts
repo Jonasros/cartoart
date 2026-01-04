@@ -1,6 +1,6 @@
 import type { ColorPalette, PosterConfig, PosterStyle } from '@/types/poster';
 import { isColorDark } from '@/lib/utils';
-import { getContourTileJsonUrl } from '@/lib/styles/tileUrl';
+import { getContourTileJsonUrl, getTerrainRgbTileJsonUrl } from '@/lib/styles/tileUrl';
 import { createBuilding3DLayer, createBuilding3DLight } from '@/lib/styles/layers/buildings3d';
 import { building2DStylePresets, type Building2DStyle } from '@/lib/styles/layers/buildings2d';
 
@@ -157,6 +157,37 @@ export function applyPaletteToStyle(
       } else {
         updatedStyle.layers.push(outlineLayer);
       }
+    }
+  }
+
+  // Inject 3D terrain if enabled
+  if (layers?.terrain3d) {
+    const terrainUrl = getTerrainRgbTileJsonUrl();
+
+    if (terrainUrl) {
+      // Initialize sources if not present
+      if (!updatedStyle.sources) {
+        updatedStyle.sources = {};
+      }
+
+      // Add terrain-rgb source for elevation data
+      updatedStyle.sources['terrain-rgb'] = {
+        type: 'raster-dem',
+        url: terrainUrl,
+        tileSize: 256,
+      };
+
+      // Add terrain configuration with user-controlled exaggeration
+      updatedStyle.terrain = {
+        source: 'terrain-rgb',
+        exaggeration: layers.terrain3dExaggeration ?? 1.0,
+      };
+    }
+  } else {
+    // Explicitly remove terrain config when disabled
+    // This ensures save/load correctly toggles 3D terrain off
+    if (updatedStyle.terrain) {
+      delete updatedStyle.terrain;
     }
   }
 

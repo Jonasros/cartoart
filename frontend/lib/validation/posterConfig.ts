@@ -169,6 +169,8 @@ export const PosterConfigSchema: z.ZodType<PosterConfig> = z.object({
     terrain: z.boolean(),
     terrainUnderWater: z.boolean(),
     hillshadeExaggeration: z.number(),
+    terrain3d: z.boolean().optional(),
+    terrain3dExaggeration: z.number().min(0.5).max(3.0).optional(),
     contours: z.boolean(),
     contourDensity: z.number(),
     population: z.boolean(),

@@ -128,6 +128,9 @@ export interface PosterConfig {
     terrain: boolean;
     terrainUnderWater: boolean; // New: toggle bathymetry/terrain under water
     hillshadeExaggeration: number; // New: control hillshade intensity
+    // 3D Terrain
+    terrain3d?: boolean; // Toggle for 3D terrain elevation extrusion
+    terrain3dExaggeration?: number; // Terrain height multiplier (0.5-3.0)
     contours: boolean;
     contourDensity: number; // New: control contour line density (interval)
     population: boolean;
