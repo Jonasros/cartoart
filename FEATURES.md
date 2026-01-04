@@ -13,6 +13,7 @@ Waymarker transforms GPS activity data into gallery-worthy wall art. Starting wi
 ### Market Position
 
 **Primary niche**: Hiking / Outdoor Adventure
+
 - Strong buy readiness ("custom hike route print" is searched actively)
 - Expands naturally to trail runners, cyclists, skiers
 - Emotional hook: "I conquered this trail"
@@ -86,6 +87,8 @@ const lineWithElevation = await maptilersdk.elevation.fromLineString(routeGeoJSO
 
 ## Next Priority: Phase 4 — 3D Printed Route Sculptures
 
+> **Comprehensive specification**: [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md)
+
 Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
 ### Why This Is Next
@@ -96,66 +99,54 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 | Premium pricing | €79-249 vs €20-40 posters |
 | Tactile value | Physical object > flat print |
 | Data ready | Already have GPX + elevation |
+| Existing 3D infra | 3D terrain & buildings already implemented |
 
 ### Product Concept
 
-- GPS track extruded as 3D ribbon/line
-- Z-axis = actual elevation profile
-- Mounted on stylized base
+- GPS track extruded as 3D ribbon/line using Three.js TubeGeometry
+- Z-axis = actual elevation profile from route data
+- Mounted on stylized base (rectangular, circular, organic, or terrain)
 - Sizes: 10cm (€79-99), 15cm (€119-149), 20cm+ (€179-249)
 - Materials: PLA, wood-fill PLA, resin
 
-### Technical Approach
+### UX Strategy
 
-#### Option A: Route Ribbon (simpler)
+Mode toggle below logo in left navigation:
 
-```text
-GPS + elevation → TubeGeometry (Three.js) → Add base → Export STL
-```
+- **Poster Mode**: Current functionality (map styles, typography, export PNG)
+- **3D Print Mode**: Sculpture preview (R3F), base/material selection, export STL
 
-#### Option B: Route on Terrain (premium)
+Tabs adapt per mode:
 
-```javascript
-// Three.js terrain mesh generation
-const geometry = new THREE.PlaneGeometry(width, depth, segments, segments);
-geometry.rotateX(-Math.PI / 2);
+- Shared: Library, Location, Style
+- Poster only: Text, Frame
+- 3D only: Sculpture (base, size, material)
 
-// Apply heightmap from MapTiler elevation API
-const vertices = geometry.attributes.position.array;
-for (let i = 0, j = 0; i < vertices.length; i++, j += 3) {
-  vertices[j + 1] = heightData[i] * exaggeration;
-}
-geometry.computeVertexNormals();
+### Technical Stack
 
-// Add route line on terrain surface
-const routeMesh = new THREE.TubeGeometry(routeCurve, segments, radius, 8, false);
-```
+- **React Three Fiber** (@react-three/fiber) - React renderer for Three.js
+- **Drei** (@react-three/drei) - R3F helpers (OrbitControls, Stage, Line)
+- **Three.js** - TubeGeometry, PlaneGeometry, STLExporter
+- **MapTiler Elevation API** - Already integrated for 3D terrain
 
-#### Elevation Data Pipeline
+### Leveraging Existing Code
 
-1. MapTiler `elevation.fromLineString()` → route with Z coords
-2. MapTiler terrain tiles → heightmap grid for terrain base
-3. Three.js PlaneGeometry + vertex displacement → 3D mesh
-4. STL/OBJ export for 3D printing
+| Existing Feature | Location | Reuse |
+| ---------------- | -------- | ----- |
+| 3D Terrain | `applyPalette.ts` | Elevation source |
+| 3D Buildings | `buildings3d.ts` | Style/camera presets |
+| Route Elevation | `RoutePoint.elevation` | Direct mesh input |
+| Route Stats | min/max elevation | Normalization |
 
-### MVP Feature Set
+### Implementation Phases
 
-- [ ] Tab to switch between Poster and 3D Print modes
-- [ ] 3D preview of route sculpture (rotatable)
-- [ ] 2-3 base style options (rectangular, circular, organic)
-- [ ] Size selection (10cm, 15cm)
-- [ ] Material selection
-- [ ] Generate printable mesh from route data
-- [ ] Fulfillment partner API integration (Shapeways, i.materialise)
-- [ ] Order checkout and tracking
+1. **Phase 4.1**: Mode switching + basic R3F preview
+2. **Phase 4.2**: Sculpture controls (base, size, material)
+3. **Phase 4.3**: STL export + mesh optimization
+4. **Phase 4.4**: Terrain-based sculptures (premium)
+5. **Phase 4.5**: Fulfillment integration + checkout
 
-### First Implementation Steps
-
-1. Install Three.js / React Three Fiber
-2. Create 3D preview component with route mesh
-3. Build route-to-mesh conversion (coordinates + elevation → 3D ribbon)
-4. Add tab-based mode switching (Poster / 3D Print)
-5. Research fulfillment partner APIs
+See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for complete component architecture, state management, Three.js/R3F reference, and implementation details.
 
 ---
 

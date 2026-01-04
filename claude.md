@@ -3,6 +3,7 @@
 > **Single source of truth** for AI development context.
 > - See [STATUS.md](STATUS.md) for completed features & history
 > - See [FEATURES.md](FEATURES.md) for roadmap & strategy
+> - See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for Phase 4 specification
 
 ## Quick Reference
 
