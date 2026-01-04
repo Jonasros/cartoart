@@ -74,9 +74,15 @@ function estimateTextHeightCqw(
 
 /**
  * Calculate the maximum safe title size given current config
+ * 
+ * This considers BOTH:
+ * 1. Vertical space (height) - so text doesn't overflow bottom
+ * 2. Horizontal space (width) - so text doesn't overflow sides
  */
 export function getMaxTitleSize(config: PosterConfig): number {
-  const { format, typography } = config;
+  const { format, typography, location } = config;
+  
+  // === HEIGHT-BASED LIMIT ===
   const availableHeight = getAvailableHeightCqw(
     format.margin,
     format.aspectRatio,
@@ -99,7 +105,35 @@ export function getMaxTitleSize(config: PosterConfig): number {
   reservedHeight += 4; // Padding
   
   const availableForTitle = maxTextHeight - reservedHeight;
-  const maxTitleSize = availableForTitle / LAYOUT.TITLE_HEIGHT_MULTIPLIER;
+  const maxFromHeight = availableForTitle / LAYOUT.TITLE_HEIGHT_MULTIPLIER;
+  
+  // === WIDTH-BASED LIMIT ===
+  // Available width is 100cqw minus margins on both sides, with some padding
+  const availableWidth = 100 - (2 * format.margin) - 4; // 4cqw padding on sides
+  
+  // Estimate title width based on character count and letter spacing
+  // Average character width is approximately 0.6 * fontSize for most fonts
+  // But with letter spacing and ALL CAPS, it can be wider
+  const titleText = location.name || '';
+  const charCount = titleText.length || 1;
+  const letterSpacing = typography.titleLetterSpacing || 0;
+  
+  // Character width factor: ~0.55 for average, higher for ALL CAPS wide fonts
+  // Add letter spacing contribution (letterSpacing is in em units, so multiply by fontSize)
+  const charWidthFactor = typography.titleAllCaps ? 0.65 : 0.55;
+  
+  // Title width ≈ charCount * fontSize * charWidthFactor + (charCount - 1) * fontSize * letterSpacing
+  // We want: titleWidth <= availableWidth
+  // charCount * fontSize * charWidthFactor + (charCount - 1) * fontSize * letterSpacing <= availableWidth
+  // fontSize * (charCount * charWidthFactor + (charCount - 1) * letterSpacing) <= availableWidth
+  // fontSize <= availableWidth / (charCount * charWidthFactor + (charCount - 1) * letterSpacing)
+  
+  const effectiveLetterSpacing = Math.max(0, letterSpacing); // Only positive spacing adds width
+  const widthDivisor = (charCount * charWidthFactor) + ((charCount - 1) * effectiveLetterSpacing);
+  const maxFromWidth = widthDivisor > 0 ? availableWidth / widthDivisor : LAYOUT.TITLE_SIZE_MAX;
+  
+  // Take the minimum of height-based and width-based limits
+  const maxTitleSize = Math.min(maxFromHeight, maxFromWidth);
   
   // Clamp to absolute limits
   return Math.max(LAYOUT.TITLE_SIZE_MIN, Math.min(LAYOUT.TITLE_SIZE_MAX, maxTitleSize));
