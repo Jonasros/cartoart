@@ -194,6 +194,66 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
             <span>Thick</span>
           </div>
         </div>
+
+        {/* Terrain Rotation */}
+        <div className="space-y-2 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Terrain Rotation
+          </ControlLabel>
+          {/* Auto checkbox */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={(config.terrainRotation ?? -1) === -1}
+              onChange={(e) => onConfigChange({ terrainRotation: e.target.checked ? -1 : 0 })}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-xs text-gray-700 dark:text-gray-300">Auto (start point at front)</span>
+          </label>
+          {/* Manual rotation - only shown when not auto */}
+          {(config.terrainRotation ?? -1) !== -1 && (
+            <>
+              {/* Rectangular: 4 discrete rotation buttons */}
+              {config.shape === 'rectangular' ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 90, 180, 270].map((angle) => (
+                    <button
+                      key={angle}
+                      onClick={() => onConfigChange({ terrainRotation: angle })}
+                      className={cn(
+                        'py-2 px-1 text-center rounded-lg border transition-all text-xs font-medium',
+                        (config.terrainRotation ?? 0) === angle
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
+                      )}
+                    >
+                      {angle}°
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                /* Circular: continuous slider */
+                <div className="space-y-1">
+                  <ControlSlider
+                    min="0"
+                    max="360"
+                    step="5"
+                    value={config.terrainRotation ?? 0}
+                    onChange={(e) => onConfigChange({ terrainRotation: parseFloat(e.target.value) })}
+                    displayValue={`${(config.terrainRotation ?? 0).toFixed(0)}°`}
+                    onValueChange={(value) => onConfigChange({ terrainRotation: value })}
+                    formatValue={(v) => `${v.toFixed(0)}°`}
+                    parseValue={(s) => parseFloat(s.replace('°', ''))}
+                  />
+                  <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                    <span>0°</span>
+                    <span>360°</span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </ControlSection>
 
       {/* Colors */}

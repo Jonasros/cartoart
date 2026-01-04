@@ -69,6 +69,8 @@ export interface SculptureConfig {
   routeColor: string;
   /** Text configuration */
   text: SculptureTextConfig;
+  /** Terrain rotation in degrees (-1 = auto-orient start to front) */
+  terrainRotation: number;
 }
 
 /**
@@ -98,6 +100,7 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainColor: '#8b7355',
   routeColor: '#4ade80',
   text: DEFAULT_TEXT_CONFIG,
+  terrainRotation: -1, // -1 = auto-orient start point to front
 };
 
 /**

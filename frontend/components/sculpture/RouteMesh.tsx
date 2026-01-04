@@ -122,7 +122,7 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 }
 
 /**
- * Start marker mesh (optional, for future enhancement)
+ * Start marker mesh (green sphere at route start)
  */
 export function RouteStartMarker({
   routeData,
@@ -177,7 +177,7 @@ export function RouteStartMarker({
 }
 
 /**
- * End marker mesh (optional, for future enhancement)
+ * End marker mesh (red cube at route end)
  */
 export function RouteEndMarker({
   routeData,

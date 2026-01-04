@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, Grid } from '@react-three/drei';
 import type { RouteData } from '@/types/poster';
@@ -9,7 +9,37 @@ import { TerrainMesh } from './TerrainMesh';
 import { RouteMesh, RouteStartMarker, RouteEndMarker } from './RouteMesh';
 import { CircularBase } from './CircularBase';
 import { RectangularBase } from './RectangularBase';
+import { SimpleTextMesh } from './TextMesh';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
+
+/**
+ * Calculate the rotation angle needed to orient the route start point to the front.
+ * Returns the angle in radians to rotate around the Y axis.
+ */
+function calculateStartRotation(routeData: RouteData, meshSize: number): number {
+  const { points, bounds } = routeData;
+  if (points.length === 0) return 0;
+
+  const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+  const lngRange = maxLng - minLng || 0.001;
+  const latRange = maxLat - minLat || 0.001;
+
+  // Get normalized position of start point
+  const startPoint = points[0];
+  const normalizedX = (startPoint.lng - minLng) / lngRange;
+  const normalizedZ = (startPoint.lat - minLat) / latRange;
+
+  // Convert to mesh coordinates
+  const x = (normalizedX - 0.5) * meshSize;
+  const z = (normalizedZ - 0.5) * meshSize;
+
+  // Calculate angle from center to start point
+  // We want the start to be at positive Z (front), so we calculate angle and rotate
+  const currentAngle = Math.atan2(x, z); // Angle from +Z axis
+
+  // Return negative angle to rotate start to front
+  return -currentAngle;
+}
 
 interface SculpturePreviewProps {
   routeData: RouteData | null;
@@ -64,7 +94,23 @@ function BasePlatform({ config }: { config: SculptureConfig }) {
 }
 
 /**
+ * Snap an angle (in radians) to the nearest 90° (0, 90, 180, 270)
+ */
+function snapTo90Degrees(angleRad: number): number {
+  // Convert to degrees
+  const angleDeg = (angleRad * 180) / Math.PI;
+  // Normalize to 0-360 range
+  const normalized = ((angleDeg % 360) + 360) % 360;
+  // Find nearest 90° angle
+  const snapped = Math.round(normalized / 90) * 90;
+  // Convert back to radians
+  return (snapped * Math.PI) / 180;
+}
+
+/**
  * The actual sculpture scene with terrain and route
+ * The terrain + route + markers are rotated together so the start point faces front,
+ * while the base and text stay fixed.
  */
 function SculptureScene({
   routeData,
@@ -76,24 +122,50 @@ function SculptureScene({
   // Generate elevation grid from route data
   const { grid: elevationGrid } = useElevationGrid(routeData, config.terrainResolution);
 
+  // Calculate rotation to orient route start to front
+  // If terrainRotation is -1 (auto), calculate based on start point position
+  // For rectangular shapes, snap to nearest 90° to stay in bounds
+  // Otherwise use the manual rotation value (in degrees, convert to radians)
+  const meshSize = config.size / 10;
+  const terrainRotation = config.terrainRotation ?? -1;
+  const startRotation = useMemo(() => {
+    if (terrainRotation === -1) {
+      // Auto mode: calculate rotation to orient start point to front
+      const autoRotation = calculateStartRotation(routeData, meshSize);
+      // For rectangular shapes, snap to nearest 90° to prevent out-of-bounds
+      if (config.shape === 'rectangular') {
+        return snapTo90Degrees(autoRotation);
+      }
+      return autoRotation;
+    }
+    // Manual mode: convert degrees to radians
+    return (terrainRotation * Math.PI) / 180;
+  }, [routeData, meshSize, terrainRotation, config.shape]);
+
   return (
     <group>
-      {/* Base platform (circular or rectangular) */}
+      {/* Base platform (circular or rectangular) - stays fixed */}
       <BasePlatform config={config} />
 
-      {/* Terrain mesh with height displacement */}
-      <TerrainMesh
-        routeData={routeData}
-        config={config}
-        elevationGrid={elevationGrid ?? undefined}
-      />
+      {/* Rotated group: terrain + route + markers rotate together so start faces front */}
+      <group rotation={[0, startRotation, 0]}>
+        {/* Terrain mesh with height displacement */}
+        <TerrainMesh
+          routeData={routeData}
+          config={config}
+          elevationGrid={elevationGrid ?? undefined}
+        />
 
-      {/* Route tube following the trail path */}
-      <RouteMesh routeData={routeData} config={config} />
+        {/* Route tube following the trail path */}
+        <RouteMesh routeData={routeData} config={config} />
 
-      {/* Start/End markers */}
-      <RouteStartMarker routeData={routeData} config={config} />
-      <RouteEndMarker routeData={routeData} config={config} />
+        {/* Start/End markers */}
+        <RouteStartMarker routeData={routeData} config={config} />
+        <RouteEndMarker routeData={routeData} config={config} />
+      </group>
+
+      {/* Engraved text on base - stays fixed at front */}
+      <SimpleTextMesh config={config} />
     </group>
   );
 }
