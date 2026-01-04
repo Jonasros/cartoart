@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { trackApiRequest } from '@/lib/api-usage/tracker';
 
 const SOURCES: Record<string, string> = {
   openfreemap: 'https://tiles.openfreemap.org/',
@@ -73,16 +74,20 @@ export async function GET(
       },
     });
 
+    // Track the API request (fire-and-forget)
+    const isTileJson = remainingPath.endsWith('tiles.json') || remainingPath === 'planet';
+    trackApiRequest(sourceKey, { isTileJson, isError: !response.ok });
+
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'No error body');
       logger.error(`Tile fetch error (${response.status}) for ${tileUrl}:`, errorText);
       return NextResponse.json(
-        { 
-          error: 'Upstream fetch failed', 
-          status: response.status, 
+        {
+          error: 'Upstream fetch failed',
+          status: response.status,
           url: tileUrl,
-          details: errorText.slice(0, 500) 
-        }, 
+          details: errorText.slice(0, 500)
+        },
         { status: response.status }
       );
     }
@@ -91,9 +96,9 @@ export async function GET(
     const contentType = response.headers.get('Content-Type') || '';
 
     // If this is a TileJSON request (OpenFreeMap or MapTiler), rewrite tile URLs to go through our proxy
-    const isTileJson = contentType.includes('application/json') && (remainingPath.endsWith('tiles.json') || remainingPath === 'planet');
+    const shouldRewriteTileJson = contentType.includes('application/json') && isTileJson;
 
-    if (isTileJson) {
+    if (shouldRewriteTileJson) {
       try {
         const text = new TextDecoder().decode(data);
         const json = JSON.parse(text);

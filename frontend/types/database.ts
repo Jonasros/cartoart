@@ -156,6 +156,38 @@ export interface Database {
           updated_at?: string;
         };
       };
+      api_usage: {
+        Row: {
+          id: string;
+          source: string; // 'maptiler', 'openfreemap', etc.
+          date: string; // YYYY-MM-DD
+          request_count: number;
+          tilejson_count: number; // TileJSON requests (counted separately)
+          error_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          source: string;
+          date: string;
+          request_count?: number;
+          tilejson_count?: number;
+          error_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          source?: string;
+          date?: string;
+          request_count?: number;
+          tilejson_count?: number;
+          error_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

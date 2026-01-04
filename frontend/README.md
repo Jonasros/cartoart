@@ -7,6 +7,17 @@ Create a `.env.local` file in the `frontend/` directory with the following varia
 ```bash
 # Google Analytics ID (optional - leave empty to disable analytics)
 NEXT_PUBLIC_GA_ID=G-3TZH3H4MVW
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# MapTiler API (for terrain tiles and contours)
+NEXT_PUBLIC_MAPTILER_KEY=your_maptiler_api_key
+
+# Admin Dashboard (for API usage tracking at /admin/api-usage)
+ADMIN_PASSWORD=your_secure_admin_password
 ```
 
 ## Getting Started

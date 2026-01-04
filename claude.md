@@ -13,6 +13,7 @@
 ### What's Working
 - 11 map styles with 15+ palettes
 - GPX route upload with styling (color, width, opacity, dash patterns)
+- 3D terrain elevation with MapTiler terrain-rgb tiles
 - 3D buildings with style presets & perspective controls
 - High-res PNG export (up to 7200x10800px)
 - Social features (feed, likes, comments, sharing)
