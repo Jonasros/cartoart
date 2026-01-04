@@ -16,6 +16,7 @@ interface ExportOptionsModalProps {
 }
 
 // Resolution metadata with icons and pricing
+// Premium pricing for print-ready exports, free for screen/sharing
 const RESOLUTION_META: Record<ExportResolutionKey, {
   icon: React.ReactNode;
   price: string | null; // null = free
@@ -23,17 +24,17 @@ const RESOLUTION_META: Record<ExportResolutionKey, {
 }> = {
   SMALL: {
     icon: <Printer className="w-4 h-4" />,
-    price: null,
+    price: '€19',
     fileSizeEstimate: '~8-15 MB'
   },
   MEDIUM: {
     icon: <Printer className="w-4 h-4" />,
-    price: '€2.99',
+    price: '€25',
     fileSizeEstimate: '~15-25 MB'
   },
   LARGE: {
     icon: <Printer className="w-4 h-4" />,
-    price: '€4.99',
+    price: '€29',
     fileSizeEstimate: '~30-50 MB'
   },
   THUMBNAIL: {
@@ -53,7 +54,7 @@ const RESOLUTION_META: Record<ExportResolutionKey, {
   },
   DESKTOP_4K: {
     icon: <Tv className="w-4 h-4" />,
-    price: '€1.99',
+    price: null,
     fileSizeEstimate: '~5-10 MB'
   },
 };
