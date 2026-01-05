@@ -14,17 +14,58 @@ interface TerrainMeshProps {
 }
 
 /**
+ * Calculate the minimum distance from a point to the route path.
+ * Returns the distance and the elevation at the nearest route point.
+ */
+function getDistanceToRoute(
+  x: number,
+  z: number,
+  routePoints: Array<{ x: number; z: number; y: number }>
+): { distance: number; elevation: number } {
+  let minDist = Infinity;
+  let nearestElev = 0;
+
+  for (let i = 0; i < routePoints.length - 1; i++) {
+    const p1 = routePoints[i];
+    const p2 = routePoints[i + 1];
+
+    // Calculate distance from point to line segment
+    const dx = p2.x - p1.x;
+    const dz = p2.z - p1.z;
+    const lenSq = dx * dx + dz * dz;
+
+    let t = 0;
+    if (lenSq > 0) {
+      t = Math.max(0, Math.min(1, ((x - p1.x) * dx + (z - p1.z) * dz) / lenSq));
+    }
+
+    const projX = p1.x + t * dx;
+    const projZ = p1.z + t * dz;
+    const dist = Math.sqrt((x - projX) ** 2 + (z - projZ) ** 2);
+
+    if (dist < minDist) {
+      minDist = dist;
+      // Interpolate elevation between p1 and p2
+      nearestElev = p1.y + t * (p2.y - p1.y);
+    }
+  }
+
+  return { distance: minDist, elevation: nearestElev };
+}
+
+/**
  * 3D Terrain mesh with height displacement based on elevation data.
  *
  * Uses PlaneGeometry with grid subdivision for detailed terrain.
  * For circular shapes, vertices outside the radius are clipped.
+ * When routeStyle is 'engraved', carves a groove into the terrain along the route.
  *
  * The terrain is normalized to fit within the sculpture size and
  * elevation scale parameters from the config.
  */
 export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshProps) {
   const geometry = useMemo(() => {
-    const { size, elevationScale, terrainResolution, shape, rimHeight } = config;
+    const { size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness } = config;
     const segments = terrainResolution;
 
     // Account for rim when sizing terrain
@@ -55,6 +96,38 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     // Determine the coordinate range for normalization
     // For circular: radius is meshSize/2, for rectangular: half-size is meshSize/2
     const coordRange = meshSize;
+
+    // Pre-compute route points in mesh coordinates for groove carving
+    const routeMeshPoints: Array<{ x: number; z: number; y: number }> = [];
+    const grooveWidth = routeStyle === 'engraved' ? (routeThickness / 100) * 2.5 : 0; // Much wider for visibility
+    const grooveDepth = routeStyle === 'engraved' ? 0.05 : 0; // Deep groove for strong shadow effect
+
+    // Circular boundary for clipping route points (stays inside rim)
+    const routeClipRadius = meshSize / 2 * 0.88;
+
+    if (routeStyle === 'engraved') {
+      for (const point of routeData.points) {
+        const normalizedX = (point.lng - minLng) / lngRange;
+        const normalizedZ = (point.lat - minLat) / latRange;
+        let x = (normalizedX - 0.5) * meshSize;
+        let z = (normalizedZ - 0.5) * meshSize;
+
+        // For circular shape, clamp route points to stay within the circle
+        if (shape === 'circular') {
+          const distFromCenter = Math.sqrt(x * x + z * z);
+          if (distFromCenter > routeClipRadius) {
+            const scale = routeClipRadius / distFromCenter;
+            x *= scale;
+            z *= scale;
+          }
+        }
+
+        const elev = point.elevation ?? minElevation;
+        const normalizedElev = (elev - minElevation) / elevRange;
+        const y = normalizedElev * heightScale;
+        routeMeshPoints.push({ x, z, y });
+      }
+    }
 
     if (elevationGrid && elevationGrid.length > 0) {
       // Use provided elevation grid
@@ -88,7 +161,20 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
 
         const elev = elevationGrid[zi]?.[xi] ?? minElevation;
         const normalizedElev = (elev - minElevation) / elevRange;
-        positions.setY(i, normalizedElev * heightScale);
+        let y = normalizedElev * heightScale;
+
+        // Carve groove if engraved style and vertex is near route
+        if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
+          const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
+          if (distance < grooveWidth / 2) {
+            // Smooth groove with rounded edges
+            const t = distance / (grooveWidth / 2);
+            const smoothFactor = 1 - Math.cos(t * Math.PI / 2); // 0 at center, 1 at edge
+            y -= grooveDepth * (1 - smoothFactor);
+          }
+        }
+
+        positions.setY(i, y);
       }
     } else {
       // Interpolate from route points (simplified nearest-neighbor)
@@ -131,7 +217,20 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         }
 
         const normalizedElev = (nearestElev - minElevation) / elevRange;
-        positions.setY(i, normalizedElev * heightScale);
+        let y = normalizedElev * heightScale;
+
+        // Carve groove if engraved style and vertex is near route
+        if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
+          const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
+          if (distance < grooveWidth / 2) {
+            // Smooth groove with rounded edges
+            const t = distance / (grooveWidth / 2);
+            const smoothFactor = 1 - Math.cos(t * Math.PI / 2); // 0 at center, 1 at edge
+            y -= grooveDepth * (1 - smoothFactor);
+          }
+        }
+
+        positions.setY(i, y);
       }
     }
 

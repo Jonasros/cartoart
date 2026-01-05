@@ -6,7 +6,7 @@ import { OrbitControls, Stage, Grid } from '@react-three/drei';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
 import { TerrainMesh } from './TerrainMesh';
-import { RouteMesh, RouteStartMarker, RouteEndMarker } from './RouteMesh';
+import { RouteMesh } from './RouteMesh';
 import { CircularBase } from './CircularBase';
 import { RectangularBase } from './RectangularBase';
 import { SimpleTextMesh } from './TextMesh';
@@ -163,12 +163,8 @@ function SculptureScene({
           elevationGrid={elevationGrid ?? undefined}
         />
 
-        {/* Route tube following the trail path */}
+        {/* Route following the trail path */}
         <RouteMesh routeData={routeData} config={config} />
-
-        {/* Start/End markers */}
-        <RouteStartMarker routeData={routeData} config={config} />
-        <RouteEndMarker routeData={routeData} config={config} />
       </group>
 
       {/* Engraved text on base - stays fixed at front */}
