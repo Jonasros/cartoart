@@ -19,12 +19,14 @@ import type {
   SculptureRouteStyle,
   SculptureMaterial,
   SculptureTextConfig,
+  SculptureTerrainMode,
 } from '@/types/sculpture';
 import {
   SCULPTURE_SIZES,
   SCULPTURE_SHAPES,
   SCULPTURE_ROUTE_STYLES,
   SCULPTURE_MATERIALS,
+  SCULPTURE_TERRAIN_MODES,
 } from '@/types/sculpture';
 
 interface SculptureControlsProps {
@@ -38,8 +40,12 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
   const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Get elevation grid for export
-  const { grid: elevationGrid } = useElevationGrid(routeData ?? null, config.terrainResolution);
+  // Get elevation grid for export (now with terrain mode support)
+  const { grid: elevationGrid, loading: terrainLoading } = useElevationGrid(
+    routeData ?? null,
+    config.terrainResolution,
+    config.terrainMode
+  );
 
   const updateText = (updates: Partial<SculptureTextConfig>) => {
     onConfigChange({ text: { ...config.text, ...updates } });
@@ -120,8 +126,45 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
 
       {/* Terrain & Route */}
       <ControlSection title="Terrain & Route">
-        {/* Route Style Toggle */}
+        {/* Terrain Mode Toggle */}
         <div className="space-y-2">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Terrain Data Source
+          </ControlLabel>
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.entries(SCULPTURE_TERRAIN_MODES) as [SculptureTerrainMode, { label: string; description: string }][]).map(
+              ([mode, { label, description }]) => (
+                <button
+                  key={mode}
+                  onClick={() => onConfigChange({ terrainMode: mode })}
+                  className={cn(
+                    'p-2.5 text-left rounded-lg border transition-all',
+                    config.terrainMode === mode
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  )}
+                >
+                  <div className={cn(
+                    'text-xs font-semibold',
+                    config.terrainMode === mode ? 'text-emerald-700 dark:text-emerald-300' : 'text-gray-700 dark:text-gray-300'
+                  )}>
+                    {label}
+                  </div>
+                  <div className="text-[9px] text-gray-500 mt-0.5">{description}</div>
+                </button>
+              )
+            )}
+          </div>
+          {terrainLoading && (
+            <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1">
+              <span className="inline-block w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              Fetching terrain data...
+            </div>
+          )}
+        </div>
+
+        {/* Route Style Toggle */}
+        <div className="space-y-2 mt-4">
           <ControlLabel className="text-[10px] uppercase text-gray-500">
             Route Style
           </ControlLabel>
@@ -170,6 +213,72 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
           <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
             <span>Flat</span>
             <span>Dramatic</span>
+          </div>
+        </div>
+
+        {/* Terrain Height Limit */}
+        <div className="space-y-1 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Height Limit
+          </ControlLabel>
+          <ControlSlider
+            min="0.3"
+            max="1.0"
+            step="0.05"
+            value={config.terrainHeightLimit ?? 0.8}
+            onChange={(e) => onConfigChange({ terrainHeightLimit: parseFloat(e.target.value) })}
+            displayValue={`${Math.round((config.terrainHeightLimit ?? 0.8) * 100)}%`}
+            onValueChange={(value) => onConfigChange({ terrainHeightLimit: value })}
+            formatValue={(v) => `${Math.round(v * 100)}%`}
+            parseValue={(s) => parseFloat(s.replace('%', '')) / 100}
+          />
+          <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+            <span>Capped</span>
+            <span>Full</span>
+          </div>
+        </div>
+
+        {/* Route Clearance */}
+        <div className="space-y-1 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Route Clearance
+          </ControlLabel>
+          <ControlSlider
+            min="0"
+            max="0.15"
+            step="0.01"
+            value={config.routeClearance ?? 0.05}
+            onChange={(e) => onConfigChange({ routeClearance: parseFloat(e.target.value) })}
+            displayValue={(config.routeClearance ?? 0.05) === 0 ? 'Off' : `${Math.round((config.routeClearance ?? 0.05) * 100)}%`}
+            onValueChange={(value) => onConfigChange({ routeClearance: value })}
+            formatValue={(v) => v === 0 ? 'Off' : `${Math.round(v * 100)}%`}
+            parseValue={(s) => s === 'Off' ? 0 : parseFloat(s.replace('%', '')) / 100}
+          />
+          <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+            <span>None</span>
+            <span>Wide</span>
+          </div>
+        </div>
+
+        {/* Terrain Smoothing */}
+        <div className="space-y-1 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Terrain Smoothing
+          </ControlLabel>
+          <ControlSlider
+            min="0"
+            max="3"
+            step="1"
+            value={config.terrainSmoothing ?? 1}
+            onChange={(e) => onConfigChange({ terrainSmoothing: parseInt(e.target.value) })}
+            displayValue={(config.terrainSmoothing ?? 1) === 0 ? 'Off' : `${config.terrainSmoothing ?? 1}x`}
+            onValueChange={(value) => onConfigChange({ terrainSmoothing: value })}
+            formatValue={(v) => v === 0 ? 'Off' : `${v}x`}
+            parseValue={(s) => s === 'Off' ? 0 : parseInt(s.replace('x', ''))}
+          />
+          <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+            <span>Sharp</span>
+            <span>Smooth</span>
           </div>
         </div>
 

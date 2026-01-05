@@ -54,6 +54,46 @@ function getDistanceToRoute(
 }
 
 /**
+ * Apply box blur smoothing to a 2D height array.
+ * Each pass averages each cell with its neighbors for smoother terrain.
+ */
+function applySmoothing(heights: number[], width: number, height: number, passes: number): number[] {
+  if (passes <= 0) return heights;
+
+  let current = [...heights];
+  let next = new Array(heights.length).fill(0);
+
+  for (let pass = 0; pass < passes; pass++) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        let sum = 0;
+        let count = 0;
+
+        // Sample 3x3 neighborhood
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              sum += current[ny * width + nx];
+              count++;
+            }
+          }
+        }
+
+        next[idx] = sum / count;
+      }
+    }
+
+    // Swap buffers
+    [current, next] = [next, current];
+  }
+
+  return current;
+}
+
+/**
  * 3D Terrain mesh with height displacement based on elevation data.
  *
  * Uses PlaneGeometry with grid subdivision for detailed terrain.
@@ -65,7 +105,10 @@ function getDistanceToRoute(
  */
 export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshProps) {
   const geometry = useMemo(() => {
-    const { size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness } = config;
+    const {
+      size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness,
+      terrainHeightLimit = 0.8, routeClearance = 0.05, terrainSmoothing = 1
+    } = config;
     const segments = terrainResolution;
 
     // Account for rim when sizing terrain
@@ -97,7 +140,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     // For circular: radius is meshSize/2, for rectangular: half-size is meshSize/2
     const coordRange = meshSize;
 
-    // Pre-compute route points in mesh coordinates for groove carving
+    // Pre-compute route points in mesh coordinates for groove carving and route clearance
     const routeMeshPoints: Array<{ x: number; z: number; y: number }> = [];
     const grooveWidth = routeStyle === 'engraved' ? (routeThickness / 100) * 2.5 : 0; // Much wider for visibility
     const grooveDepth = routeStyle === 'engraved' ? 0.05 : 0; // Deep groove for strong shadow effect
@@ -105,29 +148,40 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     // Circular boundary for clipping route points (stays inside rim)
     const routeClipRadius = meshSize / 2 * 0.88;
 
-    if (routeStyle === 'engraved') {
-      for (const point of routeData.points) {
-        const normalizedX = (point.lng - minLng) / lngRange;
-        const normalizedZ = (point.lat - minLat) / latRange;
-        let x = (normalizedX - 0.5) * meshSize;
-        let z = (normalizedZ - 0.5) * meshSize;
+    // Always compute route mesh points (needed for both engraved groove and raised clearance)
+    for (const point of routeData.points) {
+      const normalizedX = (point.lng - minLng) / lngRange;
+      const normalizedZ = (point.lat - minLat) / latRange;
+      let x = (normalizedX - 0.5) * meshSize;
+      let z = (normalizedZ - 0.5) * meshSize;
 
-        // For circular shape, clamp route points to stay within the circle
-        if (shape === 'circular') {
-          const distFromCenter = Math.sqrt(x * x + z * z);
-          if (distFromCenter > routeClipRadius) {
-            const scale = routeClipRadius / distFromCenter;
-            x *= scale;
-            z *= scale;
-          }
+      // For circular shape, clamp route points to stay within the circle
+      if (shape === 'circular') {
+        const distFromCenter = Math.sqrt(x * x + z * z);
+        if (distFromCenter > routeClipRadius) {
+          const scale = routeClipRadius / distFromCenter;
+          x *= scale;
+          z *= scale;
         }
-
-        const elev = point.elevation ?? minElevation;
-        const normalizedElev = (elev - minElevation) / elevRange;
-        const y = normalizedElev * heightScale;
-        routeMeshPoints.push({ x, z, y });
       }
+
+      const elev = point.elevation ?? minElevation;
+      const normalizedElev = (elev - minElevation) / elevRange;
+      const y = normalizedElev * heightScale;
+      routeMeshPoints.push({ x, z, y });
     }
+
+    // Calculate the grid dimensions for smoothing
+    const gridWidth = segments + 1;
+    const gridHeight = segments + 1;
+
+    // First pass: compute raw heights into an array
+    const rawHeights: number[] = new Array(gridWidth * gridHeight).fill(0);
+    const vertexClipped: boolean[] = new Array(gridWidth * gridHeight).fill(false);
+
+    // Route clearance settings - wider effect zone for better visibility
+    const clearanceRadius = routeClearance * meshSize; // Scale clearance to mesh size
+    const maxHeight = terrainHeightLimit * heightScale; // Max terrain height
 
     if (elevationGrid && elevationGrid.length > 0) {
       // Use provided elevation grid
@@ -138,15 +192,12 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         const x = positions.getX(i);
         const z = positions.getZ(i);
 
-        // For circular shape, clip vertices outside the radius
+        // For circular shape, check if outside radius
         if (shape === 'circular') {
           const distFromCenter = Math.sqrt(x * x + z * z);
           if (distFromCenter > circleRadius * 0.95) {
-            // Collapse vertices outside circle to the edge at base level
-            const scale = (circleRadius * 0.95) / distFromCenter;
-            positions.setX(i, x * scale);
-            positions.setZ(i, z * scale);
-            positions.setY(i, 0);
+            vertexClipped[i] = true;
+            rawHeights[i] = 0;
             continue;
           }
         }
@@ -161,20 +212,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
 
         const elev = elevationGrid[zi]?.[xi] ?? minElevation;
         const normalizedElev = (elev - minElevation) / elevRange;
-        let y = normalizedElev * heightScale;
-
-        // Carve groove if engraved style and vertex is near route
-        if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
-          const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
-          if (distance < grooveWidth / 2) {
-            // Smooth groove with rounded edges
-            const t = distance / (grooveWidth / 2);
-            const smoothFactor = 1 - Math.cos(t * Math.PI / 2); // 0 at center, 1 at edge
-            y -= grooveDepth * (1 - smoothFactor);
-          }
-        }
-
-        positions.setY(i, y);
+        rawHeights[i] = normalizedElev * heightScale;
       }
     } else {
       // Interpolate from route points (simplified nearest-neighbor)
@@ -184,15 +222,12 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         const x = positions.getX(i);
         const z = positions.getZ(i);
 
-        // For circular shape, clip vertices outside the radius
+        // For circular shape, check if outside radius
         if (shape === 'circular') {
           const distFromCenter = Math.sqrt(x * x + z * z);
           if (distFromCenter > circleRadius * 0.95) {
-            // Collapse vertices outside circle to the edge at base level
-            const scale = (circleRadius * 0.95) / distFromCenter;
-            positions.setX(i, x * scale);
-            positions.setZ(i, z * scale);
-            positions.setY(i, 0);
+            vertexClipped[i] = true;
+            rawHeights[i] = 0;
             continue;
           }
         }
@@ -217,21 +252,80 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         }
 
         const normalizedElev = (nearestElev - minElevation) / elevRange;
-        let y = normalizedElev * heightScale;
+        rawHeights[i] = normalizedElev * heightScale;
+      }
+    }
 
-        // Carve groove if engraved style and vertex is near route
-        if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
-          const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
-          if (distance < grooveWidth / 2) {
-            // Smooth groove with rounded edges
-            const t = distance / (grooveWidth / 2);
-            const smoothFactor = 1 - Math.cos(t * Math.PI / 2); // 0 at center, 1 at edge
-            y -= grooveDepth * (1 - smoothFactor);
+    // Apply smoothing to raw heights (only for non-clipped vertices)
+    let smoothedHeights = rawHeights;
+    if (terrainSmoothing > 0) {
+      smoothedHeights = applySmoothing(rawHeights, gridWidth, gridHeight, terrainSmoothing);
+      // Preserve clipped vertices
+      for (let i = 0; i < vertexClipped.length; i++) {
+        if (vertexClipped[i]) {
+          smoothedHeights[i] = 0;
+        }
+      }
+    }
+
+    // Final pass: apply height limit, route clearance, and groove carving
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i);
+      const z = positions.getZ(i);
+
+      // Handle clipped vertices (outside circle)
+      if (vertexClipped[i]) {
+        if (shape === 'circular') {
+          const distFromCenter = Math.sqrt(x * x + z * z);
+          const scale = (circleRadius * 0.95) / distFromCenter;
+          positions.setX(i, x * scale);
+          positions.setZ(i, z * scale);
+        }
+        positions.setY(i, 0);
+        continue;
+      }
+
+      let y = smoothedHeights[i];
+
+      // Apply height limit - clamp maximum terrain height
+      y = Math.min(y, maxHeight);
+
+      // Apply route clearance - lower terrain near route to ensure visibility
+      if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
+        const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
+
+        if (distance < clearanceRadius) {
+          // Smooth falloff - terrain is lowered more as it gets closer to route
+          const t = distance / clearanceRadius;
+          const falloff = Math.pow(t, 0.5); // Square root for gentle curve
+
+          // For raised routes: terrain must stay below route elevation
+          // For engraved routes: terrain follows route elevation (groove handles visual)
+          if (routeStyle === 'raised') {
+            // Ensure terrain is always below the route tube
+            const maxTerrainNearRoute = routeElev - 0.01; // Stay 0.01 below route
+            const targetHeight = falloff * y + (1 - falloff) * Math.min(y, maxTerrainNearRoute);
+            y = Math.min(y, targetHeight);
+          } else {
+            // For engraved: blend terrain toward route elevation near the groove
+            const blendedHeight = falloff * y + (1 - falloff) * routeElev;
+            y = blendedHeight;
           }
         }
-
-        positions.setY(i, y);
       }
+
+      // Carve groove if engraved style and vertex is near route
+      if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
+        const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
+        if (distance < grooveWidth / 2) {
+          // Smooth groove with rounded edges
+          const t = distance / (grooveWidth / 2);
+          const smoothFactor = 1 - Math.cos(t * Math.PI / 2); // 0 at center, 1 at edge
+          y -= grooveDepth * (1 - smoothFactor);
+        }
+      }
+
+      positions.setY(i, y);
     }
 
     positions.needsUpdate = true;

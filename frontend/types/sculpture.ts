@@ -21,6 +21,13 @@ export type SculptureShape = 'rectangular' | 'circular';
 export type SculptureRouteStyle = 'raised' | 'engraved';
 
 /**
+ * Terrain data source mode
+ * - 'route': Interpolate elevation from route points only (simpler, faster)
+ * - 'terrain': Fetch real terrain-rgb data from MapTiler (detailed, slower)
+ */
+export type SculptureTerrainMode = 'route' | 'terrain';
+
+/**
  * Material options for 3D printing
  */
 export type SculptureMaterial = 'pla' | 'wood' | 'resin';
@@ -71,6 +78,14 @@ export interface SculptureConfig {
   text: SculptureTextConfig;
   /** Terrain rotation in degrees (-1 = auto-orient start to front) */
   terrainRotation: number;
+  /** Terrain data source mode */
+  terrainMode: SculptureTerrainMode;
+  /** Maximum terrain height as fraction of elevation scale (0.3-1.0) - for 3D printability */
+  terrainHeightLimit: number;
+  /** Distance around route where terrain is lowered to ensure visibility (0-0.15) */
+  routeClearance: number;
+  /** Terrain smoothing passes for better 3D printing (0-3) */
+  terrainSmoothing: number;
 }
 
 /**
@@ -101,6 +116,10 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   routeColor: '#4ade80',
   text: DEFAULT_TEXT_CONFIG,
   terrainRotation: -1, // -1 = auto-orient start point to front
+  terrainMode: 'route', // Default to route-based terrain (faster)
+  terrainHeightLimit: 0.8, // 80% of elevation scale - keeps terrain printable
+  routeClearance: 0.05, // Terrain dips near route for visibility
+  terrainSmoothing: 1, // One smoothing pass for gentle terrain
 };
 
 /**
@@ -141,3 +160,14 @@ export const SCULPTURE_ROUTE_STYLES: Record<
  * Available size options in cm
  */
 export const SCULPTURE_SIZES = [10, 15, 20] as const;
+
+/**
+ * Terrain mode display information for UI
+ */
+export const SCULPTURE_TERRAIN_MODES: Record<
+  SculptureTerrainMode,
+  { label: string; description: string }
+> = {
+  route: { label: 'Route Only', description: 'Use route elevation data (fast)' },
+  terrain: { label: 'Full Terrain', description: 'Fetch real terrain data (detailed)' },
+};

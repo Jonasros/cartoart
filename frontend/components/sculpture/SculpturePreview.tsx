@@ -126,8 +126,12 @@ function SculptureScene({
   routeData: RouteData;
   config: SculptureConfig;
 }) {
-  // Generate elevation grid from route data
-  const { grid: elevationGrid } = useElevationGrid(routeData, config.terrainResolution);
+  // Generate elevation grid from route data (supports route-based or terrain-rgb mode)
+  const { grid: elevationGrid } = useElevationGrid(
+    routeData,
+    config.terrainResolution,
+    config.terrainMode
+  );
 
   // Calculate rotation to orient route start to front
   // If terrainRotation is -1 (auto), calculate based on start point position
