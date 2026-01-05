@@ -250,15 +250,17 @@ export function AccountPanel({
               Browse Feed
             </Button>
 
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3"
-              onClick={handleShareMap}
-              data-share-button
-            >
-              <Share2 className="w-4 h-4" />
-              Share This Map
-            </Button>
+            {currentMapStatus?.isPublished && (
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={handleShareMap}
+                data-share-button
+              >
+                <Share2 className="w-4 h-4" />
+                Share This Map
+              </Button>
+            )}
 
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
               <Button
@@ -291,15 +293,17 @@ export function AccountPanel({
               Browse Feed
             </Button>
 
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3"
-              onClick={handleShareMap}
-              data-share-button
-            >
-              <Share2 className="w-4 h-4" />
-              Share This Map
-            </Button>
+            {currentMapStatus?.isPublished && (
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3"
+                onClick={handleShareMap}
+                data-share-button
+              >
+                <Share2 className="w-4 h-4" />
+                Share This Map
+              </Button>
+            )}
           </>
         )}
       </div>
