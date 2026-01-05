@@ -1,5 +1,8 @@
 // Core type definitions for the Map Poster Generator
 
+// Import sculpture types for SavedProject
+import type { SculptureConfig, ProductMode } from './sculpture';
+
 export interface PosterLocation {
   name: string;
   city?: string; // New: specific city/municipality field
@@ -154,6 +157,10 @@ export interface SavedProject {
   name: string;
   config: PosterConfig;
   updatedAt: number;
+  // Sculpture-related fields (Phase 4.6)
+  productType?: ProductMode;
+  sculptureConfig?: SculptureConfig | null;
+  sculptureThumbnailUrl?: string | null;
 }
 
 // Route/Journey Types for GPX/GPS data

@@ -53,6 +53,10 @@ export interface Database {
           published_at: string | null;
           created_at: string;
           updated_at: string;
+          // Sculpture-related fields (Phase 4.6)
+          product_type: 'poster' | 'sculpture';
+          sculpture_config: Json | null;
+          sculpture_thumbnail_url: string | null;
         };
         Insert: {
           id?: string;
@@ -66,6 +70,10 @@ export interface Database {
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          // Sculpture-related fields (Phase 4.6)
+          product_type?: 'poster' | 'sculpture';
+          sculpture_config?: Json | null;
+          sculpture_thumbnail_url?: string | null;
         };
         Update: {
           id?: string;
@@ -79,6 +87,10 @@ export interface Database {
           published_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          // Sculpture-related fields (Phase 4.6)
+          product_type?: 'poster' | 'sculpture';
+          sculpture_config?: Json | null;
+          sculpture_thumbnail_url?: string | null;
         };
       };
       votes: {

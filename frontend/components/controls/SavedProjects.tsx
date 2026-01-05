@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, FolderOpen, Clock, Edit2, Check, X } from 'lucide-react';
+import { Trash2, FolderOpen, Clock, Edit2, Check, X, Box, Image } from 'lucide-react';
 import type { SavedProject } from '@/types/poster';
 
 interface SavedProjectsProps {
@@ -123,9 +123,23 @@ export function SavedProjects({
                         </button>
                       </div>
                     ) : (
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {project.name}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {project.name}
+                        </h4>
+                        {/* Product Type Badge */}
+                        {project.productType === 'sculpture' ? (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex-shrink-0">
+                            <Box className="w-2.5 h-2.5" />
+                            3D
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
+                            <Image className="w-2.5 h-2.5" />
+                            2D
+                          </span>
+                        )}
+                      </div>
                     )}
                     <div className="flex items-center mt-1 text-[10px] text-gray-500 dark:text-gray-400">
                       <Clock className="w-3 h-3 mr-1" />

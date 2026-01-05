@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Trash2, Edit, Eye, EyeOff, Calendar, TrendingUp } from 'lucide-react';
+import { Trash2, Edit, Eye, EyeOff, Calendar, TrendingUp, Image as ImageIcon, Box } from 'lucide-react';
 import { Button } from '@/components/ui/control-components';
 import { PublishModal } from './PublishModal';
 import type { SavedMap } from '@/lib/actions/maps';
@@ -70,10 +70,10 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-gray-400 mb-4">
-          You haven't saved any maps yet.
+          You haven't saved any posters or sculptures yet.
         </p>
         <Link href="/">
-          <Button>Create Your First Map</Button>
+          <Button>Create Your First Design</Button>
         </Link>
       </div>
     );
@@ -86,25 +86,39 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
           key={map.id}
           className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
         >
-          {map.thumbnail_url ? (
-            <Link href={`/map/${map.id}`}>
-              <div className="aspect-[2/3] relative bg-gray-100 dark:bg-gray-700">
+          <Link href={`/map/${map.id}`}>
+            <div className="aspect-[2/3] relative bg-gray-100 dark:bg-gray-700">
+              {/* Product Type Badge */}
+              <div className="absolute top-2 left-2 z-10">
+                {map.product_type === 'sculpture' ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+                    <Box className="w-3 h-3" />
+                    3D
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+                    <ImageIcon className="w-3 h-3" />
+                    Poster
+                  </span>
+                )}
+              </div>
+
+              {/* Thumbnail Image */}
+              {(map.product_type === 'sculpture' ? map.sculpture_thumbnail_url : map.thumbnail_url) ? (
                 <Image
-                  src={map.thumbnail_url}
+                  src={(map.product_type === 'sculpture' ? map.sculpture_thumbnail_url : map.thumbnail_url) as string}
                   alt={map.title}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-              </div>
-            </Link>
-          ) : (
-            <Link href={`/map/${map.id}`}>
-              <div className="aspect-[2/3] bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                <p className="text-gray-400 dark:text-gray-500 text-sm">No thumbnail</p>
-              </div>
-            </Link>
-          )}
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">No thumbnail</p>
+                </div>
+              )}
+            </div>
+          </Link>
           
           <div className="p-4">
             <Link href={`/map/${map.id}`}>

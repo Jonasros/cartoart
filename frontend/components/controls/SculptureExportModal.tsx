@@ -48,9 +48,31 @@ export function SculptureExportModal({
     setExportError(null);
     setExportStats(null);
 
+    // Small delay to allow UI to update and show loading state before heavy computation
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     try {
+      // Debug: Log export parameters to diagnose freezing
+      console.log('[STL Export] Starting with:', {
+        hasElevationGrid: !!elevationGrid,
+        elevationGridSize: elevationGrid ? `${elevationGrid.length}x${elevationGrid[0]?.length}` : 'null',
+        routePoints: routeData.points.length,
+        terrainResolution: config.terrainResolution,
+        hasElevationInRoute: routeData.points.some(p => p.elevation !== undefined),
+      });
+
+      // Use a much lower resolution for export to prevent freezing
+      // 32x32 = 1,089 vertices vs 64x64 = 4,225 vertices
+      const exportConfig = {
+        ...config,
+        terrainResolution: Math.min(config.terrainResolution, 32), // Cap at 32 for export
+      };
+
+      console.log('[STL Export] Using terrainResolution:', exportConfig.terrainResolution);
+
       // Generate meshes
-      const meshes = generateSculptureMeshes(routeData, config, elevationGrid);
+      const meshes = generateSculptureMeshes(routeData, exportConfig, elevationGrid);
 
       // Create a scene with the combined mesh
       const THREE = await import('three');

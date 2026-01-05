@@ -44,6 +44,9 @@ export interface FeedMap {
     display_name: string | null;
     avatar_url: string | null;
   };
+  // Sculpture-related fields (Phase 4.6)
+  product_type: 'poster' | 'sculpture';
+  sculpture_thumbnail_url: string | null;
 }
 
 /**
@@ -121,6 +124,8 @@ export async function getFeed(
         vote_score,
         published_at,
         created_at,
+        product_type,
+        sculpture_thumbnail_url,
         profiles!left (
           username,
           display_name,
@@ -186,6 +191,8 @@ export async function getFeed(
           display_name: null,
           avatar_url: null,
         },
+        product_type: map.product_type || 'poster',
+        sculpture_thumbnail_url: map.sculpture_thumbnail_url,
       };
     });
   } catch (error: any) {
@@ -215,7 +222,7 @@ async function getFeedFallback(
   // First, fetch the maps
   let query = supabase
     .from('maps')
-    .select('id, title, subtitle, thumbnail_url, vote_score, published_at, created_at, user_id')
+    .select('id, title, subtitle, thumbnail_url, vote_score, published_at, created_at, user_id, product_type, sculpture_thumbnail_url')
     .eq('is_published', true)
     .not('published_at', 'is', null);
 
@@ -287,6 +294,8 @@ async function getFeedFallback(
         display_name: null,
         avatar_url: null,
       },
+      product_type: map.product_type || 'poster',
+      sculpture_thumbnail_url: map.sculpture_thumbnail_url,
     };
   });
 }

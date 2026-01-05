@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { PosterConfig, SavedProject } from '@/types/poster';
+import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 import { safeGetItem, safeSetItem } from '@/lib/storage/safeStorage';
 import { logger } from '@/lib/logger';
-import { saveMap, saveMapWithThumbnail, updateMap, updateMapThumbnail, deleteMap, getUserMaps } from '@/lib/actions/maps';
-import { uploadThumbnail } from '@/lib/actions/storage';
+import { saveMap, saveMapWithThumbnail, updateMap, updateMapThumbnail, updateMapSculptureThumbnail, deleteMap, getUserMaps } from '@/lib/actions/maps';
+import { uploadThumbnail, uploadSculptureThumbnail } from '@/lib/actions/storage';
 import { createClient } from '@/lib/supabase/client';
 
 const STORAGE_KEY = 'carto-art-saved-projects';
@@ -55,6 +56,9 @@ export function useSavedProjects() {
               name: map.title,
               config: map.config,
               updatedAt: new Date(map.updated_at).getTime(),
+              productType: map.product_type,
+              sculptureConfig: map.sculpture_config,
+              sculptureThumbnailUrl: map.sculpture_thumbnail_url,
             })));
             setStorageError(null);
           } catch (error) {
@@ -114,37 +118,54 @@ export function useSavedProjects() {
     }
   }, [projects, isLoaded, isAuthenticated]);
 
-  const saveProject = useCallback(async (name: string, config: PosterConfig, thumbnailBlob?: Blob): Promise<SavedProject> => {
+  const saveProject = useCallback(async (
+    name: string,
+    config: PosterConfig,
+    thumbnailBlob?: Blob,
+    options?: {
+      productType?: ProductMode;
+      sculptureConfig?: SculptureConfig;
+      sculptureThumbnailBlob?: Blob;
+    }
+  ): Promise<SavedProject> => {
     if (isAuthenticated) {
       // Save to Supabase
       try {
         let savedMap;
+        const sculptureOptions = options?.productType || options?.sculptureConfig
+          ? { productType: options.productType, sculptureConfig: options.sculptureConfig }
+          : undefined;
 
-        if (thumbnailBlob) {
-          // First save the map to get an ID
-          const tempMap = await saveMap(config, name);
+        // First save the map to get an ID
+        const tempMap = await saveMap(config, name, sculptureOptions);
+        savedMap = tempMap;
 
-          // Get current user for thumbnail upload
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
+        // Get current user for thumbnail uploads
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
 
-          if (user) {
+        if (user) {
+          // Upload poster thumbnail if provided
+          if (thumbnailBlob) {
             try {
-              // Upload thumbnail
               const thumbnailUrl = await uploadThumbnail(tempMap.id, user.id, thumbnailBlob);
-
-              // Update the map with thumbnail URL using server action
               savedMap = await updateMapThumbnail(tempMap.id, thumbnailUrl);
             } catch (thumbnailError) {
-              logger.error('Failed to upload thumbnail:', thumbnailError);
-              // Continue without thumbnail
-              savedMap = tempMap;
+              logger.error('Failed to upload poster thumbnail:', thumbnailError);
+              // Continue without poster thumbnail
             }
-          } else {
-            savedMap = tempMap;
           }
-        } else {
-          savedMap = await saveMap(config, name);
+
+          // Upload sculpture thumbnail if provided
+          if (options?.sculptureThumbnailBlob) {
+            try {
+              const sculptureThumbnailUrl = await uploadSculptureThumbnail(tempMap.id, user.id, options.sculptureThumbnailBlob);
+              savedMap = await updateMapSculptureThumbnail(tempMap.id, sculptureThumbnailUrl);
+            } catch (sculptureThumbnailError) {
+              logger.error('Failed to upload sculpture thumbnail:', sculptureThumbnailError);
+              // Continue without sculpture thumbnail
+            }
+          }
         }
 
         const savedProject: SavedProject = {
@@ -152,6 +173,9 @@ export function useSavedProjects() {
           name: savedMap.title,
           config: savedMap.config,
           updatedAt: new Date(savedMap.created_at).getTime(),
+          productType: savedMap.product_type,
+          sculptureConfig: savedMap.sculpture_config,
+          sculptureThumbnailUrl: savedMap.sculpture_thumbnail_url,
         };
 
         setProjects(prev => [savedProject, ...prev]);
@@ -169,6 +193,8 @@ export function useSavedProjects() {
         name,
         config,
         updatedAt: Date.now(),
+        productType: options?.productType,
+        sculptureConfig: options?.sculptureConfig,
       };
       setProjects(prev => [newProject, ...prev]);
       return newProject;
@@ -211,24 +237,50 @@ export function useSavedProjects() {
     }
   }, [isAuthenticated, projects]);
 
-  const updateProject = useCallback(async (id: string, config: PosterConfig, thumbnailBlob?: Blob): Promise<SavedProject> => {
+  const updateProject = useCallback(async (
+    id: string,
+    config: PosterConfig,
+    thumbnailBlob?: Blob,
+    options?: {
+      productType?: ProductMode;
+      sculptureConfig?: SculptureConfig;
+      sculptureThumbnailBlob?: Blob;
+    }
+  ): Promise<SavedProject> => {
     if (isAuthenticated) {
       try {
+        // Build sculpture options for update
+        const sculptureOptions = options?.productType || options?.sculptureConfig
+          ? { productType: options.productType, sculptureConfig: options.sculptureConfig }
+          : undefined;
+
         // Update the map config
-        const updatedMap = await updateMap(id, config);
+        let updatedMap = await updateMap(id, config, undefined, sculptureOptions);
 
-        // Update thumbnail if provided
-        if (thumbnailBlob) {
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
+        // Get current user for thumbnail uploads
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
 
-          if (user) {
+        if (user) {
+          // Update poster thumbnail if provided
+          if (thumbnailBlob) {
             try {
               const thumbnailUrl = await uploadThumbnail(id, user.id, thumbnailBlob);
-              await updateMapThumbnail(id, thumbnailUrl);
+              updatedMap = await updateMapThumbnail(id, thumbnailUrl);
             } catch (thumbnailError) {
-              logger.error('Failed to upload thumbnail:', thumbnailError);
-              // Continue without thumbnail update
+              logger.error('Failed to upload poster thumbnail:', thumbnailError);
+              // Continue without poster thumbnail update
+            }
+          }
+
+          // Update sculpture thumbnail if provided
+          if (options?.sculptureThumbnailBlob) {
+            try {
+              const sculptureThumbnailUrl = await uploadSculptureThumbnail(id, user.id, options.sculptureThumbnailBlob);
+              updatedMap = await updateMapSculptureThumbnail(id, sculptureThumbnailUrl);
+            } catch (sculptureThumbnailError) {
+              logger.error('Failed to upload sculpture thumbnail:', sculptureThumbnailError);
+              // Continue without sculpture thumbnail update
             }
           }
         }
@@ -238,6 +290,9 @@ export function useSavedProjects() {
           name: updatedMap.title,
           config: updatedMap.config,
           updatedAt: new Date(updatedMap.updated_at).getTime(),
+          productType: updatedMap.product_type,
+          sculptureConfig: updatedMap.sculpture_config,
+          sculptureThumbnailUrl: updatedMap.sculpture_thumbnail_url,
         };
 
         setProjects(prev => prev.map(p => p.id === id ? savedProject : p));
@@ -258,6 +313,8 @@ export function useSavedProjects() {
         ...existingProject,
         config,
         updatedAt: Date.now(),
+        productType: options?.productType ?? existingProject.productType,
+        sculptureConfig: options?.sculptureConfig ?? existingProject.sculptureConfig,
       };
       setProjects(prev => prev.map(p => p.id === id ? updatedProject : p));
       return updatedProject;

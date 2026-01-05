@@ -11,8 +11,9 @@ import type { ProductMode } from '@/types/sculpture';
 import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
 import { TextOverlay } from '@/components/map/TextOverlay';
-import { SculpturePreview } from '@/components/sculpture';
+import { SculpturePreview, type SculpturePreviewHandle } from '@/components/sculpture';
 import { ExportButton } from '@/components/controls/ExportButton';
+import { captureSculptureThumbnail } from '@/lib/export/sculptureThumbnail';
 import { SaveButton } from '@/components/controls/SaveButton';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
 import { throttle, cn } from '@/lib/utils';
@@ -91,6 +92,9 @@ export function PosterEditor() {
 
   // Keep a reference to the map instance for thumbnail generation
   const mapInstanceRef = useRef<MapLibreGL.Map | null>(null);
+
+  // Reference to sculpture preview for thumbnail capture
+  const sculpturePreviewRef = useRef<SculpturePreviewHandle>(null);
   
   // Wrap exportToPNG to handle errors
   const handleExport = useCallback(async (resolutionKey: import('@/lib/export/constants').ExportResolutionKey) => {
@@ -107,6 +111,15 @@ export function PosterEditor() {
     setCurrentMapId(project.id);
     setCurrentMapName(project.name);
     setOriginalConfig(cloneConfig(project.config));
+
+    // Load sculpture config and set product mode if this is a sculpture
+    if (project.productType === 'sculpture' && project.sculptureConfig) {
+      updateSculptureConfig(project.sculptureConfig);
+      setProductMode('sculpture');
+    } else {
+      // Reset to poster mode for poster projects
+      setProductMode('poster');
+    }
 
     // Fetch full metadata if authenticated
     if (isAuthenticated) {
@@ -131,27 +144,42 @@ export function PosterEditor() {
       isPublished: false,
       hasUnsavedChanges: false
     });
-  }, [setConfig, isAuthenticated]);
+  }, [setConfig, isAuthenticated, updateSculptureConfig]);
 
   // Handle saving a project (wraps saveProject to track currentMapId)
   const handleSaveProject = useCallback(async (name: string, posterConfig: PosterConfig) => {
-    // Generate thumbnail if map is available and user is authenticated
+    // Generate thumbnail based on product mode
     let thumbnailBlob: Blob | undefined;
-    if (mapInstanceRef.current && isAuthenticated) {
+    let sculptureThumbnailBlob: Blob | undefined;
+
+    if (isAuthenticated) {
       try {
-        thumbnailBlob = await generateThumbnail(mapInstanceRef.current, posterConfig);
+        if (productMode === 'sculpture') {
+          // Capture sculpture 3D canvas thumbnail
+          const sculptureCanvas = sculpturePreviewRef.current?.captureCanvas();
+          if (sculptureCanvas) {
+            sculptureThumbnailBlob = await captureSculptureThumbnail(sculptureCanvas);
+          }
+        } else if (mapInstanceRef.current) {
+          // Capture map thumbnail for poster mode
+          thumbnailBlob = await generateThumbnail(mapInstanceRef.current, posterConfig);
+        }
       } catch (error) {
         console.error('Failed to generate thumbnail:', error);
         // Continue without thumbnail
       }
     }
 
-    // Save the project and get the saved project back
-    const savedProject = await saveProject(name, posterConfig, thumbnailBlob);
+    // Save the project with sculpture options if in sculpture mode
+    const savedProject = await saveProject(name, posterConfig, thumbnailBlob, {
+      productType: productMode,
+      sculptureConfig: productMode === 'sculpture' ? sculptureConfig : undefined,
+      sculptureThumbnailBlob: sculptureThumbnailBlob,
+    });
 
     // Automatically load the saved project
     await handleLoadProject(savedProject);
-  }, [saveProject, handleLoadProject, isAuthenticated]);
+  }, [saveProject, handleLoadProject, isAuthenticated, productMode, sculptureConfig]);
 
   // Wrapper for SaveButton that passes current config
   const handleSaveClick = useCallback(async (name: string) => {
@@ -162,25 +190,38 @@ export function PosterEditor() {
   const handleUpdateProject = useCallback(async () => {
     if (!currentMapId || !isAuthenticated) return;
 
-    // Generate thumbnail if map is available
+    // Generate thumbnail based on product mode
     let thumbnailBlob: Blob | undefined;
-    if (mapInstanceRef.current) {
-      try {
+    let sculptureThumbnailBlob: Blob | undefined;
+
+    try {
+      if (productMode === 'sculpture') {
+        // Capture sculpture 3D canvas thumbnail
+        const sculptureCanvas = sculpturePreviewRef.current?.captureCanvas();
+        if (sculptureCanvas) {
+          sculptureThumbnailBlob = await captureSculptureThumbnail(sculptureCanvas);
+        }
+      } else if (mapInstanceRef.current) {
+        // Capture map thumbnail for poster mode
         const { generateThumbnail } = await import('@/lib/export/thumbnail');
         thumbnailBlob = await generateThumbnail(mapInstanceRef.current, config);
-      } catch (error) {
-        console.error('Failed to generate thumbnail:', error);
-        // Continue without thumbnail
       }
+    } catch (error) {
+      console.error('Failed to generate thumbnail:', error);
+      // Continue without thumbnail
     }
 
-    // Update the project
-    await updateProject(currentMapId, config, thumbnailBlob);
+    // Update the project with sculpture options if in sculpture mode
+    await updateProject(currentMapId, config, thumbnailBlob, {
+      productType: productMode,
+      sculptureConfig: productMode === 'sculpture' ? sculptureConfig : undefined,
+      sculptureThumbnailBlob: sculptureThumbnailBlob,
+    });
 
     // Update the original config to reflect the saved state
     setOriginalConfig(config);
     setCurrentMapStatus(prev => prev ? { ...prev, hasUnsavedChanges: false } : null);
-  }, [currentMapId, isAuthenticated, config, updateProject]);
+  }, [currentMapId, isAuthenticated, config, updateProject, productMode, sculptureConfig]);
 
   // Handle publish success - refetch map status to get latest published state
   const handlePublishSuccess = useCallback(async () => {
@@ -612,6 +653,7 @@ export function PosterEditor() {
             /* Sculpture Mode - 3D Preview */
             <div className="w-full h-full max-w-4xl max-h-[80vh] aspect-square">
               <SculpturePreview
+                ref={sculpturePreviewRef}
                 routeData={config.route?.data ?? null}
                 config={sculptureConfig}
               />

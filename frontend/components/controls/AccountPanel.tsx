@@ -70,9 +70,14 @@ export function AccountPanel({
       return;
     }
 
-    // Copy current URL to clipboard
+    // Build the shareable URL - use map detail page if we have a saved map ID
+    const shareUrl = currentMapId
+      ? `${window.location.origin}/map/${currentMapId}`
+      : window.location.href;
+
+    // Copy URL to clipboard
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(shareUrl);
 
       // Show temporary success message
       const button = document.querySelector('[data-share-button]');

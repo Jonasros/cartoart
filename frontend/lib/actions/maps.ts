@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { serializeMapConfig, deserializeMapConfig } from '@/lib/supabase/maps';
 import type { PosterConfig } from '@/types/poster';
+import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 import type { Database } from '@/types/database';
 import { revalidatePath } from 'next/cache';
 import { createError } from '@/lib/errors/ServerActionError';
@@ -25,6 +26,10 @@ export interface SavedMap {
   created_at: string;
   updated_at: string;
   user_id: string;
+  // Sculpture-related fields (Phase 4.6)
+  product_type: ProductMode;
+  sculpture_config: SculptureConfig | null;
+  sculpture_thumbnail_url: string | null;
 }
 
 // Alias for backward compatibility
@@ -33,8 +38,18 @@ export type MapConfig = z.infer<typeof PosterConfigSchema>;
 
 /**
  * Save a new map to the database
+ * @param config - The poster/map configuration
+ * @param title - The title of the map
+ * @param options - Optional parameters for sculpture mode
  */
-export async function saveMap(config: PosterConfig, title: string) {
+export async function saveMap(
+  config: PosterConfig,
+  title: string,
+  options?: {
+    productType?: ProductMode;
+    sculptureConfig?: SculptureConfig;
+  }
+) {
   const supabase = await createClient();
 
   const {
@@ -75,12 +90,23 @@ export async function saveMap(config: PosterConfig, title: string) {
 
   const serializedConfig = serializeMapConfig(config);
 
-  const insertData: Database['public']['Tables']['maps']['Insert'] = {
+  // Build insert data - only include sculpture fields if they have values
+  // This maintains backward compatibility with databases that don't have the migration yet
+  const insertData: Record<string, any> = {
     user_id: user.id,
     title,
     config: serializedConfig,
     is_published: false,
   };
+
+  // Only add sculpture fields if the product type is sculpture or if sculpture config exists
+  // This prevents errors on databases that don't have these columns yet
+  if (options?.productType === 'sculpture') {
+    insertData.product_type = options.productType;
+  }
+  if (options?.sculptureConfig) {
+    insertData.sculpture_config = JSON.parse(JSON.stringify(options.sculptureConfig));
+  }
 
   const { data, error } = await (supabase as any)
     .from('maps')
@@ -96,16 +122,26 @@ export async function saveMap(config: PosterConfig, title: string) {
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
 /**
  * Save a new map with a thumbnail
+ * @param config - The poster/map configuration
+ * @param title - The title of the map
+ * @param thumbnailUrl - URL of the thumbnail image
+ * @param options - Optional parameters for sculpture mode
  */
 export async function saveMapWithThumbnail(
   config: PosterConfig,
   title: string,
-  thumbnailUrl: string
+  thumbnailUrl: string,
+  options?: {
+    productType?: ProductMode;
+    sculptureConfig?: SculptureConfig;
+    sculptureThumbnailUrl?: string;
+  }
 ) {
   const supabase = await createClient();
 
@@ -150,6 +186,7 @@ export async function saveMapWithThumbnail(
   }
 
   const serializedConfig = serializeMapConfig(config);
+  const productType = options?.productType ?? 'poster';
 
   const insertData: Database['public']['Tables']['maps']['Insert'] = {
     user_id: user.id,
@@ -157,6 +194,9 @@ export async function saveMapWithThumbnail(
     config: serializedConfig,
     is_published: false,
     thumbnail_url: thumbnailUrl,
+    product_type: productType,
+    sculpture_config: options?.sculptureConfig ? JSON.parse(JSON.stringify(options.sculptureConfig)) : null,
+    sculpture_thumbnail_url: options?.sculptureThumbnailUrl ?? null,
   };
 
   const { data, error } = await (supabase as any)
@@ -174,16 +214,26 @@ export async function saveMapWithThumbnail(
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
 /**
  * Update an existing map
+ * @param id - The map ID
+ * @param config - The poster/map configuration
+ * @param title - Optional new title
+ * @param options - Optional parameters for sculpture mode
  */
 export async function updateMap(
   id: string,
   config: PosterConfig,
-  title?: string
+  title?: string,
+  options?: {
+    productType?: ProductMode;
+    sculptureConfig?: SculptureConfig;
+    sculptureThumbnailUrl?: string;
+  }
 ) {
   const supabase = await createClient();
 
@@ -235,6 +285,17 @@ export async function updateMap(
     updateData.title = title;
   }
 
+  // Handle sculpture-related updates
+  if (options?.productType !== undefined) {
+    updateData.product_type = options.productType;
+  }
+  if (options?.sculptureConfig !== undefined) {
+    updateData.sculpture_config = options.sculptureConfig ? JSON.parse(JSON.stringify(options.sculptureConfig)) : null;
+  }
+  if (options?.sculptureThumbnailUrl !== undefined) {
+    updateData.sculpture_thumbnail_url = options.sculptureThumbnailUrl;
+  }
+
   const { data, error } = await (supabase as any)
     .from('maps')
     .update(updateData)
@@ -258,6 +319,7 @@ export async function updateMap(
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
@@ -308,6 +370,57 @@ export async function updateMapThumbnail(
   logger.info('Thumbnail updated successfully', { mapId: id, userId: user.id });
   revalidatePath('/profile');
   revalidatePath(`/map/${id}`);
+  return data as SavedMap;
+}
+
+/**
+ * Update map's sculpture thumbnail URL
+ */
+export async function updateMapSculptureThumbnail(
+  id: string,
+  sculptureThumbnailUrl: string
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw createError.authRequired('You must be signed in to update maps');
+  }
+
+  if (!sculptureThumbnailUrl || sculptureThumbnailUrl.trim().length === 0) {
+    throw createError.validationError('Sculpture thumbnail URL is required');
+  }
+
+  const updateData: Database['public']['Tables']['maps']['Update'] = {
+    sculpture_thumbnail_url: sculptureThumbnailUrl,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await (supabase as any)
+    .from('maps')
+    .update(updateData)
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    logger.error('Failed to update sculpture thumbnail:', { error, mapId: id, userId: user.id });
+    throw createError.databaseError(`Failed to update sculpture thumbnail: ${error.message}`);
+  }
+
+  if (!data) {
+    throw createError.notFound('Map');
+  }
+
+  logger.info('Sculpture thumbnail updated successfully', { mapId: id, userId: user.id });
+  revalidatePath('/profile');
+  revalidatePath(`/map/${id}`);
+  revalidatePath('/feed');
   return data as SavedMap;
 }
 
@@ -415,6 +528,7 @@ export async function publishMap(
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
@@ -462,6 +576,7 @@ export async function unpublishMap(id: string) {
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
@@ -494,6 +609,7 @@ export async function getUserMaps(): Promise<SavedMap[]> {
   return ((data || []) as any[]).map((map: any) => ({
     ...map,
     config: deserializeMapConfig(map.config),
+    sculpture_config: map.sculpture_config as SculptureConfig | null,
   })) as SavedMap[];
 }
 
@@ -538,6 +654,10 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
     config: sourceMap.config, // Already serialized
     is_published: false, // Duplicates start as unpublished
     thumbnail_url: sourceMap.thumbnail_url,
+    // Copy sculpture fields if present
+    product_type: sourceMap.product_type ?? 'poster',
+    sculpture_config: sourceMap.sculpture_config,
+    sculpture_thumbnail_url: sourceMap.sculpture_thumbnail_url,
   };
 
   const { data, error } = await (supabase as any)
@@ -561,6 +681,7 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
   return {
     ...data,
     config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 
@@ -598,6 +719,7 @@ export async function getMapById(id: string): Promise<SavedMap | null> {
   return {
     ...mapData,
     config: deserializeMapConfig(mapData.config),
+    sculpture_config: mapData.sculpture_config as SculptureConfig | null,
   } as SavedMap;
 }
 

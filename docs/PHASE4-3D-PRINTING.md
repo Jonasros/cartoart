@@ -1125,6 +1125,137 @@ import { Image, Box } from 'lucide-react';
 
 ---
 
+## Phase 4.6: Database & Social Integration (CRITICAL)
+
+**Goal**: Sculptures integrated with save/library/explore ecosystem
+
+### Database Schema Changes
+
+```sql
+-- Add product_type to maps table
+ALTER TABLE maps ADD COLUMN product_type TEXT DEFAULT 'poster' CHECK (product_type IN ('poster', 'sculpture'));
+
+-- Add sculpture_config JSONB field
+ALTER TABLE maps ADD COLUMN sculpture_config JSONB;
+
+-- Add 3D thumbnail URL (optional, for sculptures)
+ALTER TABLE maps ADD COLUMN sculpture_thumbnail_url TEXT;
+
+-- Index for filtering by product type
+CREATE INDEX idx_maps_product_type ON maps(product_type);
+```
+
+### TypeScript Type Updates
+
+```typescript
+// types/database.ts - Add to maps table
+maps: {
+  Row: {
+    // ... existing fields ...
+    product_type: 'poster' | 'sculpture';
+    sculpture_config: Json | null;
+    sculpture_thumbnail_url: string | null;
+  };
+  Insert: {
+    // ... existing fields ...
+    product_type?: 'poster' | 'sculpture';
+    sculpture_config?: Json | null;
+    sculpture_thumbnail_url?: string | null;
+  };
+  // ... Update type ...
+}
+
+// lib/actions/maps.ts - Update SavedMap interface
+export interface SavedMap {
+  // ... existing fields ...
+  product_type: 'poster' | 'sculpture';
+  sculpture_config: SculptureConfig | null;
+  sculpture_thumbnail_url: string | null;
+}
+```
+
+### Implementation Tasks
+
+- [ ] Run SQL migration to add columns
+- [ ] Update `types/database.ts` with new fields
+- [ ] Update `SavedMap` interface in `lib/actions/maps.ts`
+- [ ] Update `saveMap()` and `updateMap()` to accept sculpture config
+- [ ] Create `saveSculpture()` function or extend existing
+- [ ] Update `serializeMapConfig` / `deserializeMapConfig` for sculpture data
+- [ ] Generate 3D thumbnail from R3F canvas (WebGL screenshot)
+- [ ] Update `MyMapsList` to show poster/sculpture badges
+- [ ] Update feed to show sculptures with 3D indicator
+- [ ] Handle loading saved sculpture into editor (restore 3D mode + config)
+
+### Thumbnail Generation for Sculptures
+
+```typescript
+// lib/sculpture/thumbnailCapture.ts
+export async function captureSculptureThumbnail(
+  canvasRef: React.RefObject<HTMLCanvasElement>
+): Promise<Blob> {
+  // R3F Canvas has preserveDrawingBuffer: true
+  const canvas = canvasRef.current;
+  if (!canvas) throw new Error('Canvas not found');
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+    }, 'image/png', 0.9);
+  });
+}
+```
+
+### Saved Maps UI Updates
+
+```tsx
+// MyMapsList.tsx - Add product type badge
+<div className="relative">
+  {map.product_type === 'sculpture' && (
+    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+      <Box className="w-3 h-3" />
+      <span>3D</span>
+    </div>
+  )}
+  <Image src={map.product_type === 'sculpture'
+    ? (map.sculpture_thumbnail_url || map.thumbnail_url)
+    : map.thumbnail_url}
+  />
+</div>
+```
+
+### Feed/Explore Integration
+
+```tsx
+// FeedCard.tsx - Show 3D indicator
+{map.product_type === 'sculpture' && (
+  <div className="absolute bottom-2 left-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs px-2 py-1 rounded-full">
+    🧊 3D Sculpture
+  </div>
+)}
+```
+
+### Loading Saved Sculpture into Editor
+
+When user clicks "Edit" on a saved sculpture:
+
+1. Load the map config as usual
+2. Detect `product_type === 'sculpture'`
+3. Set `productMode` to 'sculpture'
+4. Restore `sculptureConfig` from saved data
+5. Show 3D preview with saved settings
+
+### Important UX Considerations
+
+1. **Saved maps show both types** - Users see all their creations in one place
+2. **Clear visual distinction** - 3D sculptures have emerald/teal badge
+3. **Edit preserves mode** - Opening a saved sculpture goes to 3D mode
+4. **Publish works the same** - Sculptures can be published to explore feed
+5. **GPX requirement** - Can't create sculpture without route data
+6. **Convert poster to sculpture** - If poster has GPX, offer "Make 3D" option
+
+---
+
 ## Open Questions
 
 1. **Self-fulfillment vs partner?** - Better margins with own printers, but higher complexity

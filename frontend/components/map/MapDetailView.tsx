@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MapPreview } from './MapPreview';
 import { TextOverlay } from './TextOverlay';
+import { SculpturePreview } from '@/components/sculpture';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
 import { getAspectRatioCSS } from '@/lib/styles/dimensions';
 import { VoteButtons } from '@/components/voting/VoteButtons';
@@ -12,10 +13,11 @@ import { CommentList } from '@/components/comments/CommentList';
 import { CommentForm } from '@/components/comments/CommentForm';
 import { Button } from '@/components/ui/control-components';
 import { FeedHeader } from '@/components/feed/FeedHeader';
-import { Edit, Copy, Loader2 } from 'lucide-react';
+import { Edit, Copy, Loader2, Printer, Image } from 'lucide-react';
 import { duplicateMap } from '@/lib/actions/maps';
 import type { SavedMap } from '@/lib/actions/maps';
 import type { Comment } from '@/lib/actions/comments';
+import { DEFAULT_SCULPTURE_CONFIG } from '@/types/sculpture';
 
 interface MapDetailViewProps {
   map: SavedMap;
@@ -51,6 +53,14 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
     setComments(comments.filter(c => c.id !== commentId));
   };
 
+  // Check if this is a sculpture product
+  const isSculpture = map.product_type === 'sculpture';
+
+  // Get sculpture config (from saved map or defaults)
+  const sculptureConfig = useMemo(() => {
+    return map.sculpture_config ?? DEFAULT_SCULPTURE_CONFIG;
+  }, [map.sculpture_config]);
+
   // Apply palette colors and visibility to the current map style
   const mapStyle = useMemo(() => {
     return applyPaletteToStyle(
@@ -70,6 +80,21 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
           {/* Map Preview */}
           <div className="space-y-4">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              {/* Product Type Badge */}
+              <div className="flex items-center gap-2 mb-3">
+                {isSculpture ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                    <Printer className="w-3.5 h-3.5" />
+                    3D Sculpture
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                    <Image className="w-3.5 h-3.5" />
+                    Poster
+                  </span>
+                )}
+              </div>
+
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {map.title}
               </h1>
@@ -78,39 +103,52 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                   {map.subtitle}
                 </p>
               )}
-              
+
               <div className="mb-6 flex items-center justify-center">
-                <div 
-                  className="relative shadow-2xl bg-white flex flex-col transition-all duration-300 ease-in-out ring-1 ring-black/5 w-full max-w-2xl"
-                  style={{ 
-                    aspectRatio: getAspectRatioCSS(map.config.format.aspectRatio, map.config.format.orientation),
-                    backgroundColor: map.config.palette.background,
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                    containerType: 'size',
-                  }}
-                >
-                  {/* The Map Window */}
-                  <div 
-                    className="absolute overflow-hidden min-h-0 min-w-0"
-                    style={{
-                      top: `${map.config.format.margin}cqw`,
-                      left: `${map.config.format.margin}cqw`,
-                      right: `${map.config.format.margin}cqw`,
-                      bottom: `${map.config.format.margin}cqw`,
-                      borderRadius: (map.config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
-                    }}
+                {isSculpture ? (
+                  /* 3D Sculpture Preview */
+                  <div
+                    className="relative w-full max-w-2xl rounded-lg overflow-hidden"
+                    style={{ aspectRatio: '1 / 1' }}
                   >
-                    <MapPreview
-                      mapStyle={mapStyle}
-                      location={map.config.location}
-                      format={map.config.format}
-                      showMarker={map.config.layers.marker}
-                      markerColor={map.config.layers.markerColor || map.config.palette.primary || map.config.palette.accent || map.config.palette.text}
-                      layers={map.config.layers}
-                      route={map.config.route}
-                      interactive={false}
+                    <SculpturePreview
+                      routeData={map.config.route?.data ?? null}
+                      config={sculptureConfig}
                     />
                   </div>
+                ) : (
+                  /* 2D Poster Preview */
+                  <div
+                    className="relative shadow-2xl bg-white flex flex-col transition-all duration-300 ease-in-out ring-1 ring-black/5 w-full max-w-2xl"
+                    style={{
+                      aspectRatio: getAspectRatioCSS(map.config.format.aspectRatio, map.config.format.orientation),
+                      backgroundColor: map.config.palette.background,
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                      containerType: 'size',
+                    }}
+                  >
+                    {/* The Map Window */}
+                    <div
+                      className="absolute overflow-hidden min-h-0 min-w-0"
+                      style={{
+                        top: `${map.config.format.margin}cqw`,
+                        left: `${map.config.format.margin}cqw`,
+                        right: `${map.config.format.margin}cqw`,
+                        bottom: `${map.config.format.margin}cqw`,
+                        borderRadius: (map.config.format.maskShape || 'rectangular') === 'circular' ? '50%' : '0',
+                      }}
+                    >
+                      <MapPreview
+                        mapStyle={mapStyle}
+                        location={map.config.location}
+                        format={map.config.format}
+                        showMarker={map.config.layers.marker}
+                        markerColor={map.config.layers.markerColor || map.config.palette.primary || map.config.palette.accent || map.config.palette.text}
+                        layers={map.config.layers}
+                        route={map.config.route}
+                        interactive={false}
+                      />
+                    </div>
                   
                   {/* Text Overlay */}
                   <TextOverlay config={map.config} />
@@ -233,7 +271,8 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                       )}
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between">

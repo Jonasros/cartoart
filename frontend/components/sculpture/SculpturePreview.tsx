@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, Grid } from '@react-three/drei';
 import type { RouteData } from '@/types/poster';
@@ -11,6 +11,13 @@ import { CircularBase } from './CircularBase';
 import { RectangularBase } from './RectangularBase';
 import { SimpleTextMesh } from './TextMesh';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
+
+/**
+ * Ref handle for SculpturePreview, exposing capture functionality
+ */
+export interface SculpturePreviewHandle {
+  captureCanvas: () => HTMLCanvasElement | null;
+}
 
 /**
  * Calculate the rotation angle needed to orient the route start point to the front.
@@ -176,67 +183,84 @@ function SculptureScene({
  *
  * Phase 4.1: Basic preview with terrain and route meshes.
  * Phase 4.2+: Will add materials, base platforms, and STL export.
+ *
+ * Exposes captureCanvas method via ref for thumbnail generation.
  */
-export function SculpturePreview({ routeData, config }: SculpturePreviewProps) {
-  return (
-    <div className="w-full h-full bg-neutral-900 rounded-lg overflow-hidden relative">
-      {/* Empty state overlay */}
-      {!routeData && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
-            <p className="text-white/80 text-sm font-medium">Upload a GPX route</p>
-            <p className="text-white/50 text-xs mt-1">to preview your 3D sculpture</p>
+export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePreviewProps>(
+  function SculpturePreview({ routeData, config }, ref) {
+    const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+    // Expose capture method via ref
+    const captureCanvas = useCallback((): HTMLCanvasElement | null => {
+      if (!canvasContainerRef.current) return null;
+      const canvas = canvasContainerRef.current.querySelector('canvas');
+      return canvas || null;
+    }, []);
+
+    useImperativeHandle(ref, () => ({
+      captureCanvas,
+    }), [captureCanvas]);
+
+    return (
+      <div ref={canvasContainerRef} className="w-full h-full bg-neutral-900 rounded-lg overflow-hidden relative">
+        {/* Empty state overlay */}
+        {!routeData && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+              <p className="text-white/80 text-sm font-medium">Upload a GPX route</p>
+              <p className="text-white/50 text-xs mt-1">to preview your 3D sculpture</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Canvas
-        camera={{ position: [3.5, 0.8, 3.5], fov: 45 }}
-        shadows
-        dpr={[1, 2]}
-        gl={{ preserveDrawingBuffer: true }}
-      >
-        <Suspense fallback={<LoadingFallback />}>
-          <Stage
-            adjustCamera={false}
-            environment="city"
-            intensity={0.5}
-            shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
-          >
-            {routeData ? (
-              <SculptureScene routeData={routeData} config={config} />
-            ) : (
-              <EmptyState />
-            )}
-          </Stage>
-        </Suspense>
+        <Canvas
+          camera={{ position: [3.5, 0.8, 3.5], fov: 45 }}
+          shadows
+          dpr={[1, 2]}
+          gl={{ preserveDrawingBuffer: true }}
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <Stage
+              adjustCamera={false}
+              environment="city"
+              intensity={0.5}
+              shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
+            >
+              {routeData ? (
+                <SculptureScene routeData={routeData} config={config} />
+              ) : (
+                <EmptyState />
+              )}
+            </Stage>
+          </Suspense>
 
-        {/* Camera controls - target center of sculpture, frontal view */}
-        <OrbitControls
-          makeDefault
-          target={[0, 0, 0]}
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          minDistance={2}
-          maxDistance={8}
-          minPolarAngle={Math.PI / 12}
-          maxPolarAngle={Math.PI / 1.8}
-        />
+          {/* Camera controls - target center of sculpture, frontal view */}
+          <OrbitControls
+            makeDefault
+            target={[0, 0, 0]}
+            enablePan={true}
+            enableZoom={true}
+            enableRotate={true}
+            minDistance={2}
+            maxDistance={8}
+            minPolarAngle={Math.PI / 12}
+            maxPolarAngle={Math.PI / 1.8}
+          />
 
-        {/* Reference grid */}
-        <Grid
-          infiniteGrid
-          fadeDistance={25}
-          fadeStrength={1}
-          cellSize={1}
-          cellThickness={0.5}
-          cellColor="#404040"
-          sectionSize={5}
-          sectionThickness={1}
-          sectionColor="#606060"
-        />
-      </Canvas>
-    </div>
-  );
-}
+          {/* Reference grid */}
+          <Grid
+            infiniteGrid
+            fadeDistance={25}
+            fadeStrength={1}
+            cellSize={1}
+            cellThickness={0.5}
+            cellColor="#404040"
+            sectionSize={5}
+            sectionThickness={1}
+            sectionColor="#606060"
+          />
+        </Canvas>
+      </div>
+    );
+  }
+);
