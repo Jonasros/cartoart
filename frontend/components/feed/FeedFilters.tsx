@@ -2,12 +2,13 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/control-components';
-import { Clock, TrendingUp, Calendar } from 'lucide-react';
-import type { TimeRange } from '@/lib/actions/feed';
+import { Clock, TrendingUp, Calendar, Box, ImageIcon } from 'lucide-react';
+import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
 
 interface FeedFiltersProps {
   currentSort: 'fresh' | 'top';
   currentTimeRange: TimeRange;
+  currentProductType: ProductTypeFilter;
 }
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
@@ -18,7 +19,7 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: 'year', label: 'This Year' },
 ];
 
-export function FeedFilters({ currentSort, currentTimeRange }: FeedFiltersProps) {
+export function FeedFilters({ currentSort, currentTimeRange, currentProductType }: FeedFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,6 +35,16 @@ export function FeedFilters({ currentSort, currentTimeRange }: FeedFiltersProps)
       params.delete('time');
     } else {
       params.set('time', range);
+    }
+    router.push(`/feed?${params.toString()}`);
+  };
+
+  const handleProductTypeChange = (type: ProductTypeFilter) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (type === 'all') {
+      params.delete('type');
+    } else {
+      params.set('type', type);
     }
     router.push(`/feed?${params.toString()}`);
   };
@@ -70,6 +81,31 @@ export function FeedFilters({ currentSort, currentTimeRange }: FeedFiltersProps)
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Product Type Filter */}
+      <div className="flex gap-2">
+        <Button
+          variant={currentProductType === 'all' ? 'default' : 'outline'}
+          onClick={() => handleProductTypeChange('all')}
+        >
+          All
+        </Button>
+        <Button
+          variant={currentProductType === 'poster' ? 'default' : 'outline'}
+          onClick={() => handleProductTypeChange('poster')}
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Posters
+        </Button>
+        <Button
+          variant={currentProductType === 'sculpture' ? 'default' : 'outline'}
+          onClick={() => handleProductTypeChange('sculpture')}
+          className={currentProductType === 'sculpture' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+        >
+          <Box className="w-4 h-4 mr-2" />
+          3D Sculptures
+        </Button>
       </div>
     </div>
   );

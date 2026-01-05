@@ -8,6 +8,7 @@ import { checkRateLimit } from '@/lib/middleware/rateLimit';
 import { RATE_LIMITS } from '@/lib/constants/limits';
 
 export type TimeRange = 'all' | 'today' | 'week' | 'month' | 'year';
+export type ProductTypeFilter = 'all' | 'poster' | 'sculpture';
 
 /**
  * Get date threshold for time range filter
@@ -85,7 +86,8 @@ export async function getFeed(
   sort: 'fresh' | 'top' = 'fresh',
   page: number = 0,
   limit: number = FEED_PAGE_SIZE,
-  timeRange: TimeRange = 'all'
+  timeRange: TimeRange = 'all',
+  productType: ProductTypeFilter = 'all'
 ): Promise<FeedMap[]> {
   const supabase = await createClient();
   
@@ -140,6 +142,11 @@ export async function getFeed(
       query = query.gte('published_at', timeRangeDate.toISOString());
     }
 
+    // Apply product type filter
+    if (productType !== 'all') {
+      query = query.eq('product_type', productType);
+    }
+
     // Apply sorting
     if (sort === 'fresh') {
       query = query.order('published_at', { ascending: false });
@@ -156,7 +163,7 @@ export async function getFeed(
       // Check if error is due to missing foreign key
       if (error.message?.includes('foreign key') || error.code === 'PGRST116' || error.message?.includes('relation')) {
         logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-        return getFeedFallback(supabase, sort, page, limit, timeRange);
+        return getFeedFallback(supabase, sort, page, limit, timeRange, productType);
       }
       logger.error('Failed to fetch feed:', { error, sort, page, limit });
       throw createError.databaseError(`Failed to fetch feed: ${error.message}`);
@@ -199,7 +206,7 @@ export async function getFeed(
     // If it's a foreign key error, try fallback
     if (error.message?.includes('foreign key') || error.code === 'PGRST116') {
       logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-      return getFeedFallback(supabase, sort, page, limit, timeRange);
+      return getFeedFallback(supabase, sort, page, limit, timeRange, productType);
     }
     throw error;
   }
@@ -214,7 +221,8 @@ async function getFeedFallback(
   sort: 'fresh' | 'top',
   page: number,
   limit: number,
-  timeRange: TimeRange = 'all'
+  timeRange: TimeRange = 'all',
+  productType: ProductTypeFilter = 'all'
 ): Promise<FeedMap[]> {
   // Calculate time range date threshold
   const timeRangeDate = getTimeRangeDate(timeRange);
@@ -229,6 +237,11 @@ async function getFeedFallback(
   // Apply time range filter
   if (timeRangeDate) {
     query = query.gte('published_at', timeRangeDate.toISOString());
+  }
+
+  // Apply product type filter
+  if (productType !== 'all') {
+    query = query.eq('product_type', productType);
   }
 
   if (sort === 'fresh') {

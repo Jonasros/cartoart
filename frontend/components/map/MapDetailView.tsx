@@ -13,7 +13,7 @@ import { CommentList } from '@/components/comments/CommentList';
 import { CommentForm } from '@/components/comments/CommentForm';
 import { Button } from '@/components/ui/control-components';
 import { FeedHeader } from '@/components/feed/FeedHeader';
-import { Edit, Copy, Loader2, Printer, Image } from 'lucide-react';
+import { Edit, Copy, Loader2, Box, Image } from 'lucide-react';
 import { duplicateMap } from '@/lib/actions/maps';
 import type { SavedMap } from '@/lib/actions/maps';
 import type { Comment } from '@/lib/actions/comments';
@@ -83,13 +83,13 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
               {/* Product Type Badge */}
               <div className="flex items-center gap-2 mb-3">
                 {isSculpture ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                    <Printer className="w-3.5 h-3.5" />
-                    3D Sculpture
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+                    <Box className="w-3 h-3" />
+                    3D
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                    <Image className="w-3.5 h-3.5" />
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+                    <Image className="w-3 h-3" />
                     Poster
                   </span>
                 )}

@@ -20,6 +20,7 @@ import type {
   SculptureMaterial,
   SculptureTextConfig,
   SculptureTerrainMode,
+  SculptureStylePreset,
 } from '@/types/sculpture';
 import {
   SCULPTURE_SIZES,
@@ -27,6 +28,7 @@ import {
   SCULPTURE_ROUTE_STYLES,
   SCULPTURE_MATERIALS,
   SCULPTURE_TERRAIN_MODES,
+  SCULPTURE_STYLE_PRESETS,
 } from '@/types/sculpture';
 
 interface SculptureControlsProps {
@@ -190,6 +192,47 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                   <div className="text-[9px] text-gray-500 mt-0.5">{description}</div>
                 </button>
               )
+            )}
+          </div>
+        </div>
+
+        {/* Style Presets */}
+        <div className="space-y-2 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Style Preset
+          </ControlLabel>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(Object.entries(SCULPTURE_STYLE_PRESETS) as [SculptureStylePreset, { label: string; description: string; config: typeof SCULPTURE_STYLE_PRESETS['balanced']['config'] }][]).map(
+              ([preset, { label, description, config: presetConfig }]) => {
+                // Check if current config matches this preset
+                const isActive =
+                  config.elevationScale === presetConfig.elevationScale &&
+                  (config.terrainHeightLimit ?? 0.8) === presetConfig.terrainHeightLimit &&
+                  (config.routeClearance ?? 0.05) === presetConfig.routeClearance &&
+                  (config.terrainSmoothing ?? 1) === presetConfig.terrainSmoothing &&
+                  config.terrainMode === presetConfig.terrainMode;
+
+                return (
+                  <button
+                    key={preset}
+                    onClick={() => onConfigChange(presetConfig)}
+                    title={description}
+                    className={cn(
+                      'px-2 py-1.5 text-center rounded-lg border transition-all',
+                      isActive
+                        ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-500'
+                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    )}
+                  >
+                    <div className={cn(
+                      'text-[10px] font-semibold',
+                      isActive ? 'text-violet-700 dark:text-violet-300' : 'text-gray-700 dark:text-gray-300'
+                    )}>
+                      {label}
+                    </div>
+                  </button>
+                );
+              }
             )}
           </div>
         </div>

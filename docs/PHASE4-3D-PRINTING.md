@@ -3,7 +3,51 @@
 > **Comprehensive Feature Specification**
 > Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-01-05
+
+---
+
+## Current Implementation Status
+
+### Completed Features (Phase 4.1-4.5)
+
+| Feature | Status | Location |
+|---------|--------|----------|
+| Mode toggle (Poster/Sculpture) | ✅ Complete | `ModeToggle.tsx` |
+| R3F Canvas integration | ✅ Complete | `SculpturePreview.tsx` |
+| Terrain mesh with height displacement | ✅ Complete | `TerrainMesh.tsx` |
+| Route tube geometry | ✅ Complete | `RouteMesh.tsx` |
+| Raised and engraved route styles | ✅ Complete | `TerrainMesh.tsx`, `RouteMesh.tsx` |
+| Base platform mesh | ✅ Complete | `BaseMesh.tsx` |
+| Rim/border mesh | ✅ Complete | `RimMesh.tsx` |
+| Engraved text | ✅ Complete | `EngravedText.tsx` |
+| Material presets (PLA, Wood, Resin) | ✅ Complete | `materials.ts` |
+| Full sculpture controls panel | ✅ Complete | `SculptureControls.tsx` |
+| Visual style presets | ✅ Complete | `SculptureStylePresets.tsx` |
+| Terrain behavior presets | ✅ Complete | `types/sculpture.ts` |
+| Terrain height limit | ✅ Complete | `TerrainMesh.tsx` |
+| Route clearance (visibility) | ✅ Complete | `TerrainMesh.tsx` |
+| Terrain smoothing | ✅ Complete | `TerrainMesh.tsx` |
+| Terrain mode (route/terrain) | ✅ Complete | `useElevationGrid.ts` |
+| Auto-rotation (start point to front) | ✅ Complete | `SculptureScene.tsx` |
+| API usage logging for terrain tiles | ✅ Complete | `/api/tiles/[...path]/route.ts` |
+| STL export | ✅ Complete | `lib/sculpture/stlExporter.ts` |
+| Mesh generator/optimization | ✅ Complete | `lib/sculpture/meshGenerator.ts` |
+| Sculpture export modal | ✅ Complete | `SculptureExportModal.tsx` |
+| Database save integration | ✅ Complete | `lib/actions/maps.ts` |
+| Sculpture thumbnail generation | ✅ Complete | `lib/export/sculptureThumbnail.ts` |
+| Feed MapCard shows sculpture badge | ✅ Complete | `components/feed/MapCard.tsx` |
+| Feed MapCard uses sculpture thumbnail | ✅ Complete | `components/feed/MapCard.tsx` |
+
+### Remaining Work
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| ExploreDrawer product type badges | Medium | Add poster/sculpture badge like MapCard |
+| ExploreDrawer sculpture thumbnails | Medium | Use `sculpture_thumbnail_url` for sculptures |
+| Fulfillment API integration | Low | Future: for ordering physical prints |
+
+**See Also**: [3D-SCULPTURE-GUIDE.md](./3D-SCULPTURE-GUIDE.md) for developer reference
 
 ---
 
@@ -928,34 +972,37 @@ export interface RouteBounds {
 
 ## Implementation Phases
 
-### Phase 4.1: Foundation (Week 1-2)
+### Phase 4.1: Foundation (Week 1-2) ✅ COMPLETE
 
 **Goal**: Basic mode switching and R3F integration
 
-- [ ] Add `@react-three/fiber` and `@react-three/drei` dependencies
-- [ ] Create `ModeToggle` component
-- [ ] Update `TabNavigation` with mode awareness
-- [ ] Create `SculpturePreview` component with basic R3F Canvas
-- [ ] Create `RouteMesh` component (TubeGeometry from route)
-- [ ] Add `sculpture` types to `types/poster.ts`
-- [ ] Basic OrbitControls for preview rotation
+- [x] Add `@react-three/fiber` and `@react-three/drei` dependencies
+- [x] Create `ModeToggle` component
+- [x] Update `TabNavigation` with mode awareness
+- [x] Create `SculpturePreview` component with basic R3F Canvas
+- [x] Create `RouteMesh` component (TubeGeometry from route)
+- [x] Create `TerrainMesh` component with height displacement
+- [x] Add `sculpture` types to `types/sculpture.ts`
+- [x] Basic OrbitControls for preview rotation
 
-**Deliverable**: Can switch modes and see route as 3D tube
+**Deliverable**: ✅ Can switch modes and see terrain + route as 3D model
 
-### Phase 4.2: Controls & Customization (Week 2-3)
+### Phase 4.2: Controls & Customization (Week 2-3) ✅ COMPLETE
 
 **Goal**: Full sculpture customization UI
 
-- [ ] Create `SculptureControls` drawer panel
-- [ ] Add base style selection (rectangular, circular, organic)
-- [ ] Add size selection with real dimensions
-- [ ] Add material preview with different looks
-- [ ] Add exaggeration slider (0.5x - 3.0x)
-- [ ] Add route tube radius control
-- [ ] Update `SculptureConfig` with all options
-- [ ] Persist sculpture config in saved maps
+- [x] Create `SculptureControls` drawer panel
+- [x] Add base style selection (rectangular, circular)
+- [x] Add size selection with real dimensions (10, 15, 20 cm)
+- [x] Add material preview with different looks (PLA, Wood, Resin)
+- [x] Add elevation scale slider (0.5x - 3.0x)
+- [x] Add route thickness control
+- [x] Add terrain settings (height limit, clearance, smoothing)
+- [x] Add style presets (visual + behavior)
+- [x] Update `SculptureConfig` with all options
+- [ ] Persist sculpture config in saved maps (deferred to Phase 4.6)
 
-**Deliverable**: Full control over sculpture appearance
+**Deliverable**: ✅ Full control over sculpture appearance
 
 ### Phase 4.3: Export & Preview (Week 3-4)
 

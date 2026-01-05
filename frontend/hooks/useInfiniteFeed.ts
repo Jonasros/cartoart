@@ -2,12 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFeed } from '@/lib/actions/feed';
-import type { FeedMap, TimeRange } from '@/lib/actions/feed';
+import type { FeedMap, TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
 
 const INITIAL_PAGE = 0;
 const PAGE_SIZE = 24;
 
-export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'all') {
+export function useInfiniteFeed(
+  sort: 'fresh' | 'top',
+  timeRange: TimeRange = 'all',
+  productType: ProductTypeFilter = 'all'
+) {
   const [maps, setMaps] = useState<FeedMap[]>([]);
   const [page, setPage] = useState(INITIAL_PAGE);
   const [hasMore, setHasMore] = useState(true);
@@ -17,6 +21,7 @@ export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'a
   const pageRef = useRef(INITIAL_PAGE);
   const sortRef = useRef(sort);
   const timeRangeRef = useRef(timeRange);
+  const productTypeRef = useRef(productType);
 
   // Update refs when values change
   useEffect(() => {
@@ -26,6 +31,10 @@ export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'a
   useEffect(() => {
     timeRangeRef.current = timeRange;
   }, [timeRange]);
+
+  useEffect(() => {
+    productTypeRef.current = productType;
+  }, [productType]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -37,7 +46,8 @@ export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'a
       const currentPage = pageRef.current;
       const currentSort = sortRef.current;
       const currentTimeRange = timeRangeRef.current;
-      const newMaps = await getFeed(currentSort, currentPage, PAGE_SIZE, currentTimeRange);
+      const currentProductType = productTypeRef.current;
+      const newMaps = await getFeed(currentSort, currentPage, PAGE_SIZE, currentTimeRange, currentProductType);
       
       if (newMaps.length === 0) {
         setHasMore(false);
@@ -75,7 +85,7 @@ export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'a
     setInitialLoading(true);
   }, []);
 
-  // Reset when sort or timeRange changes
+  // Reset when sort, timeRange, or productType changes
   useEffect(() => {
     setMaps([]);
     pageRef.current = INITIAL_PAGE;
@@ -83,7 +93,7 @@ export function useInfiniteFeed(sort: 'fresh' | 'top', timeRange: TimeRange = 'a
     setHasMore(true);
     setError(null);
     setInitialLoading(true);
-  }, [sort, timeRange]);
+  }, [sort, timeRange, productType]);
 
   // Load initial page
   useEffect(() => {

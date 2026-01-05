@@ -5,15 +5,16 @@ import { FeedFilters } from './FeedFilters';
 import { MapGrid } from './MapGrid';
 import { useInfiniteFeed } from '@/hooks/useInfiniteFeed';
 import { Loader2 } from 'lucide-react';
-import type { TimeRange } from '@/lib/actions/feed';
+import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
 
 interface FeedClientProps {
   initialSort: 'fresh' | 'top';
   initialTimeRange: TimeRange;
+  initialProductType: ProductTypeFilter;
 }
 
-export function FeedClient({ initialSort, initialTimeRange }: FeedClientProps) {
-  const { maps, loadMore, hasMore, loading, initialLoading, error } = useInfiniteFeed(initialSort, initialTimeRange);
+export function FeedClient({ initialSort, initialTimeRange, initialProductType }: FeedClientProps) {
+  const { maps, loadMore, hasMore, loading, initialLoading, error } = useInfiniteFeed(initialSort, initialTimeRange, initialProductType);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for infinite scroll
@@ -41,7 +42,7 @@ export function FeedClient({ initialSort, initialTimeRange }: FeedClientProps) {
 
   return (
     <>
-      <FeedFilters currentSort={initialSort} currentTimeRange={initialTimeRange} />
+      <FeedFilters currentSort={initialSort} currentTimeRange={initialTimeRange} currentProductType={initialProductType} />
       
       {error && (
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">

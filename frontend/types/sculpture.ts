@@ -171,3 +171,89 @@ export const SCULPTURE_TERRAIN_MODES: Record<
   route: { label: 'Route Only', description: 'Use route elevation data (fast)' },
   terrain: { label: 'Full Terrain', description: 'Fetch real terrain data (detailed)' },
 };
+
+/**
+ * Style preset identifier
+ */
+export type SculptureStylePreset = 'balanced' | 'dramatic' | 'subtle' | 'detailed' | 'smooth';
+
+/**
+ * Style preset configuration (partial config to apply)
+ */
+export interface StylePresetConfig {
+  elevationScale: number;
+  terrainHeightLimit: number;
+  routeClearance: number;
+  terrainSmoothing: number;
+  terrainMode: SculptureTerrainMode;
+  terrainResolution: number;
+}
+
+/**
+ * Style presets for different terrain looks and use cases
+ */
+export const SCULPTURE_STYLE_PRESETS: Record<
+  SculptureStylePreset,
+  { label: string; description: string; config: StylePresetConfig }
+> = {
+  balanced: {
+    label: 'Balanced',
+    description: 'Good for most routes',
+    config: {
+      elevationScale: 1.5,
+      terrainHeightLimit: 0.8,
+      routeClearance: 0.05,
+      terrainSmoothing: 1,
+      terrainMode: 'route',
+      terrainResolution: 128,
+    },
+  },
+  dramatic: {
+    label: 'Dramatic',
+    description: 'Bold elevation for mountain routes',
+    config: {
+      elevationScale: 2.5,
+      terrainHeightLimit: 1.0,
+      routeClearance: 0.08,
+      terrainSmoothing: 0,
+      terrainMode: 'terrain',
+      terrainResolution: 128,
+    },
+  },
+  subtle: {
+    label: 'Subtle',
+    description: 'Gentle terrain for flat routes',
+    config: {
+      elevationScale: 1.0,
+      terrainHeightLimit: 0.6,
+      routeClearance: 0.03,
+      terrainSmoothing: 2,
+      terrainMode: 'route',
+      terrainResolution: 96,
+    },
+  },
+  detailed: {
+    label: 'Detailed',
+    description: 'Maximum terrain detail',
+    config: {
+      elevationScale: 1.8,
+      terrainHeightLimit: 0.9,
+      routeClearance: 0.06,
+      terrainSmoothing: 1,
+      terrainMode: 'terrain',
+      terrainResolution: 192,
+    },
+  },
+  smooth: {
+    label: 'Smooth',
+    description: 'Gentle curves, polished look',
+    config: {
+      elevationScale: 1.2,
+      terrainHeightLimit: 0.7,
+      routeClearance: 0.05,
+      terrainSmoothing: 2,
+      terrainMode: 'route',
+      terrainResolution: 128,
+    },
+  },
+};

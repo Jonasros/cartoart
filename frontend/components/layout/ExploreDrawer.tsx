@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Compass, ExternalLink, Loader2, TrendingUp, Clock, Heart, MessageCircle } from 'lucide-react';
+import { X, Compass, ExternalLink, Loader2, TrendingUp, Clock, Heart, MessageCircle, Box, ImageIcon, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFeed } from '@/lib/actions/feed';
-import type { FeedMap } from '@/lib/actions/feed';
+import type { FeedMap, ProductTypeFilter } from '@/lib/actions/feed';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -18,6 +18,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
   const [maps, setMaps] = useState<FeedMap[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<'fresh' | 'top'>('top');
+  const [productType, setProductType] = useState<ProductTypeFilter>('all');
   const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -26,14 +27,14 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
     setMounted(true);
   }, []);
 
-  // Load maps when drawer opens or sort changes
+  // Load maps when drawer opens or sort/productType changes
   useEffect(() => {
     if (!isOpen) return;
 
     const loadMaps = async () => {
       setLoading(true);
       try {
-        const feedMaps = await getFeed(sort, 0, 12, 'all');
+        const feedMaps = await getFeed(sort, 0, 12, 'all', productType);
         setMaps(feedMaps);
       } catch (error) {
         console.error('Failed to load explore maps:', error);
@@ -43,7 +44,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
     };
 
     loadMaps();
-  }, [isOpen, sort]);
+  }, [isOpen, sort, productType]);
 
   // Close on escape key
   useEffect(() => {
@@ -120,6 +121,48 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
           </button>
         </div>
 
+        {/* Product Type Filter */}
+        <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <div className="flex gap-1 flex-1">
+            <button
+              onClick={() => setProductType('all')}
+              className={cn(
+                "flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
+                productType === 'all'
+                  ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                  : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setProductType('poster')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
+                productType === 'poster'
+                  ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                  : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              <ImageIcon className="w-3 h-3" />
+              Posters
+            </button>
+            <button
+              onClick={() => setProductType('sculpture')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
+                productType === 'sculpture'
+                  ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                  : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
+            >
+              <Box className="w-3 h-3" />
+              3D
+            </button>
+          </div>
+        </div>
+
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950">
           {loading ? (
@@ -169,6 +212,11 @@ interface ExploreCardProps {
 }
 
 function ExploreCard({ map, onClose }: ExploreCardProps) {
+  // Use sculpture thumbnail for sculptures, regular thumbnail for posters
+  const thumbnailUrl = map.product_type === 'sculpture'
+    ? map.sculpture_thumbnail_url
+    : map.thumbnail_url;
+
   return (
     <Link
       href={`/map/${map.id}`}
@@ -177,9 +225,9 @@ function ExploreCard({ map, onClose }: ExploreCardProps) {
     >
       {/* Thumbnail */}
       <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
-        {map.thumbnail_url ? (
+        {thumbnailUrl ? (
           <Image
-            src={map.thumbnail_url}
+            src={thumbnailUrl}
             alt={map.title}
             fill
             className="object-cover"
@@ -190,6 +238,21 @@ function ExploreCard({ map, onClose }: ExploreCardProps) {
             <Compass className="w-10 h-10 text-gray-300 dark:text-gray-600" />
           </div>
         )}
+
+        {/* Product Type Badge */}
+        <div className="absolute top-2 left-2 z-10">
+          {map.product_type === 'sculpture' ? (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+              <Box className="w-3 h-3" />
+              3D
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+              <ImageIcon className="w-3 h-3" />
+              Poster
+            </span>
+          )}
+        </div>
 
         {/* Stats badges */}
         <div className="absolute bottom-2 right-2 flex items-center gap-2">
