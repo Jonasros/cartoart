@@ -1,11 +1,21 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type MapLibreGL from 'maplibre-gl';
 import type { PosterConfig } from '@/types/poster';
 import { exportMapToPNG, downloadBlob } from '@/lib/export/exportCanvas';
 import { EXPORT_RESOLUTIONS, type ExportResolutionKey } from '@/lib/export/constants';
+import { generateShareThumbnail } from '@/lib/export/shareThumbnail';
 import { logger } from '@/lib/logger';
+
+export interface ExportResult {
+  /** The exported full-resolution blob */
+  blob: Blob;
+  /** Social-media-sized square thumbnail for sharing */
+  shareThumbnail: Blob | null;
+  /** Location/adventure name */
+  title: string;
+}
 
 /**
  * Hook for exporting the map as a high-resolution PNG image.
@@ -15,6 +25,8 @@ import { logger } from '@/lib/logger';
  * @returns Object containing:
  * - isExporting: Whether an export is currently in progress
  * - exportToPNG: Function to trigger PNG export with resolution key
+ * - lastExportResult: Result of the last successful export (for sharing)
+ * - clearLastExport: Clear the last export result
  * - setMapRef: Set the MapLibre map instance reference
  * - fitToLocation: Fit map to original location bounds
  * - zoomIn: Zoom in on the map
@@ -22,18 +34,23 @@ import { logger } from '@/lib/logger';
  *
  * @example
  * ```tsx
- * const { isExporting, exportToPNG, setMapRef } = useMapExport(config);
+ * const { isExporting, exportToPNG, lastExportResult, setMapRef } = useMapExport(config);
  * <MapPreview onMapLoad={setMapRef} />
  * <button onClick={() => exportToPNG('MEDIUM')} disabled={isExporting}>Export</button>
  * ```
  */
 export function useMapExport(config: PosterConfig) {
   const [isExporting, setIsExporting] = useState(false);
+  const [lastExportResult, setLastExportResult] = useState<ExportResult | null>(null);
   const mapRef = useRef<MapLibreGL.Map | null>(null);
 
   const setMapRef = (map: MapLibreGL.Map | null) => {
     mapRef.current = map;
   };
+
+  const clearLastExport = useCallback(() => {
+    setLastExportResult(null);
+  }, []);
 
   const exportToPNG = async (resolutionKey: ExportResolutionKey = 'SMALL', filename?: string) => {
     if (!mapRef.current) {
@@ -41,6 +58,7 @@ export function useMapExport(config: PosterConfig) {
     }
 
     const resolution = EXPORT_RESOLUTIONS[resolutionKey];
+    const title = (config.location.name || 'My Adventure').toString();
 
     setIsExporting(true);
     try {
@@ -50,8 +68,28 @@ export function useMapExport(config: PosterConfig) {
         resolution,
       });
 
-      const exportFilename = filename || `${(config.location.name || 'poster').toString().replace(/[^a-z0-9]/gi, '-').toLowerCase()}-poster.png`;
+      // Download the full-resolution image
+      const exportFilename = filename || `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-adventure-print.png`;
       downloadBlob(blob, exportFilename);
+
+      // Generate a share-optimized thumbnail (1080x1080 square)
+      let shareThumbnail: Blob | null = null;
+      try {
+        shareThumbnail = await generateShareThumbnail(blob, {
+          title,
+          addWatermark: true,
+        });
+      } catch (thumbError) {
+        logger.warn('Failed to generate share thumbnail:', thumbError);
+        // Continue without share thumbnail
+      }
+
+      // Store the result for sharing
+      setLastExportResult({
+        blob,
+        shareThumbnail,
+        title,
+      });
     } catch (error) {
       logger.error('Export failed:', error);
       throw error;
@@ -82,7 +120,10 @@ export function useMapExport(config: PosterConfig) {
   return {
     isExporting,
     exportToPNG,
+    lastExportResult,
+    clearLastExport,
     setMapRef,
+    mapRef,
     fitToLocation,
     zoomIn,
     zoomOut,

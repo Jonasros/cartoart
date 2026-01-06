@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 
 interface WaymarkerLogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
   showText?: boolean;
 }
@@ -15,12 +15,14 @@ interface WaymarkerLogoProps {
  */
 export function WaymarkerLogo({ size = 'md', className, showText = false }: WaymarkerLogoProps) {
   const sizeClasses = {
+    xs: 'w-4 h-4',
     sm: 'w-6 h-6',
     md: 'w-8 h-8',
     lg: 'w-10 h-10',
   };
 
   const textSizeClasses = {
+    xs: 'text-xs',
     sm: 'text-base',
     md: 'text-xl',
     lg: 'text-2xl',

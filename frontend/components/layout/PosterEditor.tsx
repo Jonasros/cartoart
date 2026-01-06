@@ -26,7 +26,7 @@ import { ErrorToastContainer } from '@/components/ui/ErrorToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import Link from 'next/link';
 import type MapLibreGL from 'maplibre-gl';
-import { getMapById } from '@/lib/actions/maps';
+import { getMapById, publishMap } from '@/lib/actions/maps';
 import { isConfigEqual, cloneConfig } from '@/lib/utils/configComparison';
 import type { SavedProject, PosterConfig } from '@/types/poster';
 import { generateThumbnail } from '@/lib/export/thumbnail';
@@ -88,14 +88,38 @@ export function PosterEditor() {
     hasUnsavedChanges: boolean;
   } | null>(null);
 
-  const { isExporting, exportToPNG, setMapRef, fitToLocation, zoomIn, zoomOut } = useMapExport(config);
+  const { isExporting, exportToPNG, lastExportResult, clearLastExport, setMapRef, fitToLocation, zoomIn, zoomOut } = useMapExport(config);
 
   // Keep a reference to the map instance for thumbnail generation
   const mapInstanceRef = useRef<MapLibreGL.Map | null>(null);
 
   // Reference to sculpture preview for thumbnail capture
   const sculpturePreviewRef = useRef<SculpturePreviewHandle>(null);
-  
+
+  // Sculpture thumbnail for sharing
+  const [sculptureThumbnail, setSculptureThumbnail] = useState<Blob | null>(null);
+
+  // Capture sculpture thumbnail when in sculpture mode (for share modal)
+  useEffect(() => {
+    if (productMode === 'sculpture' && sculpturePreviewRef.current) {
+      // Small delay to ensure render is complete
+      const captureTimeout = setTimeout(async () => {
+        try {
+          const canvas = sculpturePreviewRef.current?.captureCanvas();
+          if (canvas) {
+            const blob = await captureSculptureThumbnail(canvas);
+            setSculptureThumbnail(blob);
+          }
+        } catch (error) {
+          console.error('Failed to capture sculpture thumbnail:', error);
+        }
+      }, 500);
+      return () => clearTimeout(captureTimeout);
+    } else {
+      setSculptureThumbnail(null);
+    }
+  }, [productMode, sculptureConfig, config.route?.data]);
+
   // Wrap exportToPNG to handle errors
   const handleExport = useCallback(async (resolutionKey: import('@/lib/export/constants').ExportResolutionKey) => {
     try {
@@ -237,6 +261,22 @@ export function PosterEditor() {
     }
   }, [currentMapId, isAuthenticated]);
 
+  // Handle publishing from share modal
+  const handlePublishFromShareModal = useCallback(async () => {
+    if (!currentMapId || !isAuthenticated) {
+      throw new Error('Must save map first before publishing');
+    }
+
+    try {
+      await publishMap(currentMapId);
+      // Refresh map status after publishing
+      await handlePublishSuccess();
+    } catch (error) {
+      handleError(error);
+      throw error;
+    }
+  }, [currentMapId, isAuthenticated, handlePublishSuccess, handleError]);
+
   // Detect unsaved changes
   useEffect(() => {
     if (currentMapId && originalConfig) {
@@ -353,6 +393,13 @@ export function PosterEditor() {
             routeData={config.route?.data}
             elevationGrid={elevationGrid ?? undefined}
             routeName={config.route?.data?.name || config.location?.name}
+            sculptureThumbnail={sculptureThumbnail}
+            lastExportResult={lastExportResult}
+            onClearExport={clearLastExport}
+            isAuthenticated={isAuthenticated}
+            isPublished={currentMapStatus?.isPublished}
+            isSaved={!!currentMapId}
+            onPublish={currentMapId ? handlePublishFromShareModal : undefined}
           />
         </div>
       </div>
@@ -459,6 +506,13 @@ export function PosterEditor() {
             routeData={config.route?.data}
             elevationGrid={elevationGrid ?? undefined}
             routeName={config.route?.data?.name || config.location?.name}
+            sculptureThumbnail={sculptureThumbnail}
+            lastExportResult={lastExportResult}
+            onClearExport={clearLastExport}
+            isAuthenticated={isAuthenticated}
+            isPublished={currentMapStatus?.isPublished}
+            isSaved={!!currentMapId}
+            onPublish={currentMapId ? handlePublishFromShareModal : undefined}
           />
         </div>
 

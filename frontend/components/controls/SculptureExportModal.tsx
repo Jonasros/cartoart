@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { X, Download, Loader2, Box, Ruler, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RouteData } from '@/types/poster';
@@ -12,6 +12,8 @@ import {
   generateFilename,
   calculatePrintDimensions,
 } from '@/lib/sculpture';
+import { ShareModal } from './ShareModal';
+import { generateShareThumbnail } from '@/lib/export/shareThumbnail';
 
 interface SculptureExportModalProps {
   isOpen: boolean;
@@ -20,6 +22,12 @@ interface SculptureExportModalProps {
   config: SculptureConfig;
   elevationGrid?: number[][];
   routeName?: string;
+  // Share modal props
+  sculptureThumbnail?: Blob | null;
+  isAuthenticated?: boolean;
+  isPublished?: boolean;
+  isSaved?: boolean;
+  onPublish?: () => Promise<void>;
 }
 
 export function SculptureExportModal({
@@ -29,6 +37,11 @@ export function SculptureExportModal({
   config,
   elevationGrid,
   routeName,
+  sculptureThumbnail,
+  isAuthenticated = false,
+  isPublished = false,
+  isSaved = false,
+  onPublish,
 }: SculptureExportModalProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -37,6 +50,20 @@ export function SculptureExportModal({
     triangles: number;
     fileSize: number;
   } | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareThumbnail, setShareThumbnail] = useState<Blob | null>(null);
+
+  // Generate share thumbnail when export is successful and we have a source thumbnail
+  useEffect(() => {
+    if (exportStats && sculptureThumbnail) {
+      generateShareThumbnail(sculptureThumbnail, {
+        title: routeName,
+        addWatermark: true,
+      })
+        .then(setShareThumbnail)
+        .catch(console.error);
+    }
+  }, [exportStats, sculptureThumbnail, routeName]);
 
   const handleExport = useCallback(async () => {
     if (!routeData) {
@@ -95,6 +122,8 @@ export function SculptureExportModal({
           triangles: result.stats?.triangles ?? 0,
           fileSize: result.fileSize ?? 0,
         });
+        // Show share modal after successful export
+        setShowShareModal(true);
       } else {
         setExportError(result.error ?? 'Export failed');
       }
@@ -288,6 +317,22 @@ export function SculptureExportModal({
           </p>
         </div>
       </div>
+
+      {/* Share Modal - shown after successful export */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => {
+          setShowShareModal(false);
+          setShareThumbnail(null);
+        }}
+        imageBlob={shareThumbnail || sculptureThumbnail}
+        title={routeName}
+        type="sculpture"
+        isAuthenticated={isAuthenticated}
+        isPublished={isPublished}
+        isSaved={isSaved}
+        onPublish={onPublish}
+      />
     </div>
   );
 }

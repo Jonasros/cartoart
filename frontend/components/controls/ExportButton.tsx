@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { Download, Loader2, Box } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { KofiTipModal } from './KofiTipModal';
+import { ShareModal } from './ShareModal';
 import { ExportOptionsModal } from './ExportOptionsModal';
 import { SculptureExportModal } from './SculptureExportModal';
 import type { ExportResolutionKey } from '@/lib/export/constants';
 import type { PosterConfig, RouteData } from '@/types/poster';
 import type { SculptureConfig, ProductMode } from '@/types/sculpture';
+import type { ExportResult } from '@/hooks/useMapExport';
 
 interface ExportButtonProps {
   onExport: (resolutionKey: ExportResolutionKey) => void;
@@ -20,6 +21,14 @@ interface ExportButtonProps {
   routeData?: RouteData | null;
   elevationGrid?: number[][];
   routeName?: string;
+  sculptureThumbnail?: Blob | null;
+  // Share modal props
+  lastExportResult?: ExportResult | null;
+  onClearExport?: () => void;
+  isAuthenticated?: boolean;
+  isPublished?: boolean;
+  isSaved?: boolean;
+  onPublish?: () => Promise<void>;
 }
 
 export function ExportButton({
@@ -31,10 +40,17 @@ export function ExportButton({
   routeData,
   elevationGrid,
   routeName,
+  sculptureThumbnail,
+  lastExportResult,
+  onClearExport,
+  isAuthenticated = false,
+  isPublished = false,
+  isSaved = false,
+  onPublish,
 }: ExportButtonProps) {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSculptureModal, setShowSculptureModal] = useState(false);
-  const [showTipModal, setShowTipModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const isSculptureMode = productMode === 'sculpture';
 
@@ -49,8 +65,8 @@ export function ExportButton({
   const handleExport = (resolutionKey: ExportResolutionKey) => {
     onExport(resolutionKey);
     setShowExportModal(false);
-    // Show tip modal after export starts
-    setShowTipModal(true);
+    // Show share modal after export starts (it will display when lastExportResult is ready)
+    setShowShareModal(true);
   };
 
   const handleCloseExportModal = () => {
@@ -61,8 +77,9 @@ export function ExportButton({
     setShowSculptureModal(false);
   };
 
-  const handleCloseTipModal = () => {
-    setShowTipModal(false);
+  const handleCloseShareModal = () => {
+    setShowShareModal(false);
+    onClearExport?.();
   };
 
   // Sculpture mode: disable if no route data
@@ -128,12 +145,25 @@ export function ExportButton({
           config={sculptureConfig}
           elevationGrid={elevationGrid}
           routeName={routeName}
+          sculptureThumbnail={sculptureThumbnail}
+          isAuthenticated={isAuthenticated}
+          isPublished={isPublished}
+          isSaved={isSaved}
+          onPublish={onPublish}
         />
       )}
 
-      <KofiTipModal
-        isOpen={showTipModal}
-        onClose={handleCloseTipModal}
+      {/* Share Modal - shown after export completes */}
+      <ShareModal
+        isOpen={showShareModal && !!lastExportResult}
+        onClose={handleCloseShareModal}
+        imageBlob={lastExportResult?.shareThumbnail || lastExportResult?.blob}
+        title={lastExportResult?.title}
+        type="poster"
+        isAuthenticated={isAuthenticated}
+        isPublished={isPublished}
+        isSaved={isSaved}
+        onPublish={onPublish}
       />
     </>
   );
