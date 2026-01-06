@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { usePosterConfig } from '@/hooks/usePosterConfig';
 import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
@@ -35,10 +35,12 @@ import { DEFAULT_CONFIG } from '@/lib/config/defaults';
 export function PosterEditor() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>('location');
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [productMode, setProductMode] = useState<ProductMode>('poster');
+  const [isLoadingMap, setIsLoadingMap] = useState(false);
 
   // Sculpture configuration (separate from poster config)
   const {
@@ -172,6 +174,43 @@ export function PosterEditor() {
       hasUnsavedChanges: false
     });
   }, [setConfig, isAuthenticated, updateSculptureConfig]);
+
+  // Load map from URL param on mount (for edit/duplicate links)
+  useEffect(() => {
+    const mapId = searchParams.get('mapId');
+    if (!mapId || currentMapId === mapId || isLoadingMap) return;
+
+    const loadMapFromUrl = async () => {
+      setIsLoadingMap(true);
+      try {
+        const map = await getMapById(mapId);
+        if (map) {
+          // Create a SavedProject-like object to load
+          const projectToLoad: SavedProject = {
+            id: map.id,
+            name: map.title,
+            config: map.config,
+            updatedAt: new Date(map.updated_at).getTime(),
+            productType: map.product_type,
+            sculptureConfig: map.sculpture_config ?? undefined,
+          };
+          await handleLoadProject(projectToLoad);
+
+          // Clear the mapId from URL to prevent reloading
+          const params = new URLSearchParams(searchParams.toString());
+          params.delete('mapId');
+          const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+          router.replace(newUrl, { scroll: false });
+        }
+      } catch (error) {
+        console.error('Failed to load map from URL:', error);
+      } finally {
+        setIsLoadingMap(false);
+      }
+    };
+
+    loadMapFromUrl();
+  }, [searchParams, pathname, router, handleLoadProject, currentMapId, isLoadingMap]);
 
   // Handle saving a project (wraps saveProject to track currentMapId)
   const handleSaveProject = useCallback(async (name: string, posterConfig: PosterConfig) => {

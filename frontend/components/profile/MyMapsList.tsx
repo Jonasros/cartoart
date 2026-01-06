@@ -165,7 +165,7 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
                 </>
               ) : (
                 <>
-                  <Link href="/" className="flex-1">
+                  <Link href={`/?mapId=${map.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit

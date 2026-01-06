@@ -34,9 +34,9 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
   const handleDuplicate = async () => {
     setIsDuplicating(true);
     try {
-      await duplicateMap(map.id);
-      // Redirect to profile where they can see and edit their new copy
-      router.push('/profile');
+      const newMap = await duplicateMap(map.id);
+      // Redirect directly to editor with the new map loaded
+      router.push(`/?mapId=${newMap.id}`);
     } catch (error) {
       console.error('Failed to duplicate map:', error);
       alert('Failed to duplicate map. Please try again.');
@@ -281,7 +281,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                 </div>
 
                 {isOwner ? (
-                  <Link href="/profile">
+                  <Link href={`/?mapId=${map.id}`}>
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
