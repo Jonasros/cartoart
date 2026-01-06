@@ -30,6 +30,9 @@ export interface SavedMap {
   product_type: ProductMode;
   sculpture_config: SculptureConfig | null;
   sculpture_thumbnail_url: string | null;
+  // Remix tracking fields (Phase 8)
+  remixed_from_id: string | null;
+  remix_count: number;
 }
 
 // Alias for backward compatibility
@@ -614,8 +617,9 @@ export async function getUserMaps(): Promise<SavedMap[]> {
 }
 
 /**
- * Duplicate a map to the current user's library
+ * Remix a map to the current user's library
  * This allows users to copy someone else's published map and make it their own
+ * Tracks lineage by storing the original map ID
  */
 export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
   const supabase = await createClient();
@@ -626,7 +630,7 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    throw createError.authRequired('You must be signed in to duplicate maps');
+    throw createError.authRequired('You must be signed in to remix adventures');
   }
 
   // Fetch the source map
@@ -640,24 +644,29 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
     throw createError.notFound('Map');
   }
 
-  // Check if the source map is published (anyone can duplicate published maps)
-  // Or if the user owns it (can duplicate their own maps)
+  // Check if the source map is published (anyone can remix published maps)
+  // Or if the user owns it (can remix their own maps)
   if (!sourceMap.is_published && sourceMap.user_id !== user.id) {
-    throw createError.permissionDenied('You can only duplicate published maps');
+    throw createError.permissionDenied('You can only remix published adventures');
   }
+
+  // Determine if this is a remix from another user or self-copy
+  const isRemixFromOther = sourceMap.user_id !== user.id;
 
   // Create a new map with the same config but owned by the current user
   const insertData: Database['public']['Tables']['maps']['Insert'] = {
     user_id: user.id,
-    title: `${sourceMap.title} (Copy)`,
+    title: isRemixFromOther ? `${sourceMap.title} (Remix)` : `${sourceMap.title} (Copy)`,
     subtitle: sourceMap.subtitle,
     config: sourceMap.config, // Already serialized
-    is_published: false, // Duplicates start as unpublished
+    is_published: false, // Remixes start as unpublished
     thumbnail_url: sourceMap.thumbnail_url,
     // Copy sculpture fields if present
     product_type: sourceMap.product_type ?? 'poster',
     sculpture_config: sourceMap.sculpture_config,
     sculpture_thumbnail_url: sourceMap.sculpture_thumbnail_url,
+    // Track lineage - only set remixed_from_id if remixing from another user
+    remixed_from_id: isRemixFromOther ? sourceMapId : null,
   };
 
   const { data, error } = await (supabase as any)
@@ -667,17 +676,20 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
     .single();
 
   if (error) {
-    logger.error('Failed to duplicate map:', { error, sourceMapId, userId: user.id });
-    throw createError.databaseError(`Failed to duplicate map: ${error.message}`);
+    logger.error('Failed to remix map:', { error, sourceMapId, userId: user.id });
+    throw createError.databaseError(`Failed to remix adventure: ${error.message}`);
   }
 
-  logger.info('Map duplicated successfully', {
+  logger.info('Map remixed successfully', {
     sourceMapId,
     newMapId: data.id,
-    userId: user.id
+    userId: user.id,
+    isRemix: isRemixFromOther
   });
 
   revalidatePath('/profile');
+  revalidatePath('/feed');
+  revalidatePath(`/map/${sourceMapId}`);
   return {
     ...data,
     config: deserializeMapConfig(data.config),

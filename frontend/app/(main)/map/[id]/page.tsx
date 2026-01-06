@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getMapById } from '@/lib/actions/maps';
@@ -10,16 +11,93 @@ interface MapDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+// Generate dynamic metadata for social sharing
+export async function generateMetadata({ params }: MapDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  const supabase = await createClient();
+
+  const { data: mapData } = await supabase
+    .from('maps')
+    .select(`
+      id,
+      title,
+      subtitle,
+      thumbnail_url,
+      sculpture_thumbnail_url,
+      product_type,
+      profiles!maps_user_id_fkey (
+        username,
+        display_name
+      )
+    `)
+    .eq('id', id)
+    .eq('is_published', true)
+    .single();
+
+  if (!mapData) {
+    return {
+      title: 'Map Not Found | Waymarker',
+    };
+  }
+
+  // Type assertion for the map data with profiles
+  const map = mapData as {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    thumbnail_url: string | null;
+    sculpture_thumbnail_url: string | null;
+    product_type: 'poster' | 'sculpture';
+    profiles: { username: string; display_name: string | null };
+  };
+
+  const author = map.profiles;
+  const authorName = author.display_name || author.username;
+  const productType = map.product_type === 'sculpture' ? 'Journey Sculpture' : 'Adventure Print';
+  const description = map.subtitle
+    ? `${map.subtitle} - A ${productType} by ${authorName}`
+    : `A ${productType} by ${authorName} on Waymarker`;
+
+  // Use the OG image API route
+  const ogImageUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://waymarker.eu'}/api/og/map/${id}`;
+
+  return {
+    title: `${map.title} | Waymarker`,
+    description,
+    openGraph: {
+      title: map.title,
+      description,
+      type: 'article',
+      siteName: 'Waymarker',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: map.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: map.title,
+      description,
+      images: [ogImageUrl],
+    },
+  };
+}
+
 export default async function MapDetailPage({ params }: MapDetailPageProps) {
   const { id } = await params;
   const supabase = await createClient();
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const map = await getMapById(id);
-  
+
   if (!map) {
     notFound();
   }
@@ -43,4 +121,3 @@ export default async function MapDetailPage({ params }: MapDetailPageProps) {
     />
   );
 }
-

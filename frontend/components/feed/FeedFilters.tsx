@@ -2,11 +2,11 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/control-components';
-import { Clock, TrendingUp, Calendar, Box, ImageIcon } from 'lucide-react';
-import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
+import { Clock, Heart, MessageCircle, Calendar, Box, ImageIcon } from 'lucide-react';
+import type { TimeRange, ProductTypeFilter, SortOption } from '@/lib/actions/feed';
 
 interface FeedFiltersProps {
-  currentSort: 'fresh' | 'top';
+  currentSort: SortOption;
   currentTimeRange: TimeRange;
   currentProductType: ProductTypeFilter;
 }
@@ -23,7 +23,7 @@ export function FeedFilters({ currentSort, currentTimeRange, currentProductType 
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleSortChange = (sort: 'fresh' | 'top') => {
+  const handleSortChange = (sort: SortOption) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('sort', sort);
     router.push(`/feed?${params.toString()}`);
@@ -55,16 +55,26 @@ export function FeedFilters({ currentSort, currentTimeRange, currentProductType 
         <Button
           variant={currentSort === 'fresh' ? 'default' : 'outline'}
           onClick={() => handleSortChange('fresh')}
+          title="Sort by newest first"
         >
           <Clock className="w-4 h-4 mr-2" />
-          Fresh
+          Newest
         </Button>
         <Button
           variant={currentSort === 'top' ? 'default' : 'outline'}
           onClick={() => handleSortChange('top')}
+          title="Sort by most likes"
         >
-          <TrendingUp className="w-4 h-4 mr-2" />
-          Top
+          <Heart className="w-4 h-4 mr-2" />
+          Most Liked
+        </Button>
+        <Button
+          variant={currentSort === 'discussed' ? 'default' : 'outline'}
+          onClick={() => handleSortChange('discussed')}
+          title="Sort by most comments"
+        >
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Most Discussed
         </Button>
       </div>
 

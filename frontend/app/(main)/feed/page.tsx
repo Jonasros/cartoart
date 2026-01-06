@@ -1,6 +1,6 @@
 import { FeedClient } from '@/components/feed/FeedClient';
 import { FeedHeader } from '@/components/feed/FeedHeader';
-import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
+import type { TimeRange, ProductTypeFilter, SortOption } from '@/lib/actions/feed';
 
 export const metadata = {
   title: 'Explore Adventures | Waymarker',
@@ -8,15 +8,18 @@ export const metadata = {
 };
 
 interface FeedPageProps {
-  searchParams: Promise<{ sort?: 'fresh' | 'top'; time?: TimeRange; type?: ProductTypeFilter }>;
+  searchParams: Promise<{ sort?: SortOption; time?: TimeRange; type?: ProductTypeFilter }>;
 }
 
+const VALID_SORT_OPTIONS: SortOption[] = ['fresh', 'top', 'discussed'];
 const VALID_TIME_RANGES: TimeRange[] = ['all', 'today', 'week', 'month', 'year'];
 const VALID_PRODUCT_TYPES: ProductTypeFilter[] = ['all', 'poster', 'sculpture'];
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
   const params = await searchParams;
-  const sort = (params.sort || 'fresh') as 'fresh' | 'top';
+  const sort: SortOption = VALID_SORT_OPTIONS.includes(params.sort as SortOption)
+    ? (params.sort as SortOption)
+    : 'fresh';
   const timeRange: TimeRange = VALID_TIME_RANGES.includes(params.time as TimeRange)
     ? (params.time as TimeRange)
     : 'all';

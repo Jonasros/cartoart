@@ -12,8 +12,9 @@ import { VoteButtons } from '@/components/voting/VoteButtons';
 import { CommentList } from '@/components/comments/CommentList';
 import { CommentForm } from '@/components/comments/CommentForm';
 import { Button } from '@/components/ui/control-components';
-import { FeedHeader } from '@/components/feed/FeedHeader';
-import { Edit, Copy, Loader2, Box, Image } from 'lucide-react';
+import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
+import { ShareButton } from '@/components/social';
+import { Edit, Sparkles, Loader2, Box, Image } from 'lucide-react';
 import { duplicateMap } from '@/lib/actions/maps';
 import type { SavedMap } from '@/lib/actions/maps';
 import type { Comment } from '@/lib/actions/comments';
@@ -73,7 +74,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <FeedHeader />
+      <UnifiedHeader variant="detail" mapTitle={map.title} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -278,6 +279,17 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <VoteButtons mapId={map.id} initialVote={userVote} initialScore={map.vote_score} />
+                  <ShareButton
+                    map={{
+                      id: map.id,
+                      title: map.title,
+                      subtitle: map.subtitle || undefined,
+                      thumbnail_url: isSculpture ? map.sculpture_thumbnail_url : map.thumbnail_url,
+                    }}
+                    variant="ghost"
+                    size="md"
+                    showLabel
+                  />
                 </div>
 
                 {isOwner ? (
@@ -293,16 +305,17 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                     size="sm"
                     onClick={handleDuplicate}
                     disabled={isDuplicating}
+                    className="border-accent/50 text-accent hover:bg-accent/10 hover:border-accent"
                   >
                     {isDuplicating ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Duplicating...
+                        Remixing...
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4 mr-2" />
-                        Duplicate to My Library
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Remix This Adventure
                       </>
                     )}
                   </Button>

@@ -5,10 +5,10 @@ import { FeedFilters } from './FeedFilters';
 import { MapGrid } from './MapGrid';
 import { useInfiniteFeed } from '@/hooks/useInfiniteFeed';
 import { Loader2 } from 'lucide-react';
-import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
+import type { TimeRange, ProductTypeFilter, SortOption } from '@/lib/actions/feed';
 
 interface FeedClientProps {
-  initialSort: 'fresh' | 'top';
+  initialSort: SortOption;
   initialTimeRange: TimeRange;
   initialProductType: ProductTypeFilter;
 }

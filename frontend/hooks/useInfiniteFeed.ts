@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFeed } from '@/lib/actions/feed';
-import type { FeedMap, TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
+import type { FeedMap, TimeRange, ProductTypeFilter, SortOption } from '@/lib/actions/feed';
 
 const INITIAL_PAGE = 0;
 const PAGE_SIZE = 24;
 
 export function useInfiniteFeed(
-  sort: 'fresh' | 'top',
+  sort: SortOption,
   timeRange: TimeRange = 'all',
   productType: ProductTypeFilter = 'all'
 ) {

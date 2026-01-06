@@ -317,3 +317,100 @@ div[id*="kofi"] {
   );
   background-size: 200% 100%;
 }
+
+/* ===== Like Button Animations ===== */
+
+/* Heart pop animation on like */
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.35);
+  }
+  30% {
+    transform: scale(0.9);
+  }
+  45% {
+    transform: scale(1.15);
+  }
+  60% {
+    transform: scale(0.95);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heart-pop {
+  animation: heart-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Ring burst effect */
+@keyframes like-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+.animate-like-ring {
+  animation: like-ring 0.4s ease-out forwards;
+}
+
+/* Particle burst */
+@keyframes like-particle {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--particle-x), var(--particle-y)) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-like-particle {
+  animation: like-particle 0.5s ease-out forwards;
+}
+
+/* Floating hearts */
+@keyframes float-heart {
+  0% {
+    transform: translateY(0) scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-5px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-float-heart {
+  animation: float-heart 0.8s ease-out forwards;
+}
+
+/* Score increment animation */
+@keyframes score-bump {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-score-bump {
+  animation: score-bump 0.3s ease-out;
+}

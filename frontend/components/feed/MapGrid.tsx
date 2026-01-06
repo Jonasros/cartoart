@@ -34,7 +34,7 @@ export function MapGrid({ maps }: MapGridProps) {
       columnClassName="my-masonry-grid_column"
     >
       {maps.map((map) => (
-        <MapCard key={map.id} map={map} />
+        <MapCard key={map.id} map={map} userLiked={map.user_liked} />
       ))}
     </Masonry>
   );

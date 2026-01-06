@@ -9,6 +9,7 @@ import { RATE_LIMITS } from '@/lib/constants/limits';
 
 export type TimeRange = 'all' | 'today' | 'week' | 'month' | 'year';
 export type ProductTypeFilter = 'all' | 'poster' | 'sculpture';
+export type SortOption = 'fresh' | 'top' | 'discussed';
 
 /**
  * Get date threshold for time range filter
@@ -48,6 +49,11 @@ export interface FeedMap {
   // Sculpture-related fields (Phase 4.6)
   product_type: 'poster' | 'sculpture';
   sculpture_thumbnail_url: string | null;
+  // Remix tracking fields (Phase 8)
+  remixed_from_id: string | null;
+  remix_count: number;
+  // User interaction state (Phase 8)
+  user_liked: boolean;
 }
 
 /**
@@ -79,11 +85,36 @@ async function getCommentCounts(
 }
 
 /**
+ * Helper to get user's liked maps from a list of map IDs
+ */
+async function getUserLikes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  mapIds: string[],
+  userId: string | null
+): Promise<Set<string>> {
+  if (mapIds.length === 0 || !userId) return new Set();
+
+  const { data, error } = await supabase
+    .from('votes')
+    .select('map_id')
+    .in('map_id', mapIds)
+    .eq('user_id', userId)
+    .eq('value', 1);
+
+  if (error) {
+    logger.warn('Failed to fetch user likes:', { error });
+    return new Set();
+  }
+
+  return new Set((data || []).map((row: any) => row.map_id));
+}
+
+/**
  * Get feed of published maps
  * Uses JOIN to fetch maps and profiles in a single query
  */
 export async function getFeed(
-  sort: 'fresh' | 'top' = 'fresh',
+  sort: SortOption = 'fresh',
   page: number = 0,
   limit: number = FEED_PAGE_SIZE,
   timeRange: TimeRange = 'all',
@@ -128,6 +159,8 @@ export async function getFeed(
         created_at,
         product_type,
         sculpture_thumbnail_url,
+        remixed_from_id,
+        remix_count,
         profiles!left (
           username,
           display_name,
@@ -147,10 +180,10 @@ export async function getFeed(
       query = query.eq('product_type', productType);
     }
 
-    // Apply sorting
-    if (sort === 'fresh') {
+    // Apply sorting (for 'discussed', we'll sort by comment_count after fetching)
+    if (sort === 'fresh' || sort === 'discussed') {
       query = query.order('published_at', { ascending: false });
-    } else {
+    } else if (sort === 'top') {
       query = query.order('vote_score', { ascending: false }).order('published_at', { ascending: false });
     }
 
@@ -163,7 +196,7 @@ export async function getFeed(
       // Check if error is due to missing foreign key
       if (error.message?.includes('foreign key') || error.code === 'PGRST116' || error.message?.includes('relation')) {
         logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-        return getFeedFallback(supabase, sort, page, limit, timeRange, productType);
+        return getFeedFallback(supabase, sort, page, limit, timeRange, productType, user?.id || null);
       }
       logger.error('Failed to fetch feed:', { error, sort, page, limit });
       throw createError.databaseError(`Failed to fetch feed: ${error.message}`);
@@ -173,12 +206,15 @@ export async function getFeed(
       return [];
     }
 
-    // Fetch comment counts for all maps
+    // Fetch comment counts and user likes for all maps
     const mapIds = maps.map((m: any) => m.id);
-    const commentCounts = await getCommentCounts(supabase, mapIds);
+    const [commentCounts, userLikes] = await Promise.all([
+      getCommentCounts(supabase, mapIds),
+      getUserLikes(supabase, mapIds, user?.id || null),
+    ]);
 
     // Transform the data to match FeedMap interface
-    return maps.map((map: any) => {
+    const results = maps.map((map: any) => {
       const profile = map.profiles;
       return {
         id: map.id,
@@ -200,13 +236,23 @@ export async function getFeed(
         },
         product_type: map.product_type || 'poster',
         sculpture_thumbnail_url: map.sculpture_thumbnail_url,
+        remixed_from_id: map.remixed_from_id || null,
+        remix_count: map.remix_count || 0,
+        user_liked: userLikes.has(map.id),
       };
     });
+
+    // Sort by comment count for 'discussed' option
+    if (sort === 'discussed') {
+      results.sort((a, b) => b.comment_count - a.comment_count);
+    }
+
+    return results;
   } catch (error: any) {
     // If it's a foreign key error, try fallback
     if (error.message?.includes('foreign key') || error.code === 'PGRST116') {
       logger.warn('JOIN query failed, falling back to two-query approach', { error, sort, page, limit });
-      return getFeedFallback(supabase, sort, page, limit, timeRange, productType);
+      return getFeedFallback(supabase, sort, page, limit, timeRange, productType, user?.id || null);
     }
     throw error;
   }
@@ -218,11 +264,12 @@ export async function getFeed(
  */
 async function getFeedFallback(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  sort: 'fresh' | 'top',
+  sort: SortOption,
   page: number,
   limit: number,
   timeRange: TimeRange = 'all',
-  productType: ProductTypeFilter = 'all'
+  productType: ProductTypeFilter = 'all',
+  userId: string | null = null
 ): Promise<FeedMap[]> {
   // Calculate time range date threshold
   const timeRangeDate = getTimeRangeDate(timeRange);
@@ -230,7 +277,7 @@ async function getFeedFallback(
   // First, fetch the maps
   let query = supabase
     .from('maps')
-    .select('id, title, subtitle, thumbnail_url, vote_score, published_at, created_at, user_id, product_type, sculpture_thumbnail_url')
+    .select('id, title, subtitle, thumbnail_url, vote_score, published_at, created_at, user_id, product_type, sculpture_thumbnail_url, remixed_from_id, remix_count')
     .eq('is_published', true)
     .not('published_at', 'is', null);
 
@@ -244,9 +291,10 @@ async function getFeedFallback(
     query = query.eq('product_type', productType);
   }
 
-  if (sort === 'fresh') {
+  // Apply sorting (for 'discussed', we'll sort by comment_count after fetching)
+  if (sort === 'fresh' || sort === 'discussed') {
     query = query.order('published_at', { ascending: false });
-  } else {
+  } else if (sort === 'top') {
     query = query.order('vote_score', { ascending: false }).order('published_at', { ascending: false });
   }
 
@@ -282,12 +330,15 @@ async function getFeedFallback(
     (profiles || []).map((profile: any) => [profile.id, profile])
   );
 
-  // Fetch comment counts for all maps
+  // Fetch comment counts and user likes for all maps
   const mapIds = (maps as any[]).map(m => m.id);
-  const commentCounts = await getCommentCounts(supabase, mapIds);
+  const [commentCounts, userLikes] = await Promise.all([
+    getCommentCounts(supabase, mapIds),
+    getUserLikes(supabase, mapIds, userId),
+  ]);
 
   // Combine maps with profiles
-  return (maps as any[]).map((map) => {
+  const results = (maps as any[]).map((map) => {
     const profile = profileMap.get(map.user_id);
     return {
       id: map.id,
@@ -309,7 +360,17 @@ async function getFeedFallback(
       },
       product_type: map.product_type || 'poster',
       sculpture_thumbnail_url: map.sculpture_thumbnail_url,
+      remixed_from_id: map.remixed_from_id || null,
+      remix_count: map.remix_count || 0,
+      user_liked: userLikes.has(map.id),
     };
   });
+
+  // Sort by comment count for 'discussed' option
+  if (sort === 'discussed') {
+    results.sort((a, b) => b.comment_count - a.comment_count);
+  }
+
+  return results;
 }
 

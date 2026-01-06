@@ -57,6 +57,9 @@ export interface Database {
           product_type: 'poster' | 'sculpture';
           sculpture_config: Json | null;
           sculpture_thumbnail_url: string | null;
+          // Remix tracking fields (Phase 8)
+          remixed_from_id: string | null;
+          remix_count: number;
         };
         Insert: {
           id?: string;
@@ -74,6 +77,8 @@ export interface Database {
           product_type?: 'poster' | 'sculpture';
           sculpture_config?: Json | null;
           sculpture_thumbnail_url?: string | null;
+          // Remix tracking fields (Phase 8)
+          remixed_from_id?: string | null;
         };
         Update: {
           id?: string;
@@ -91,6 +96,8 @@ export interface Database {
           product_type?: 'poster' | 'sculpture';
           sculpture_config?: Json | null;
           sculpture_thumbnail_url?: string | null;
+          // Remix tracking fields (Phase 8)
+          remixed_from_id?: string | null;
         };
       };
       votes: {

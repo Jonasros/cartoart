@@ -9,6 +9,7 @@ import { deleteComment } from '@/lib/actions/comments';
 import type { Comment } from '@/lib/actions/comments';
 import { createClient } from '@/lib/supabase/client';
 import { formatRelativeTime, formatFullDate } from '@/lib/utils/formatTime';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface CommentListProps {
   comments: Comment[];
@@ -71,12 +72,11 @@ export function CommentList({ comments, onCommentDeleted }: CommentListProps) {
                 <span className="font-semibold text-sm text-gray-900 dark:text-white">
                   {comment.profile?.display_name || comment.profile?.username || 'Anonymous'}
                 </span>
-                <span
-                  className="text-xs text-gray-500 dark:text-gray-400 cursor-help"
-                  title={formatFullDate(comment.created_at)}
-                >
-                  {formatRelativeTime(comment.created_at)}
-                </span>
+                <Tooltip content={formatFullDate(comment.created_at)} side="top">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 cursor-help">
+                    {formatRelativeTime(comment.created_at)}
+                  </span>
+                </Tooltip>
               </div>
               <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                 {comment.content}
