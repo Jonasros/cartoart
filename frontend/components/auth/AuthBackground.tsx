@@ -2,81 +2,16 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-
-// Demo map card representations - styled to match our example gallery styles
-const DEMO_CARDS = [
-  {
-    id: 'chesapeake',
-    name: 'Chesapeake Bay',
-    gradient: 'from-amber-100 via-amber-50 to-stone-100',
-    accent: 'bg-amber-700/20',
-    style: 'Vintage',
-  },
-  {
-    id: 'salt-lake',
-    name: 'Salt Lake City',
-    gradient: 'from-slate-900 via-slate-800 to-indigo-900',
-    accent: 'bg-indigo-500/30',
-    style: 'Midnight',
-  },
-  {
-    id: 'tucson',
-    name: 'Tucson',
-    gradient: 'from-slate-100 via-white to-blue-50',
-    accent: 'bg-blue-900/10',
-    style: 'Minimal',
-  },
-  {
-    id: 'sf-noir',
-    name: 'San Francisco',
-    gradient: 'from-gray-900 via-gray-800 to-slate-900',
-    accent: 'bg-gray-400/20',
-    style: 'Dark Mode',
-  },
-  {
-    id: 'channel-neon',
-    name: 'The Channel',
-    gradient: 'from-purple-900 via-fuchsia-900 to-pink-900',
-    accent: 'bg-cyan-400/30',
-    style: 'Neon',
-  },
-  {
-    id: 'na-organic',
-    name: 'North America',
-    gradient: 'from-coral-100 via-rose-100 to-orange-100',
-    accent: 'bg-coral-500/20',
-    style: 'Organic',
-  },
-  {
-    id: 'midatlantic',
-    name: 'The Midatlantic',
-    gradient: 'from-orange-100 via-amber-100 to-yellow-100',
-    accent: 'bg-orange-600/20',
-    style: 'Pueblo',
-  },
-  {
-    id: 'botanical',
-    name: 'Botanical',
-    gradient: 'from-emerald-100 via-green-100 to-teal-100',
-    accent: 'bg-emerald-600/20',
-    style: 'Watercolor',
-  },
-  {
-    id: 'ksc',
-    name: 'Kennedy Space Center',
-    gradient: 'from-stone-100 via-gray-100 to-slate-100',
-    accent: 'bg-stone-600/20',
-    style: 'Topographic',
-  },
-];
+import { POSTER_EXAMPLES } from '@/lib/config/examples';
+import { PosterThumbnail } from '../map/PosterThumbnail';
 
 interface FloatingCardProps {
-  card: typeof DEMO_CARDS[0];
+  example: (typeof POSTER_EXAMPLES)[0];
   index: number;
   totalCards: number;
 }
 
-function FloatingCard({ card, index, totalCards }: FloatingCardProps) {
+function FloatingCard({ example, index, totalCards }: FloatingCardProps) {
   // Calculate initial position based on index
   const column = index % 3;
   const row = Math.floor(index / 3);
@@ -99,7 +34,7 @@ function FloatingCard({ card, index, totalCards }: FloatingCardProps) {
       }}
       initial={{ opacity: 0, scale: 0.8, rotate: -5 + Math.random() * 10 }}
       animate={{
-        opacity: [0, 0.7, 0.7, 0],
+        opacity: [0, 0.8, 0.8, 0],
         y: [0, -30, -60, -100],
         x: [0, 10 * (Math.random() > 0.5 ? 1 : -1), 20 * (Math.random() > 0.5 ? 1 : -1), 0],
         rotate: [-5 + Math.random() * 10, 5 * (Math.random() > 0.5 ? 1 : -1), -3 + Math.random() * 6],
@@ -113,37 +48,35 @@ function FloatingCard({ card, index, totalCards }: FloatingCardProps) {
         ease: 'easeInOut',
       }}
     >
-      <div className={`
-        aspect-[2/3] rounded-xl overflow-hidden shadow-2xl
-        bg-gradient-to-br ${card.gradient}
-        border border-white/20
-        transform-gpu
-      `}>
-        {/* Map content area */}
+      <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 transform-gpu">
+        {/* Actual PosterThumbnail with example config */}
         <div className="relative h-3/4 overflow-hidden">
-          {/* Simulated terrain lines */}
-          <div className="absolute inset-0 opacity-30">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className={`absolute h-px ${card.accent} rounded-full`}
-                style={{
-                  top: `${15 + i * 10}%`,
-                  left: '10%',
-                  right: '10%',
-                  transform: `rotate(${-2 + Math.random() * 4}deg)`,
-                }}
-              />
-            ))}
-          </div>
+          <PosterThumbnail
+            config={example.config}
+            className="w-full h-full"
+          />
           {/* Style badge */}
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
-            <span className="text-[8px] font-medium text-white/90">{card.style}</span>
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/30 backdrop-blur-sm">
+            <span className="text-[8px] font-medium text-white/90">{example.config.style.name}</span>
           </div>
         </div>
         {/* Title area */}
-        <div className="h-1/4 p-2 flex flex-col justify-center bg-gradient-to-t from-black/40 to-transparent">
-          <p className="text-[10px] font-bold text-white/90 truncate">{card.name}</p>
+        <div
+          className="h-1/4 p-2 flex flex-col justify-center"
+          style={{ backgroundColor: example.config.palette.background }}
+        >
+          <p
+            className="text-[10px] font-bold truncate"
+            style={{ color: example.config.palette.text }}
+          >
+            {example.name}
+          </p>
+          <p
+            className="text-[8px] truncate opacity-70"
+            style={{ color: example.config.palette.text }}
+          >
+            {example.config.location.subtitle || example.config.location.city}
+          </p>
         </div>
       </div>
     </motion.div>
@@ -167,13 +100,13 @@ export function AuthBackground() {
       <div className="absolute inset-0 bg-gradient-to-br from-trail-light/80 via-background/90 to-background dark:from-background/95 dark:via-background/98 dark:to-card/90" />
 
       {/* Floating cards */}
-      <div className="absolute inset-0 opacity-30 dark:opacity-20">
-        {DEMO_CARDS.map((card, index) => (
+      <div className="absolute inset-0 opacity-40 dark:opacity-25">
+        {POSTER_EXAMPLES.map((example, index) => (
           <FloatingCard
-            key={card.id}
-            card={card}
+            key={example.id}
+            example={example}
             index={index}
-            totalCards={DEMO_CARDS.length}
+            totalCards={POSTER_EXAMPLES.length}
           />
         ))}
       </div>
