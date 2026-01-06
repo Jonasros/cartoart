@@ -157,7 +157,7 @@ export function ExportButton({
       <ShareModal
         isOpen={showShareModal && !!lastExportResult}
         onClose={handleCloseShareModal}
-        imageBlob={lastExportResult?.shareThumbnail || lastExportResult?.blob}
+        imageBlob={lastExportResult?.blob}
         title={lastExportResult?.title}
         type="poster"
         isAuthenticated={isAuthenticated}

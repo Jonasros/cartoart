@@ -3,6 +3,7 @@
  */
 
 const SHARE_SIZE = 1080; // 1080x1080 for Instagram, fits well on all platforms
+const SHARE_MAX_DIMENSION = 1200; // Max dimension for full-size share images
 const WATERMARK_PADDING = 24;
 const WATERMARK_HEIGHT = 32;
 
@@ -157,4 +158,126 @@ export async function generateShareThumbnailFromCanvas(
       1.0
     );
   });
+}
+
+/**
+ * Generate a full-size share image that preserves aspect ratio
+ * Scales down if needed and adds watermark, but NO cropping
+ */
+export async function generateFullShareImage(
+  sourceBlob: Blob,
+  options: {
+    maxDimension?: number;
+    addWatermark?: boolean;
+  } = {}
+): Promise<Blob> {
+  const { maxDimension = SHARE_MAX_DIMENSION, addWatermark = true } = options;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = async () => {
+      const sourceWidth = img.width;
+      const sourceHeight = img.height;
+
+      // Calculate scaled dimensions (preserve aspect ratio)
+      let width = sourceWidth;
+      let height = sourceHeight;
+
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height / width) * maxDimension);
+          width = maxDimension;
+        } else {
+          width = Math.round((width / height) * maxDimension);
+          height = maxDimension;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Could not create canvas context'));
+        return;
+      }
+
+      // Draw the full image (no cropping)
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Add watermark if enabled
+      if (addWatermark) {
+        // Scale watermark based on image size
+        const scale = Math.min(width, height) / 1080;
+        await drawWatermarkScaled(ctx, width, height, scale);
+      }
+
+      // Convert to PNG blob
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create blob'));
+          }
+        },
+        'image/png',
+        0.95
+      );
+    };
+
+    img.onerror = () => reject(new Error('Failed to load source image'));
+    img.src = URL.createObjectURL(sourceBlob);
+  });
+}
+
+/**
+ * Draw watermark on canvas with scaling support
+ */
+async function drawWatermarkScaled(
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  scale: number
+): Promise<void> {
+  const padding = Math.max(16, Math.round(WATERMARK_PADDING * scale));
+  const height = Math.max(24, Math.round(WATERMARK_HEIGHT * scale));
+
+  // Background pill for watermark
+  const text = 'waymarker.eu';
+  ctx.font = `600 ${height * 0.55}px system-ui, -apple-system, sans-serif`;
+  const textWidth = ctx.measureText(text).width;
+  const pillWidth = textWidth + height + padding;
+  const pillHeight = height;
+
+  const x = canvasWidth - pillWidth - padding;
+  const y = canvasHeight - pillHeight - padding;
+
+  // Draw semi-transparent dark pill background
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.beginPath();
+  ctx.roundRect(x, y, pillWidth, pillHeight, pillHeight / 2);
+  ctx.fill();
+
+  // Draw mountain icon (simplified)
+  const iconSize = height * 0.5;
+  const iconX = x + padding * 0.5;
+  const iconY = y + (height - iconSize) / 2;
+
+  // Simple mountain path
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+  ctx.beginPath();
+  ctx.moveTo(iconX, iconY + iconSize);
+  ctx.lineTo(iconX + iconSize * 0.35, iconY + iconSize * 0.3);
+  ctx.lineTo(iconX + iconSize * 0.5, iconY + iconSize * 0.5);
+  ctx.lineTo(iconX + iconSize * 0.75, iconY);
+  ctx.lineTo(iconX + iconSize, iconY + iconSize);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw text
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, iconX + iconSize + padding * 0.4, y + height / 2);
 }

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WaymarkerLogo } from '@/components/ui/WaymarkerLogo';
+import { generateFullShareImage } from '@/lib/export/shareThumbnail';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -95,22 +96,41 @@ export function ShareModal({
     };
   }, [isOpen, onClose]);
 
-  // Download image for sharing
-  const handleDownload = useCallback(() => {
+  // Download image for sharing (generates watermarked version)
+  const handleDownload = useCallback(async () => {
     if (!imageBlob) return;
 
-    const url = URL.createObjectURL(imageBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    const safeName = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    link.download = `${safeName}-waymarker-share.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      // Generate full-size watermarked image for sharing
+      const shareImage = await generateFullShareImage(imageBlob, {
+        addWatermark: true,
+      });
 
-    setDownloaded(true);
-    setTimeout(() => setDownloaded(false), 2000);
+      const url = URL.createObjectURL(shareImage);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeName = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      link.download = `${safeName}-waymarker-share.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setDownloaded(true);
+      setTimeout(() => setDownloaded(false), 2000);
+    } catch (error) {
+      console.error('Failed to generate share image:', error);
+      // Fallback to original blob
+      const url = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeName = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      link.download = `${safeName}-waymarker.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   }, [imageBlob, title]);
 
   // Copy image to clipboard
@@ -298,12 +318,12 @@ export function ShareModal({
           {/* Preview Image */}
           {imageUrl && (
             <div className="relative mb-6">
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-secondary/30 shadow-lg ring-1 ring-border/50">
+              <div className="relative rounded-xl overflow-hidden bg-stone-900 shadow-lg ring-1 ring-border/50">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt={`${title} - ${productName}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto block"
                 />
                 {/* Watermark overlay */}
                 <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm">
@@ -315,7 +335,7 @@ export function ShareModal({
               </div>
 
               {/* Adventure name badge */}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-primary text-white text-sm font-medium shadow-lg shadow-primary/25">
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-primary text-white text-sm font-medium shadow-lg shadow-primary/25 max-w-[90%] truncate">
                 {title}
               </div>
             </div>
@@ -459,66 +479,69 @@ export function ShareModal({
               </button>
             </div>
 
-            {/* Publish to Feed Section */}
+            {/* Inspire Others Section */}
             {onPublish && (
               <div className="pt-4 mt-4 border-t border-border/50">
                 {!isAuthenticated ? (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Sign in to share your adventure with the community
+                  <div className="text-center py-2">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      💡 Want to inspire fellow adventurers?
                     </p>
                     <a
                       href="/login"
                       className={cn(
-                        'inline-flex items-center justify-center gap-2',
-                        'px-4 py-2.5 rounded-lg font-medium text-sm',
-                        'bg-secondary hover:bg-secondary/80 text-foreground',
+                        'inline-flex items-center justify-center gap-1.5',
+                        'px-3 py-2 rounded-lg font-medium text-xs',
+                        'text-primary hover:bg-primary/10',
                         'transition-colors'
                       )}
                     >
-                      Sign in to Publish
+                      Sign in to share with the community →
                     </a>
                   </div>
                 ) : !isSaved ? (
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Save your map first to publish it to the community feed
+                  <div className="text-center py-2">
+                    <p className="text-xs text-muted-foreground">
+                      💡 Save your map to share it with the Waymarker community
                     </p>
                   </div>
                 ) : isPublished || publishSuccess ? (
                   <div className="flex items-center justify-center gap-2 py-2 text-primary">
-                    <Globe className="w-5 h-5" />
-                    <span className="font-medium">
-                      Published to the Community!
-                    </span>
                     <Sparkles className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      Shared with the community!
+                    </span>
                   </div>
                 ) : (
-                  <button
-                    onClick={handlePublish}
-                    disabled={isPublishing}
-                    className={cn(
-                      'w-full flex items-center justify-center gap-2.5',
-                      'px-4 py-3 rounded-xl font-medium',
-                      'bg-gradient-to-r from-primary/20 to-accent/20',
-                      'hover:from-primary/30 hover:to-accent/30',
-                      'text-foreground border border-primary/30',
-                      'active:scale-[0.98] transition-all',
-                      'disabled:opacity-50 disabled:cursor-not-allowed'
-                    )}
-                  >
-                    {isPublishing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Publishing...
-                      </>
-                    ) : (
-                      <>
-                        <Globe className="w-5 h-5" />
-                        Publish to Community Feed
-                      </>
-                    )}
-                  </button>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      💡 Inspire fellow adventurers
+                    </p>
+                    <button
+                      onClick={handlePublish}
+                      disabled={isPublishing}
+                      className={cn(
+                        'inline-flex items-center justify-center gap-1.5',
+                        'px-4 py-2 rounded-lg font-medium text-sm',
+                        'text-primary hover:bg-primary/10',
+                        'border border-primary/20 hover:border-primary/40',
+                        'transition-all',
+                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                      )}
+                    >
+                      {isPublishing ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sharing...
+                        </>
+                      ) : (
+                        <>
+                          <Globe className="w-4 h-4" />
+                          Share with the Community
+                        </>
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             )}
