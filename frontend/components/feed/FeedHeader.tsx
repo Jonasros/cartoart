@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { PenTool, ArrowLeft } from 'lucide-react';
+import { WaymarkerLogo } from '@/components/ui/WaymarkerLogo';
 
 export function FeedHeader() {
   return (
@@ -18,9 +19,8 @@ export function FeedHeader() {
           </Link>
 
           {/* Center - Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-forest to-forest-light shadow-lg" />
-            <span className="font-bold text-xl text-foreground">Waymarker</span>
+          <Link href="/">
+            <WaymarkerLogo size="md" showText />
           </Link>
 
           {/* Right side - Create button */}
