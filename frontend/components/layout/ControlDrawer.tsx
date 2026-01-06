@@ -1,6 +1,6 @@
 'use client';
 
-import { Minus } from 'lucide-react';
+import { Minus, Navigation2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { LocationSearch } from '@/components/controls/LocationSearch';
@@ -49,6 +49,10 @@ interface ControlDrawerProps {
   productMode: ProductMode;
   sculptureConfig: SculptureConfig;
   updateSculptureConfig: (updates: Partial<SculptureConfig>) => void;
+  // Location feature
+  useMyLocation: () => void;
+  isLocating: boolean;
+  locationError: string | null;
 }
 
 export function ControlDrawer({
@@ -75,6 +79,9 @@ export function ControlDrawer({
   productMode,
   sculptureConfig,
   updateSculptureConfig,
+  useMyLocation,
+  isLocating,
+  locationError,
 }: ControlDrawerProps) {
   const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('examples');
   const [locationMode, setLocationMode] = useState<'point' | 'route'>(config.route?.data ? 'route' : 'point');
@@ -189,11 +196,37 @@ export function ControlDrawer({
                     onLocationSelect={updateLocation}
                     currentLocation={config.location}
                   />
+
+                  <button
+                    onClick={useMyLocation}
+                    disabled={isLocating}
+                    className={cn(
+                      "w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                      isLocating
+                        ? "bg-primary/5 text-primary/50 cursor-wait"
+                        : "text-primary dark:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 border border-primary/30 dark:border-primary/40"
+                    )}
+                  >
+                    {isLocating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Getting location...
+                      </>
+                    ) : (
+                      <>
+                        <Navigation2 className="w-4 h-4" />
+                        Use my location
+                      </>
+                    )}
+                  </button>
+                  {locationError && (
+                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">{locationError}</p>
+                  )}
                 </div>
 
                 <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg text-xs text-primary dark:text-primary/90">
                   <p className="font-medium mb-1">Single Location Mode</p>
-                  <p className="opacity-90">Search for a city, address, or landmark. The map will center on your location with a marker.</p>
+                  <p className="opacity-90">Search for a city, address, or landmark, or use your current location. The map will center on your chosen spot.</p>
                 </div>
               </div>
             ) : (

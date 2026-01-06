@@ -153,7 +153,8 @@ export function usePosterConfig() {
   const urlUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [config, dispatch] = useReducer(posterReducer, DEFAULT_CONFIG);
-  const [shouldAutoLocate, setShouldAutoLocate] = useState(() => !searchParams.has('s'));
+  // Don't auto-locate on page load - user must explicitly request via "Use my location" button
+  const [shouldAutoLocate, setShouldAutoLocate] = useState(false);
 
   // Initialize from URL on mount
   useEffect(() => {
@@ -275,7 +276,7 @@ export function usePosterConfig() {
   }, [shouldAutoLocate]);
 
   // Isolate geolocation side effect
-  useUserLocation(handleUserLocationFound, shouldAutoLocate);
+  const { isLoading: isLocating, error: locationError } = useUserLocation(handleUserLocationFound, shouldAutoLocate);
 
   const updateLocation = useCallback((location: Partial<PosterLocation>) => {
     setShouldAutoLocate(false);
@@ -332,6 +333,12 @@ export function usePosterConfig() {
     setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
   }, [config]);
 
+  // Manually trigger geolocation (for "Use my location" button)
+  const useMyLocation = useCallback(() => {
+    console.log('[usePosterConfig] useMyLocation called, setting shouldAutoLocate to true');
+    setShouldAutoLocate(true);
+  }, []);
+
   return {
     config,
     updateLocation,
@@ -346,5 +353,8 @@ export function usePosterConfig() {
     redo,
     canUndo,
     canRedo,
+    useMyLocation,
+    isLocating,
+    locationError,
   };
 }

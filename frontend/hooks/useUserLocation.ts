@@ -28,7 +28,12 @@ export function useUserLocation(onLocationFound: (location: PosterLocation) => v
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined' || !navigator.geolocation) return;
+    console.log('[useUserLocation] Effect running, enabled:', enabled);
+    if (!enabled || typeof window === 'undefined' || !navigator.geolocation) {
+      console.log('[useUserLocation] Early return - enabled:', enabled, 'window:', typeof window, 'geolocation:', !!navigator?.geolocation);
+      return;
+    }
+    console.log('[useUserLocation] Starting geolocation request...');
 
     let isMounted = true;
     setIsLoading(true);

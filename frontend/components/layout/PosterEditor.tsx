@@ -62,6 +62,9 @@ export function PosterEditor() {
     redo,
     canUndo,
     canRedo,
+    useMyLocation,
+    isLocating,
+    locationError,
   } = usePosterConfig();
   
   const {
@@ -444,6 +447,9 @@ export function PosterEditor() {
         productMode={productMode}
         sculptureConfig={sculptureConfig}
         updateSculptureConfig={updateSculptureConfig}
+        useMyLocation={useMyLocation}
+        isLocating={isLocating}
+        locationError={locationError}
       />
 
       {/* Main Content */}
