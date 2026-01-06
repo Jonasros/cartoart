@@ -1,7 +1,9 @@
 import { EmailAuthForm } from '@/components/auth/EmailAuthForm';
+import { AuthBackground } from '@/components/auth/AuthBackground';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { Mountain } from 'lucide-react';
 
 export const metadata = {
   title: 'Login | Waymarker',
@@ -25,32 +27,40 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-trail-light to-background dark:from-background dark:to-card relative overflow-hidden">
+      <AuthBackground />
+      <div className="max-w-md w-full mx-4 relative z-10">
+        <div className="bg-card/95 dark:bg-card/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-border">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-forest to-forest-dark flex items-center justify-center shadow-lg">
+              <Mountain className="w-8 h-8 text-white" />
+            </div>
+          </div>
+
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-display font-bold text-foreground mb-2">
               Welcome Back
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-muted-foreground">
               Sign in to your Waymarker account
             </p>
           </div>
 
           {params.error && (
-            <div className="mb-6 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-600 dark:text-red-400">{params.error}</p>
+            <div className="mb-6 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+              <p className="text-sm text-destructive">{params.error}</p>
             </div>
           )}
 
           <EmailAuthForm mode="login" redirectTo={params.redirect} />
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{' '}
               <Link
                 href={params.redirect ? `/signup?redirect=${encodeURIComponent(params.redirect)}` : '/signup'}
-                className="text-primary dark:text-primary hover:underline font-medium"
+                className="text-primary hover:text-forest-light hover:underline font-medium transition-colors"
               >
                 Sign up
               </Link>

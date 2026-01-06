@@ -73,19 +73,19 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {message && (
-        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-          <p className="text-sm text-green-600 dark:text-green-400">{message}</p>
+        <div className="p-3 rounded-lg bg-forest/10 border border-forest/30">
+          <p className="text-sm text-forest dark:text-forest-light">{message}</p>
         </div>
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+        <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
           Email
         </label>
         <input
@@ -94,13 +94,13 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
           placeholder="you@example.com"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+        <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
           Password
         </label>
         <input
@@ -110,14 +110,14 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
           placeholder="••••••••"
         />
       </div>
 
       {mode === 'signup' && (
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1">
             Confirm Password
           </label>
           <input
@@ -127,7 +127,7 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
             placeholder="••••••••"
           />
         </div>
@@ -136,7 +136,7 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full"
+        className="w-full btn-press"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -144,11 +144,11 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
             {mode === 'signup' ? 'Creating account...' : 'Signing in...'}
           </span>
         ) : (
-          mode === 'signup' ? 'Create Account' : 'Sign In'
+          mode === 'signup' ? 'Start Your Journey' : 'Sign In'
         )}
       </Button>
 
-      <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-6">
+      <p className="text-xs text-center text-muted-foreground mt-6">
         By signing in, you agree to our Terms of Service and Privacy Policy
       </p>
     </form>
