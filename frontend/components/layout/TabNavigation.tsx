@@ -91,7 +91,7 @@ export function TabNavigation({
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 md:relative md:h-full md:w-24 bg-card border-t md:border-t-0 md:border-r border-border flex md:flex-col items-center z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-sm pb-safe md:pb-0">
       <div className="hidden md:flex h-16 items-center justify-center w-full border-b border-border/50 mb-2">
-        <Link href="/" title="Waymarker">
+        <Link href="/create" title="Waymarker">
           <WaymarkerLogo size="md" />
         </Link>
       </div>

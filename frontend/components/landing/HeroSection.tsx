@@ -1,0 +1,198 @@
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import Link from 'next/link';
+import { ArrowRight, MapPin, Mountain } from 'lucide-react';
+import { POSTER_EXAMPLES } from '@/lib/config/examples';
+import { PosterThumbnail } from '../map/PosterThumbnail';
+import { floatingPoster } from '@/lib/animations/landing';
+
+// Select featured examples for hero display
+const HERO_POSTERS = [
+  POSTER_EXAMPLES[0], // Chesapeake Bay - Vintage
+  POSTER_EXAMPLES[1], // Salt Lake City - Midnight
+  POSTER_EXAMPLES[3], // San Francisco Noir - Dark Mode
+  POSTER_EXAMPLES[8], // Kennedy Space Center - Topographic
+];
+
+export function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  // Parallax transforms for floating posters
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const y4 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const parallaxY = [y1, y2, y3, y4];
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+    >
+      {/* Background with topographic pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-stone-100 via-stone-50 to-primary/5 dark:from-stone-900 dark:via-stone-900 dark:to-primary/10" />
+
+      {/* Subtle topographic texture overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C20 15 10 20 5 30s5 20 25 25c20-5 25-15 25-25S40 15 30 5z' fill='none' stroke='%232D5A3D' stroke-width='0.5'/%3E%3Cpath d='M30 15C23 22 18 25 15 30s3 12 15 15c12-3 15-8 15-15s-8-13-15-15z' fill='none' stroke='%232D5A3D' stroke-width='0.5'/%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Floating Posters - Desktop Only */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none">
+        {HERO_POSTERS.map((example, index) => {
+          // Position posters around the edges
+          const positions = [
+            { left: '8%', top: '15%', rotate: -8 },
+            { right: '6%', top: '12%', rotate: 6 },
+            { left: '5%', bottom: '18%', rotate: -4 },
+            { right: '8%', bottom: '15%', rotate: 5 },
+          ];
+          const pos = positions[index];
+
+          return (
+            <motion.div
+              key={example.id}
+              className="absolute"
+              style={{
+                ...pos,
+                y: parallaxY[index],
+                width: 'clamp(160px, 14vw, 220px)',
+              }}
+              initial={floatingPoster(index).initial}
+              animate={floatingPoster(index).animate}
+            >
+              <div
+                className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 dark:border-white/10 transform-gpu hover:scale-105 transition-transform duration-500"
+                style={{ transform: `rotate(${pos.rotate}deg)` }}
+              >
+                <PosterThumbnail
+                  config={example.config}
+                  className="w-full h-full"
+                />
+              </div>
+              {/* Style badge */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm shadow-lg">
+                <span className="text-[10px] font-semibold text-stone-600 dark:text-stone-300 whitespace-nowrap">
+                  {example.config.style.name}
+                </span>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/20 mb-8"
+        >
+          <Mountain className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Turn adventures into art</span>
+        </motion.div>
+
+        {/* Main Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-stone-900 dark:text-white leading-[1.1] tracking-tight mb-6"
+        >
+          Your Journey.{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary to-accent">
+            Your Masterpiece.
+          </span>
+        </motion.h1>
+
+        {/* Subheadline */}
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-lg sm:text-xl text-stone-600 dark:text-stone-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+        >
+          Transform your hiking trails, running routes, and travel memories into stunning
+          wall art and 3D sculptures. Upload a GPX file or search any location to begin.
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <Link
+            href="/create"
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:-translate-y-0.5"
+          >
+            <MapPin className="w-5 h-5" />
+            Create Your First Print
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          <Link
+            href="/feed"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold rounded-xl border-2 border-stone-200 dark:border-stone-700 transition-all duration-300 hover:-translate-y-0.5"
+          >
+            Explore the Community
+          </Link>
+        </motion.div>
+
+        {/* Mobile Poster Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="lg:hidden mt-16 flex justify-center gap-4 overflow-x-auto pb-4 px-4 -mx-6"
+        >
+          {HERO_POSTERS.slice(0, 3).map((example, index) => (
+            <div
+              key={example.id}
+              className="flex-shrink-0 w-32 sm:w-40"
+              style={{ transform: `rotate(${-4 + index * 4}deg)` }}
+            >
+              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-xl border border-white/20">
+                <PosterThumbnail
+                  config={example.config}
+                  className="w-full h-full"
+                />
+              </div>
+              <p className="mt-2 text-[10px] font-medium text-stone-500 dark:text-stone-400 text-center">
+                {example.config.style.name}
+              </p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-6 h-10 rounded-full border-2 border-stone-300 dark:border-stone-600 flex items-start justify-center p-2"
+        >
+          <div className="w-1.5 h-2.5 bg-stone-400 dark:bg-stone-500 rounded-full" />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}

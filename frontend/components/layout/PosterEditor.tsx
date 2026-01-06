@@ -398,7 +398,7 @@ export function PosterEditor() {
       <ErrorToastContainer errors={errors} onDismiss={clearError} />
       {/* Mobile Header */}
       <div className="md:hidden h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-40 shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/create" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-forest-light shadow-lg" />
           <span className="font-bold text-gray-900 dark:text-white">Waymarker</span>
         </Link>

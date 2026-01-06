@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Trash2, Edit, Eye, EyeOff, Calendar, TrendingUp, Image as ImageIcon, Box } from 'lucide-react';
+import { Trash2, Edit, Eye, EyeOff, Calendar, TrendingUp, Image as ImageIcon, Box, MapPin, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/control-components';
 import { PublishModal } from './PublishModal';
 import type { SavedMap } from '@/lib/actions/maps';
@@ -68,13 +68,30 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
 
   if (maps.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
-          You haven&apos;t saved any adventure prints or journey sculptures yet.
+      <div className="text-center py-16">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+          <MapPin className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          No adventures yet
+        </h3>
+        <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+          Create your first adventure print or explore the community for inspiration.
         </p>
-        <Link href="/">
-          <Button>Create Your First Adventure</Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link href="/create">
+            <Button className="gap-2">
+              <MapPin className="w-4 h-4" />
+              Create Your First Adventure
+            </Button>
+          </Link>
+          <Link href="/feed">
+            <Button variant="outline" className="gap-2">
+              <Compass className="w-4 h-4" />
+              Explore the Community
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

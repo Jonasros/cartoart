@@ -212,7 +212,7 @@ export function UnifiedHeader({
       return { href: '/feed', label: 'Community' };
     }
     if (variant === 'profile' || variant === 'feed') {
-      return { href: '/', label: 'Editor' };
+      return { href: '/create', label: 'Editor' };
     }
     return null;
   };
@@ -244,7 +244,7 @@ export function UnifiedHeader({
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/create" className="flex-shrink-0">
               <WaymarkerLogo size="md" showText className="hidden sm:flex" />
               <WaymarkerLogo size="md" className="sm:hidden" />
             </Link>
@@ -274,7 +274,7 @@ export function UnifiedHeader({
 
             {/* Create CTA - shown on social pages */}
             {variant !== 'editor' && (
-              <Link href="/">
+              <Link href="/create">
                 <Button
                   variant="default"
                   size="sm"
@@ -301,10 +301,10 @@ export function UnifiedHeader({
         <div className="lg:hidden border-t border-border bg-card">
           <nav className="px-4 py-3 space-y-1">
             <Link
-              href="/"
+              href="/create"
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
-                pathname === '/'
+                pathname === '/create'
                   ? 'bg-primary/10 text-primary'
                   : 'text-foreground hover:bg-secondary'
               )}
