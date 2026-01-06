@@ -45,30 +45,30 @@ export function FeedClient({ initialSort, initialTimeRange, initialProductType }
       <FeedFilters currentSort={initialSort} currentTimeRange={initialTimeRange} currentProductType={initialProductType} />
       
       {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
       {initialLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : (
         <>
           <MapGrid maps={maps} />
-          
+
           {/* Sentinel element for infinite scroll */}
           <div ref={sentinelRef} className="h-10 flex items-center justify-center">
             {loading && (
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm">Loading more maps...</span>
+                <span className="text-sm">Loading more adventures...</span>
               </div>
             )}
             {!hasMore && maps.length > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No more maps to load
+              <p className="text-sm text-muted-foreground">
+                You've explored all adventures
               </p>
             )}
           </div>

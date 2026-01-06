@@ -43,7 +43,7 @@ export function CommentForm({ mapId, onCommentAdded }: CommentFormProps) {
         onChange={(e) => setContent(e.target.value)}
         placeholder="Add a comment..."
         rows={3}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
         disabled={isPending}
       />
       <div className="flex justify-end">

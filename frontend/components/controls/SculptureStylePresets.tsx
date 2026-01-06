@@ -204,7 +204,7 @@ export function SculptureStylePresets({ config, onConfigChange }: SculptureStyle
                 className={cn(
                   'relative p-3 rounded-xl border-2 transition-all text-left overflow-hidden group',
                   isActive
-                    ? 'border-blue-500 ring-2 ring-blue-500/20'
+                    ? 'border-primary ring-2 ring-primary/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 )}
               >
@@ -227,7 +227,7 @@ export function SculptureStylePresets({ config, onConfigChange }: SculptureStyle
 
                 <div className={cn(
                   'text-xs font-semibold',
-                  isActive ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                  isActive ? 'text-primary dark:text-primary' : 'text-gray-700 dark:text-gray-300'
                 )}>
                   {preset.name}
                 </div>
@@ -236,7 +236,7 @@ export function SculptureStylePresets({ config, onConfigChange }: SculptureStyle
                 </div>
 
                 {isActive && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500" />
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
                 )}
               </button>
             );
@@ -270,7 +270,7 @@ export function SculptureStylePresets({ config, onConfigChange }: SculptureStyle
         </div>
       </ControlSection>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-xs text-blue-800 dark:text-blue-200">
+      <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg text-xs text-primary dark:text-primary/90">
         <p className="font-medium mb-1">3D Sculpture Mode</p>
         <p className="opacity-90">
           Choose a style preset or fine-tune colors and settings in the Sculpture tab.

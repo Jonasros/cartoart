@@ -70,10 +70,10 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-gray-400 mb-4">
-          You haven't saved any posters or sculptures yet.
+          You haven&apos;t saved any adventure prints or journey sculptures yet.
         </p>
         <Link href="/">
-          <Button>Create Your First Design</Button>
+          <Button>Create Your First Adventure</Button>
         </Link>
       </div>
     );
@@ -91,14 +91,14 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
               {/* Product Type Badge */}
               <div className="absolute top-2 left-2 z-10">
                 {map.product_type === 'sculpture' ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-journey-sculpture text-white shadow-sm backdrop-blur-sm">
                     <Box className="w-3 h-3" />
-                    3D
+                    Sculpture
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-adventure-print text-white shadow-sm backdrop-blur-sm">
                     <ImageIcon className="w-3 h-3" />
-                    Poster
+                    Print
                   </span>
                 )}
               </div>
@@ -122,7 +122,7 @@ export function MyMapsList({ maps, onDelete, onPublish, onUnpublish }: MyMapsLis
           
           <div className="p-4">
             <Link href={`/map/${map.id}`}>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1 hover:text-blue-600 dark:hover:text-blue-400">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1 hover:text-primary dark:hover:text-primary">
                 {map.title}
               </h3>
             </Link>

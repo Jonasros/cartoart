@@ -19,13 +19,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         className={cn(
           'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-50',
           {
-            'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600': variant === 'default',
-            'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700': variant === 'outline',
-            'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800': variant === 'ghost',
-            'bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600': variant === 'destructive',
+            'bg-accent text-white hover:bg-accent/90 dark:bg-accent dark:hover:bg-accent/90': variant === 'default',
+            'border border-border bg-white text-foreground hover:bg-secondary dark:border-border dark:bg-card dark:text-foreground dark:hover:bg-secondary': variant === 'outline',
+            'text-muted-foreground hover:bg-secondary dark:text-muted-foreground dark:hover:bg-secondary': variant === 'ghost',
+            'bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90': variant === 'destructive',
           },
           {
             'h-9 px-4 py-2': size === 'default',
@@ -56,7 +56,7 @@ export function ControlSection({ title, children, className, action }: {
   return (
     <section className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </h3>
         {action}
@@ -98,7 +98,7 @@ export function CollapsibleSection({ title, children, defaultOpen = true, classN
     <div className={cn("space-y-2", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+        className="flex items-center gap-2 w-full text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
       >
         {isOpen ? (
           <ChevronDown className="w-4 h-4" />
@@ -127,8 +127,8 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 export function ControlLabel({ children, className, action, ...props }: LabelProps) {
   return (
     <div className="flex items-center justify-between mb-1.5">
-      <label 
-        className={cn("text-xs font-medium text-gray-700 dark:text-gray-300 select-none", className)}
+      <label
+        className={cn("text-xs font-medium text-foreground/80 select-none", className)}
         {...props}
       >
         {children}
@@ -144,7 +144,7 @@ export const ControlInput = React.forwardRef<HTMLInputElement, React.InputHTMLAt
       <input
         ref={ref}
         className={cn(
-          "flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:focus-visible:ring-blue-400 dark:text-gray-100",
+          "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -163,7 +163,7 @@ export const ControlSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            "flex h-9 w-full appearance-none items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:ring-offset-gray-950 dark:text-gray-100 dark:focus:ring-blue-400",
+            "flex h-9 w-full appearance-none items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
           {...props}
@@ -240,7 +240,7 @@ export const ControlSlider = React.forwardRef<HTMLInputElement, SliderProps>(
         <input
           type="range"
           ref={ref}
-          className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600 hover:accent-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="flex-1 h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20"
           {...props}
         />
         {displayValue !== undefined && (
@@ -253,7 +253,7 @@ export const ControlSlider = React.forwardRef<HTMLInputElement, SliderProps>(
                 onChange={(e) => setEditValue(e.target.value)}
                 onBlur={handleSubmit}
                 onKeyDown={handleKeyDown}
-                className="w-12 text-right text-xs font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-12 text-right text-xs font-mono text-foreground bg-background border border-primary rounded px-1 focus:outline-none focus:ring-1 focus:ring-primary"
               />
             ) : (
               <button
@@ -262,8 +262,8 @@ export const ControlSlider = React.forwardRef<HTMLInputElement, SliderProps>(
                 className={cn(
                   "w-12 text-right text-xs font-mono tabular-nums transition-colors",
                   onValueChange
-                    ? "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer"
-                    : "text-gray-500 dark:text-gray-400 cursor-default"
+                    ? "text-primary hover:text-primary/80 cursor-pointer"
+                    : "text-muted-foreground cursor-default"
                 )}
               >
                 {displayValue}
@@ -293,10 +293,10 @@ export const ControlToggle = React.forwardRef<HTMLInputElement, ToggleProps>(
             checked={checked ?? false}
             {...props}
           />
-          <div className="h-5 w-9 rounded-full bg-gray-200 dark:bg-gray-700 peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-1 dark:peer-focus:ring-offset-gray-900 peer-checked:bg-blue-600 transition-colors" />
+          <div className="h-5 w-9 rounded-full bg-secondary peer-focus:ring-2 peer-focus:ring-primary peer-focus:ring-offset-1 peer-focus:ring-offset-background peer-checked:bg-primary transition-colors" />
           <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
         </div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+        <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
           {label}
         </span>
       </label>
@@ -313,22 +313,22 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const ControlCheckbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ className, label, description, checked, ...props }, ref) => {
     return (
-      <label className={cn("flex items-start gap-3 p-2 -ml-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors group", className)}>
+      <label className={cn("flex items-start gap-3 p-2 -ml-2 rounded-lg hover:bg-secondary cursor-pointer transition-colors group", className)}>
         <div className="relative flex items-center justify-center mt-0.5">
           <input
             type="checkbox"
-            className="peer h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+            className="peer h-4 w-4 rounded border-border text-primary focus:ring-primary"
             ref={ref}
             checked={checked ?? false}
             {...props}
           />
         </div>
         <div className="flex-1 space-y-0.5">
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+          <div className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
             {label}
           </div>
           {description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {description}
             </p>
           )}

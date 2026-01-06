@@ -44,9 +44,9 @@ const toastStyles: Record<ToastType, { bg: string; border: string; text: string;
     icon: AlertCircle,
   },
   info: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
-    text: 'text-blue-800 dark:text-blue-200',
+    bg: 'bg-primary/5 dark:bg-primary/10',
+    border: 'border-primary/20 dark:border-primary/30',
+    text: 'text-primary dark:text-primary',
     icon: Info,
   },
   warning: {

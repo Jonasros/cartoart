@@ -317,13 +317,13 @@ export function PosterEditor() {
       {/* Mobile Header */}
       <div className="md:hidden h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-40 shadow-sm">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-forest-light shadow-lg" />
           <span className="font-bold text-gray-900 dark:text-white">Waymarker</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsExploreOpen(true)}
-            className="p-2 rounded-md transition-colors text-gray-600 hover:text-blue-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-gray-700"
+            className="p-2 rounded-md transition-colors text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:text-primary dark:hover:bg-gray-700"
             title="Explore Community Maps"
           >
             <Compass className="w-4 h-4" />
@@ -505,21 +505,21 @@ export function PosterEditor() {
                 <div className="absolute bottom-4 right-4 flex flex-row gap-2 z-10">
                   <button
                     onClick={zoomOut}
-                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-primary pointer-events-auto"
                     title="Zoom Out"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <button
                     onClick={zoomIn}
-                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-primary pointer-events-auto"
                     title="Zoom In"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                   <button
                     onClick={fitToLocation}
-                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-blue-600 pointer-events-auto"
+                    className="p-2 bg-white/90 hover:bg-white border border-gray-200 rounded-md shadow-sm transition-colors text-gray-600 hover:text-primary pointer-events-auto"
                     title="Snap map to original bounds"
                   >
                     <Maximize className="h-4 w-4" />

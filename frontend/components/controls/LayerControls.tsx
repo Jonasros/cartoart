@@ -147,8 +147,8 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                       onClick={() => onLayersChange({ labelStyle: style as any })}
                       className={cn(
                         "py-1.5 px-2 text-[10px] uppercase font-bold rounded border transition-all",
-                        (layers.labelStyle || 'elevated') === style 
-                          ? "bg-blue-600 border-blue-600 text-white shadow-sm" 
+                        (layers.labelStyle || 'elevated') === style
+                          ? "bg-primary border-primary text-white shadow-sm"
                           : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                       )}
                     >
@@ -285,7 +285,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                             className={cn(
                               "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
                               isActive
-                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                ? "bg-primary border-primary text-white shadow-sm"
                                 : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                             )}
                           >
@@ -321,7 +321,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                               className={cn(
                                 "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
                                 isActive
-                                  ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                  ? "bg-primary border-primary text-white shadow-sm"
                                   : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                               )}
                             >
@@ -452,7 +452,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                           className={cn(
                             "flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-lg border transition-all",
                             isActive
-                              ? "bg-white dark:bg-gray-700 border-blue-500 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-500/20"
+                              ? "bg-white dark:bg-gray-700 border-primary text-primary dark:text-primary shadow-sm ring-1 ring-primary/20"
                               : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                           )}
                         >
@@ -471,7 +471,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                     action={
                       <button
                         onClick={() => onLayersChange({ markerColor: undefined })}
-                        className="text-[10px] text-blue-600 hover:underline font-medium"
+                        className="text-[10px] text-primary hover:underline font-medium"
                       >
                         Reset
                       </button>
@@ -487,7 +487,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                       className={cn(
                         'w-9 h-9 rounded-md border shadow-sm transition-all',
                         showMarkerColorPicker
-                          ? 'border-blue-500 ring-2 ring-blue-500/20'
+                          ? 'border-primary ring-2 ring-primary/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                       )}
                       style={{ backgroundColor: effectiveMarkerColor }}
@@ -538,7 +538,7 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                         className={cn(
                           "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
                           isActive
-                            ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                            ? "bg-primary border-primary text-white shadow-sm"
                             : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                         )}
                       >

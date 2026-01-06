@@ -191,7 +191,7 @@ export function ControlDrawer({
                   />
                 </div>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-xs text-blue-800 dark:text-blue-200">
+                <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg text-xs text-primary dark:text-primary/90">
                   <p className="font-medium mb-1">Single Location Mode</p>
                   <p className="opacity-90">Search for a city, address, or landmark. The map will center on your location with a marker.</p>
                 </div>

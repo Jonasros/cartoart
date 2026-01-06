@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Login | Waymarker',
-  description: 'Sign in to save and share your map posters',
+  description: 'Sign in to save and share your adventure keepsakes',
 };
 
 export default async function LoginPage({
@@ -50,7 +50,7 @@ export default async function LoginPage({
               Don&apos;t have an account?{' '}
               <Link
                 href={params.redirect ? `/signup?redirect=${encodeURIComponent(params.redirect)}` : '/signup'}
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-primary dark:text-primary hover:underline font-medium"
               >
                 Sign up
               </Link>

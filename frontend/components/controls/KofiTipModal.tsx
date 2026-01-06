@@ -73,7 +73,7 @@ export function KofiTipModal({ isOpen, onClose }: KofiTipModalProps) {
         className={cn(
           "relative w-full flex flex-col z-10",
           "bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl",
-          "shadow-2xl shadow-blue-500/10",
+          "shadow-2xl shadow-forest/10",
           "border border-white/20 dark:border-gray-700/50",
           "animate-in fade-in zoom-in-95 duration-300",
           "ring-1 ring-black/5 dark:ring-white/10",
@@ -110,7 +110,7 @@ export function KofiTipModal({ isOpen, onClose }: KofiTipModalProps) {
               "rounded-lg hover:bg-gray-100/80 dark:hover:bg-gray-700/80",
               "active:bg-gray-200/80 dark:active:bg-gray-600/80",
               "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white",
-              "transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+              "transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50",
               "touch-manipulation",
               // Mobile: larger touch target (min 44x44px)
               isMobile ? "p-3 min-w-[44px] min-h-[44px] flex items-center justify-center" : "p-3"
@@ -180,9 +180,9 @@ export function KofiTipModal({ isOpen, onClose }: KofiTipModalProps) {
             className={cn(
               "w-full flex items-center justify-center gap-2",
               "px-4 py-2.5 rounded-lg font-medium",
-              "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600",
+              "bg-accent hover:bg-accent/90",
               "text-white transition-colors duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2",
+              "focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2",
               "touch-manipulation",
               isMobile ? "text-sm" : "text-base"
             )}

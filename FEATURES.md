@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-03
+**Last Updated**: 2026-01-06
 
 ---
 
@@ -113,14 +113,14 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 
 Mode toggle below logo in left navigation:
 
-- **Poster Mode**: Current functionality (map styles, typography, export PNG)
-- **3D Print Mode**: Sculpture preview (R3F), base/material selection, export STL
+- **Adventure Print Mode**: Current functionality (map styles, typography, export PNG)
+- **Journey Sculpture Mode**: Sculpture preview (R3F), base/material selection, export STL
 
 Tabs adapt per mode:
 
 - Shared: Library, Location, Style
-- Poster only: Text, Frame
-- 3D only: Sculpture (base, size, material)
+- Print only: Text, Frame
+- Sculpture only: Base, Size, Material
 
 ### Technical Stack
 

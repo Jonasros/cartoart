@@ -75,7 +75,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                 className={cn(
                   'p-4 text-center rounded-xl border-2 transition-all',
                   config.shape === shape
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
+                    ? 'bg-primary/5 dark:bg-primary/10 border-primary'
                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 )}
               >
@@ -83,18 +83,18 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                   {shape === 'circular' ? (
                     <Circle className={cn(
                       'w-8 h-8',
-                      config.shape === shape ? 'text-blue-600' : 'text-gray-400'
+                      config.shape === shape ? 'text-primary' : 'text-gray-400'
                     )} />
                   ) : (
                     <Square className={cn(
                       'w-8 h-8',
-                      config.shape === shape ? 'text-blue-600' : 'text-gray-400'
+                      config.shape === shape ? 'text-primary' : 'text-gray-400'
                     )} />
                   )}
                 </div>
                 <div className={cn(
                   'text-sm font-semibold',
-                  config.shape === shape ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                  config.shape === shape ? 'text-primary dark:text-primary' : 'text-gray-700 dark:text-gray-300'
                 )}>
                   {label}
                 </div>
@@ -115,7 +115,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
               className={cn(
                 'py-3 px-2 text-center rounded-lg border transition-all',
                 config.size === size
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                  ? 'bg-primary border-primary text-white shadow-sm'
                   : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               )}
             >
@@ -179,13 +179,13 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                   className={cn(
                     'p-2.5 text-left rounded-lg border transition-all',
                     config.routeStyle === style
-                      ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
+                      ? 'bg-primary/5 dark:bg-primary/10 border-primary'
                       : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   )}
                 >
                   <div className={cn(
                     'text-xs font-semibold',
-                    config.routeStyle === style ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                    config.routeStyle === style ? 'text-primary dark:text-primary' : 'text-gray-700 dark:text-gray-300'
                   )}>
                     {label}
                   </div>
@@ -358,7 +358,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
               type="checkbox"
               checked={(config.terrainRotation ?? -1) === -1}
               onChange={(e) => onConfigChange({ terrainRotation: e.target.checked ? -1 : 0 })}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
             <span className="text-xs text-gray-700 dark:text-gray-300">Auto (start point at front)</span>
           </label>
@@ -375,7 +375,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                       className={cn(
                         'py-2 px-1 text-center rounded-lg border transition-all text-xs font-medium',
                         (config.terrainRotation ?? 0) === angle
-                          ? 'bg-blue-600 border-blue-600 text-white'
+                          ? 'bg-primary border-primary text-white'
                           : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300'
                       )}
                     >
@@ -422,7 +422,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
               className={cn(
                 'w-9 h-9 rounded-md border shadow-sm transition-all',
                 showColorPicker === 'terrain'
-                  ? 'border-blue-500 ring-2 ring-blue-500/20'
+                  ? 'border-primary ring-2 ring-primary/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
               )}
               style={{ backgroundColor: config.terrainColor }}
@@ -462,7 +462,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
               className={cn(
                 'w-9 h-9 rounded-md border shadow-sm transition-all',
                 showColorPicker === 'route'
-                  ? 'border-blue-500 ring-2 ring-blue-500/20'
+                  ? 'border-primary ring-2 ring-primary/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
               )}
               style={{ backgroundColor: config.routeColor }}
@@ -543,7 +543,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
               type="checkbox"
               checked={config.text.enabled}
               onChange={(e) => updateText({ enabled: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">Show engraved text</span>
           </label>
@@ -614,7 +614,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                 className={cn(
                   'w-full p-3 text-left rounded-lg border transition-all flex items-center justify-between',
                   config.material === material
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
+                    ? 'bg-primary/5 dark:bg-primary/10 border-primary'
                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 )}
               >
@@ -622,7 +622,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                   <div className={cn(
                     'text-sm font-medium',
                     config.material === material
-                      ? 'text-blue-700 dark:text-blue-300'
+                      ? 'text-primary dark:text-primary'
                       : 'text-gray-700 dark:text-gray-300'
                   )}>
                     {label}
@@ -632,7 +632,7 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
                   </div>
                 </div>
                 {config.material === material && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <div className="w-2 h-2 rounded-full bg-primary" />
                 )}
               </button>
             )

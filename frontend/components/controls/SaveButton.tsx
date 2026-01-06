@@ -129,7 +129,7 @@ export function SaveButton({
         className={cn(
           'group relative flex items-center gap-2 px-4 py-2 rounded-full font-medium shadow-md transition-all duration-300',
           hasUnsavedChanges
-            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
+            ? 'bg-primary text-white hover:bg-primary/90 hover:shadow-lg'
             : currentMapName
             ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750',
@@ -189,12 +189,12 @@ export function SaveButton({
                   type="button"
                   onClick={handleUpdateExisting}
                   disabled={isSaving}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   <Save className="h-5 w-5" />
                   <div className="text-left">
                     <div className="font-medium">Update "{currentMapName}"</div>
-                    <div className="text-xs text-blue-200">Overwrite the existing project</div>
+                    <div className="text-xs text-white/70">Overwrite the existing project</div>
                   </div>
                 </button>
 
@@ -256,7 +256,7 @@ export function SaveButton({
                     }}
                     placeholder="My Awesome Map"
                     autoFocus
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     disabled={isSaving}
                   />
                 </div>
@@ -282,7 +282,7 @@ export function SaveButton({
                   <button
                     type="submit"
                     disabled={!projectName.trim() || isSaving}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSaving ? 'Saving...' : 'Save'}
                   </button>

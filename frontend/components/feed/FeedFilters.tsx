@@ -69,11 +69,11 @@ export function FeedFilters({ currentSort, currentTimeRange, currentProductType 
       </div>
 
       <div className="flex items-center gap-2">
-        <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        <Calendar className="w-4 h-4 text-muted-foreground" />
         <select
           value={currentTimeRange}
           onChange={(e) => handleTimeRangeChange(e.target.value as TimeRange)}
-          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 text-sm border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {TIME_RANGE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -94,17 +94,18 @@ export function FeedFilters({ currentSort, currentTimeRange, currentProductType 
         <Button
           variant={currentProductType === 'poster' ? 'default' : 'outline'}
           onClick={() => handleProductTypeChange('poster')}
+          className={currentProductType === 'poster' ? 'bg-adventure-print hover:bg-adventure-print/90' : ''}
         >
           <ImageIcon className="w-4 h-4 mr-2" />
-          Posters
+          Prints
         </Button>
         <Button
           variant={currentProductType === 'sculpture' ? 'default' : 'outline'}
           onClick={() => handleProductTypeChange('sculpture')}
-          className={currentProductType === 'sculpture' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+          className={currentProductType === 'sculpture' ? 'bg-journey-sculpture hover:bg-journey-sculpture/90' : ''}
         >
           <Box className="w-4 h-4 mr-2" />
-          3D Sculptures
+          Sculptures
         </Button>
       </div>
     </div>

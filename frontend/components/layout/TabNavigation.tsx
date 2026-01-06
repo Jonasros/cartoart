@@ -60,8 +60,8 @@ export function TabNavigation({
       className={cn(
         "flex-1 md:w-full flex flex-col items-center justify-center py-2.5 md:py-5 px-3 space-y-1.5 transition-colors relative",
         activeTab === id && isDrawerOpen
-          ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20" 
-          : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+          ? "text-primary bg-primary/10"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
       )}
       title={label}
     >
@@ -69,8 +69,8 @@ export function TabNavigation({
       <span className="text-[11px] font-medium hidden md:block">{label}</span>
       {activeTab === id && isDrawerOpen && (
         <>
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 dark:bg-blue-400 hidden md:block" />
-          <div className="absolute left-0 right-0 top-0 h-1 bg-blue-600 dark:bg-blue-400 md:hidden" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary hidden md:block" />
+          <div className="absolute left-0 right-0 top-0 h-1 bg-primary md:hidden" />
         </>
       )}
     </button>
@@ -88,9 +88,9 @@ export function TabNavigation({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 md:relative md:h-full md:w-24 bg-white dark:bg-gray-800 border-t md:border-t-0 md:border-r border-gray-200 dark:border-gray-700 flex md:flex-col items-center z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-sm pb-safe md:pb-0">
-      <div className="hidden md:flex h-16 items-center justify-center w-full border-b border-gray-100 dark:border-gray-700 mb-2">
-        <Link href="/" className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg" />
+    <nav className="fixed bottom-0 left-0 right-0 h-16 md:relative md:h-full md:w-24 bg-card border-t md:border-t-0 md:border-r border-border flex md:flex-col items-center z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:shadow-sm pb-safe md:pb-0">
+      <div className="hidden md:flex h-16 items-center justify-center w-full border-b border-border/50 mb-2">
+        <Link href="/" className="w-8 h-8 rounded-full bg-gradient-to-tr from-forest to-forest-light shadow-lg" />
       </div>
 
       {/* Mode Toggle - Desktop only, below logo */}
@@ -114,11 +114,11 @@ export function TabNavigation({
       </div>
 
       {/* Explore and Account tabs on desktop - shows at bottom of sidenav */}
-      <div className="hidden md:flex md:flex-col md:w-full md:space-y-1 md:mt-auto md:mb-2 md:border-t md:border-gray-200 dark:md:border-gray-700 md:pt-2">
+      <div className="hidden md:flex md:flex-col md:w-full md:space-y-1 md:mt-auto md:mb-2 md:border-t md:border-border md:pt-2">
         {onOpenExplore && (
           <button
             onClick={onOpenExplore}
-            className="w-full flex flex-col items-center justify-center py-5 px-3 space-y-1.5 transition-colors text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="w-full flex flex-col items-center justify-center py-5 px-3 space-y-1.5 transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary"
             title="Explore Community Maps"
           >
             <Compass className="w-6 h-6" />

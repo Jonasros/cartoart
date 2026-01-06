@@ -57,4 +57,3 @@ export const LAYOUT = {
   // Estimated coordinate text height in cqw
   COORDS_HEIGHT_ESTIMATE: 2,
 } as const;
-

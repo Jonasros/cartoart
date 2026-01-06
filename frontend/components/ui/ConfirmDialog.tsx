@@ -59,8 +59,8 @@ export function ConfirmDialog({
       button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
     },
     default: {
-      icon: 'text-blue-600 dark:text-blue-400',
-      button: 'bg-blue-600 hover:bg-blue-700 text-white',
+      icon: 'text-primary dark:text-primary',
+      button: 'bg-primary hover:bg-primary/90 text-white',
     },
   };
 
@@ -91,7 +91,7 @@ export function ConfirmDialog({
           <div className={cn('flex-shrink-0 p-2 rounded-full',
             variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30' :
             variant === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-            'bg-blue-100 dark:bg-blue-900/30'
+            'bg-primary/10 dark:bg-primary/20'
           )}>
             <AlertTriangle className={cn('w-5 h-5', styles.icon)} />
           </div>

@@ -13,19 +13,19 @@ interface MapCardProps {
 export function MapCard({ map, userLiked = false }: MapCardProps) {
   return (
     <Link href={`/map/${map.id}`}>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col">
-        <div className="relative bg-gray-100 dark:bg-gray-700 w-full" style={{ minHeight: '200px' }}>
+      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer flex flex-col">
+        <div className="relative bg-secondary w-full" style={{ minHeight: '200px' }}>
           {/* Product Type Badge */}
           <div className="absolute top-2 left-2 z-10">
             {map.product_type === 'sculpture' ? (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-journey-sculpture text-white shadow-sm backdrop-blur-sm">
                 <Box className="w-3 h-3" />
-                3D
+                Sculpture
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-adventure-print text-white shadow-sm backdrop-blur-sm">
                 <ImageIcon className="w-3 h-3" />
-                Poster
+                Print
               </span>
             )}
           </div>
@@ -40,22 +40,22 @@ export function MapCard({ map, userLiked = false }: MapCardProps) {
             />
           ) : (
             <div className="aspect-[2/3] flex items-center justify-center">
-              <p className="text-gray-400 dark:text-gray-500 text-sm">No thumbnail</p>
+              <p className="text-muted-foreground text-sm">No thumbnail</p>
             </div>
           )}
         </div>
 
         <div className="p-4 flex-1 flex flex-col">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+          <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
             {map.title}
           </h3>
           {map.subtitle && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-1">
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-1">
               {map.subtitle}
             </p>
           )}
 
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-auto">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto">
             <div className="flex items-center gap-1">
               <User className="w-3 h-3" />
               <span>{map.author.display_name || map.author.username}</span>

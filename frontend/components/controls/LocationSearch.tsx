@@ -202,7 +202,7 @@ export function LocationSearch({ onLocationSelect, currentLocation }: LocationSe
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
           </div>
         )}
       </div>

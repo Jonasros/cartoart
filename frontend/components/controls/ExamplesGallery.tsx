@@ -14,7 +14,7 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onSelect, curr
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 px-1">
-        <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <Sparkles className="w-5 h-5 text-primary dark:text-primary" />
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
           Inspiration Gallery
         </h2>
@@ -31,9 +31,9 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onSelect, curr
               onClick={() => onSelect(example.config)}
               className={cn(
                 "group relative flex flex-col overflow-hidden rounded-xl border-2 transition-all duration-300 hover:shadow-lg text-left bg-white dark:bg-gray-800",
-                isActive 
-                  ? "border-blue-500 ring-4 ring-blue-500/10 shadow-md translate-y-[-2px]" 
-                  : "border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+                isActive
+                  ? "border-primary ring-4 ring-primary/10 shadow-md translate-y-[-2px]"
+                  : "border-gray-100 dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50"
               )}
             >
               <div className="aspect-[4/3] w-full relative bg-gray-50 dark:bg-gray-900 overflow-hidden">
@@ -52,7 +52,7 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onSelect, curr
                 </p>
               </div>
               {isActive && (
-                <div className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded-full shadow-lg">
+                <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full shadow-lg">
                   <Sparkles className="w-3 h-3" />
                 </div>
               )}
@@ -61,8 +61,8 @@ export const ExamplesGallery: React.FC<ExamplesGalleryProps> = ({ onSelect, curr
         })}
       </div>
       
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
-        <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed italic">
+      <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20 dark:border-primary/30">
+        <p className="text-[11px] text-primary dark:text-primary/90 leading-relaxed italic">
           Tip: Selecting a preset will replace all your current settings. Use these as a starting point for your own custom artwork.
         </p>
       </div>

@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-sora);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -44,75 +45,122 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Waymarker Outdoor Theme - Additional Colors */
+  --color-forest: var(--forest);
+  --color-forest-light: var(--forest-light);
+  --color-forest-dark: var(--forest-dark);
+  --color-summit: var(--summit);
+  --color-summit-hover: var(--summit-hover);
+  --color-trail: var(--trail);
+  --color-trail-light: var(--trail-light);
+  --color-stone-warm: var(--stone-warm);
+  --color-adventure-print: var(--adventure-print);
+  --color-journey-sculpture: var(--journey-sculpture);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.21 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  /* Waymarker Outdoor Color Palette */
+  /* Primary - Forest Pine Green */
+  --forest: oklch(0.45 0.12 145);           /* #2D5A3D - Deep forest green */
+  --forest-light: oklch(0.55 0.10 145);     /* #3D7A4D - Lighter green */
+  --forest-dark: oklch(0.35 0.10 145);      /* #1D4A2D - Darker green */
+
+  /* Accent - Summit Orange (CTAs) */
+  --summit: oklch(0.65 0.18 45);            /* #D4763A - Warm sunset orange */
+  --summit-hover: oklch(0.58 0.20 45);      /* #B85A20 - Darker orange hover */
+
+  /* Secondary - Trail Tan */
+  --trail: oklch(0.75 0.06 70);             /* #C4A77D - Warm tan/khaki */
+  --trail-light: oklch(0.92 0.03 70);       /* #F5EFE6 - Light cream */
+
+  /* Product Type Colors */
+  --adventure-print: oklch(0.45 0.12 145);  /* Forest green for prints */
+  --journey-sculpture: oklch(0.50 0.10 55); /* Bronze/copper for sculptures */
+
+  /* Warm Stone Neutrals */
+  --stone-warm: oklch(0.98 0.005 80);       /* #FAF9F7 - Off-white warm */
+
+  /* Core Theme Colors */
+  --background: oklch(0.98 0.005 80);       /* Warm off-white */
+  --foreground: oklch(0.22 0.02 80);        /* Warm dark stone */
+  --card: oklch(1 0.002 80);                /* Pure warm white */
+  --card-foreground: oklch(0.22 0.02 80);
+  --popover: oklch(1 0.002 80);
+  --popover-foreground: oklch(0.22 0.02 80);
+  --primary: oklch(0.45 0.12 145);          /* Forest green */
+  --primary-foreground: oklch(0.98 0.005 80);
+  --secondary: oklch(0.95 0.01 80);         /* Light warm gray */
+  --secondary-foreground: oklch(0.30 0.02 80);
+  --muted: oklch(0.95 0.01 80);
+  --muted-foreground: oklch(0.50 0.02 80);
+  --accent: oklch(0.65 0.18 45);            /* Summit orange */
+  --accent-foreground: oklch(0.98 0.005 80);
+  --destructive: oklch(0.55 0.20 25);       /* Rust red */
+  --border: oklch(0.90 0.015 80);           /* Warm light border */
+  --input: oklch(0.90 0.015 80);
+  --ring: oklch(0.45 0.12 145);             /* Forest green ring */
+  --chart-1: oklch(0.45 0.12 145);          /* Forest */
+  --chart-2: oklch(0.65 0.18 45);           /* Summit */
+  --chart-3: oklch(0.75 0.06 70);           /* Trail */
+  --chart-4: oklch(0.50 0.10 55);           /* Bronze */
+  --chart-5: oklch(0.55 0.15 145);          /* Light forest */
+  --sidebar: oklch(0.98 0.005 80);
+  --sidebar-foreground: oklch(0.22 0.02 80);
+  --sidebar-primary: oklch(0.45 0.12 145);
+  --sidebar-primary-foreground: oklch(0.98 0.005 80);
+  --sidebar-accent: oklch(0.95 0.01 80);
+  --sidebar-accent-foreground: oklch(0.30 0.02 80);
+  --sidebar-border: oklch(0.90 0.015 80);
+  --sidebar-ring: oklch(0.45 0.12 145);
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.92 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.552 0.016 285.938);
+  /* Dark mode - Warm dark stone base */
+  --forest: oklch(0.60 0.12 145);           /* Brighter forest for dark mode */
+  --forest-light: oklch(0.70 0.10 145);
+  --forest-dark: oklch(0.50 0.12 145);
+  --summit: oklch(0.70 0.18 45);            /* Brighter orange */
+  --summit-hover: oklch(0.65 0.20 45);
+  --trail: oklch(0.65 0.06 70);
+  --trail-light: oklch(0.30 0.02 70);
+  --adventure-print: oklch(0.60 0.12 145);
+  --journey-sculpture: oklch(0.60 0.10 55);
+  --stone-warm: oklch(0.15 0.01 80);
+
+  --background: oklch(0.15 0.01 80);        /* Warm dark */
+  --foreground: oklch(0.95 0.005 80);       /* Warm light */
+  --card: oklch(0.20 0.015 80);             /* Slightly lighter for cards */
+  --card-foreground: oklch(0.95 0.005 80);
+  --popover: oklch(0.20 0.015 80);
+  --popover-foreground: oklch(0.95 0.005 80);
+  --primary: oklch(0.60 0.12 145);          /* Brighter forest */
+  --primary-foreground: oklch(0.15 0.01 80);
+  --secondary: oklch(0.25 0.015 80);
+  --secondary-foreground: oklch(0.90 0.005 80);
+  --muted: oklch(0.25 0.015 80);
+  --muted-foreground: oklch(0.65 0.02 80);
+  --accent: oklch(0.70 0.18 45);            /* Brighter summit orange */
+  --accent-foreground: oklch(0.15 0.01 80);
+  --destructive: oklch(0.65 0.20 25);       /* Brighter rust */
+  --border: oklch(1 0.005 80 / 12%);
+  --input: oklch(1 0.005 80 / 15%);
+  --ring: oklch(0.60 0.12 145);
+  --chart-1: oklch(0.60 0.12 145);
+  --chart-2: oklch(0.70 0.18 45);
+  --chart-3: oklch(0.65 0.06 70);
+  --chart-4: oklch(0.60 0.10 55);
+  --chart-5: oklch(0.70 0.10 145);
+  --sidebar: oklch(0.18 0.01 80);
+  --sidebar-foreground: oklch(0.95 0.005 80);
+  --sidebar-primary: oklch(0.60 0.12 145);
+  --sidebar-primary-foreground: oklch(0.95 0.005 80);
+  --sidebar-accent: oklch(0.25 0.015 80);
+  --sidebar-accent-foreground: oklch(0.90 0.005 80);
+  --sidebar-border: oklch(1 0.005 80 / 12%);
+  --sidebar-ring: oklch(0.60 0.12 145);
 }
 
 @layer base {
@@ -180,4 +228,92 @@ div[id*="kofi"] {
 .my-masonry-grid_column > div {
   margin-bottom: 1.5rem;
   break-inside: avoid; /* Prevent items from breaking across columns */
+}
+
+/* ===== Micro-Interactions & Animations ===== */
+
+/* Card hover lift effect */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(45, 90, 61, 0.15);
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Smooth focus ring animation */
+.focus-ring-animated {
+  transition: box-shadow 0.2s ease;
+}
+.focus-ring-animated:focus-visible {
+  box-shadow: 0 0 0 3px oklch(0.45 0.12 145 / 30%);
+}
+
+/* Staggered fade-in animation for lists */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease forwards;
+}
+
+/* Stagger children animations */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in-up 0.3s ease forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+/* Smooth tab indicator slide */
+.tab-indicator {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.95 0.01 80) 0%,
+    oklch(0.98 0.005 80) 50%,
+    oklch(0.95 0.01 80) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(0.25 0.015 80) 0%,
+    oklch(0.30 0.015 80) 50%,
+    oklch(0.25 0.015 80) 100%
+  );
+  background-size: 200% 100%;
 }

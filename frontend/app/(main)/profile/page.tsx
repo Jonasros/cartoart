@@ -5,8 +5,8 @@ import { MyMapsList } from '@/components/profile/MyMapsList';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 
 export const metadata = {
-  title: 'My Maps | Waymarker',
-  description: 'View and manage your saved map posters',
+  title: 'My Adventures | Waymarker',
+  description: 'View and manage your adventure prints and journey sculptures',
 };
 
 export default async function ProfilePage() {
@@ -29,10 +29,10 @@ export default async function ProfilePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            My Maps
+            My Adventures
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Manage your saved and published map posters
+            Manage your saved and published adventure prints and journey sculptures
           </p>
         </div>
 

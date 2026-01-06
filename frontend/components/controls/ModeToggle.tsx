@@ -27,13 +27,13 @@ export function ModeToggle({ mode, onModeChange, hasRoute }: ModeToggleProps) {
           className={cn(
             'flex-1 basis-0 flex flex-col items-center justify-center py-2 px-2 rounded-md transition-all',
             mode === 'poster'
-              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+              ? 'bg-white dark:bg-gray-700 shadow-sm text-adventure-print'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           )}
-          title="Create 2D poster print"
+          title="Create Adventure Print"
         >
           <Image className="w-4 h-4" />
-          <span className="text-[10px] font-medium mt-1 hidden md:block">2D</span>
+          <span className="text-[10px] font-medium mt-1 hidden md:block">Print</span>
         </button>
 
         {/* Sculpture Mode Button */}
@@ -43,22 +43,22 @@ export function ModeToggle({ mode, onModeChange, hasRoute }: ModeToggleProps) {
           className={cn(
             'flex-1 basis-0 flex flex-col items-center justify-center py-2 px-2 rounded-md transition-all',
             mode === 'sculpture'
-              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+              ? 'bg-white dark:bg-gray-700 shadow-sm text-journey-sculpture'
               : sculptureDisabled
                 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           )}
-          title={sculptureDisabled ? 'Upload a GPX route to enable 3D sculpture mode' : 'Create 3D printed sculpture'}
+          title={sculptureDisabled ? 'Upload a GPX route to enable Journey Sculpture mode' : 'Create Journey Sculpture'}
         >
           <Box className="w-4 h-4" />
-          <span className="text-[10px] font-medium mt-1 hidden md:block">3D</span>
+          <span className="text-[10px] font-medium mt-1 hidden md:block">Sculpture</span>
         </button>
       </div>
 
       {/* Tooltip for disabled state */}
       {sculptureDisabled && mode === 'poster' && (
         <p className="text-[9px] text-gray-400 dark:text-gray-500 text-center mt-1.5 hidden md:block">
-          Upload GPX for 3D
+          Upload trail for sculpture
         </p>
       )}
     </div>

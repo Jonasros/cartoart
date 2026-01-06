@@ -120,7 +120,7 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
           className={cn(
             'relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors',
             isDragOver
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              ? 'border-primary bg-primary/5 dark:bg-primary/10'
               : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500',
             isLoading && 'opacity-50 pointer-events-none'
           )}
@@ -136,7 +136,7 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
           <div className="flex flex-col items-center gap-2">
             {isLoading ? (
               <>
-                <div className="h-8 w-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                <div className="h-8 w-8 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Processing GPX file...
                 </span>
@@ -164,7 +164,7 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
           {/* Route header */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 min-w-0">
-              <Route className="h-4 w-4 text-blue-500 flex-shrink-0" />
+              <Route className="h-4 w-4 text-primary flex-shrink-0" />
               <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {routeData.name || 'Uploaded Route'}
               </span>

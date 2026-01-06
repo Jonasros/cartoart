@@ -119,7 +119,7 @@ export default function ApiUsagePage() {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded text-white font-medium"
+              className="w-full py-2 bg-primary hover:bg-primary/90 disabled:bg-gray-600 rounded text-white font-medium"
             >
               {loading ? 'Loading...' : 'Access Dashboard'}
             </button>

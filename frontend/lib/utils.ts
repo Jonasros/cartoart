@@ -10,7 +10,7 @@ import { twMerge } from "tailwind-merge"
  * 
  * @example
  * ```tsx
- * cn('px-4', isActive && 'bg-blue-500', { 'text-white': isDark })
+ * cn('px-4', isActive && 'bg-primary', { 'text-white': isDark })
  * ```
  */
 export function cn(...inputs: ClassValue[]) {

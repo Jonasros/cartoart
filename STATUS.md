@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-03
+**Last Updated**: 2026-01-06
 
 ---
 
@@ -15,6 +15,7 @@
 | 3 | Social Features | ✅ Complete |
 | 4 | Style Expansion (3→11 styles) | ✅ Complete |
 | 5 | GPX Route Support | ✅ Complete |
+| 6 | "Trail & Summit" UI Redesign | ✅ Complete |
 
 ---
 
@@ -92,6 +93,38 @@
 - ✅ Confirmation dialogs
 - ✅ Non-interactive map on detail view
 - ✅ Explore drawer for browsing while editing
+
+### "Trail & Summit" UI Redesign
+
+Complete visual overhaul to position Waymarker as a premium outdoor adventure platform.
+
+**Color System**:
+
+- Primary: Forest Green (`#2D5A3D`) - outdoors/nature focus
+- Accent: Sunset Orange (`#D4763A`) - CTAs and highlights
+- Product colors: Adventure Print (forest green), Journey Sculpture (bronze/copper)
+- Earth-tone neutrals with warm stone/slate palette
+
+**Typography**:
+
+- Headlines: Sora (modern geometric with outdoor appeal)
+- Body: Source Sans 3 (highly readable, professional)
+- Stats/Data: JetBrains Mono (tabular numerics)
+
+**Terminology Updates**:
+
+- "Map Poster" → "Adventure Print"
+- "3D Sculpture" → "Journey Sculpture"
+- Mode toggle: "Print" / "Sculpture"
+- Consistent outdoor/adventure vocabulary throughout
+
+**UI Components**:
+
+- Product type badges with distinct colors (green for Print, bronze for Sculpture)
+- Updated buttons, inputs, and controls with earth-tone theme
+- New mountain logo with forest green to sunset orange gradient
+- Micro-interactions (card hover lift, button press, staggered animations)
+- Loading shimmer effects with warm stone colors
 
 ### GPX Route Support
 

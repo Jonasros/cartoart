@@ -51,7 +51,7 @@ export function RouteStyleControls({ route, onRouteChange }: RouteStyleControlsP
               className={cn(
                 'w-9 h-9 rounded-md border shadow-sm transition-all',
                 showColorPicker === 'route'
-                  ? 'border-blue-500 ring-2 ring-blue-500/20'
+                  ? 'border-primary ring-2 ring-primary/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
               )}
               style={{ backgroundColor: effectiveRouteColor }}
@@ -129,7 +129,7 @@ export function RouteStyleControls({ route, onRouteChange }: RouteStyleControlsP
                   className={cn(
                     "py-2 px-2 text-[10px] uppercase font-bold rounded border transition-all",
                     isActive
-                      ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                      ? "bg-primary border-primary text-white shadow-sm"
                       : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                   )}
                 >
@@ -163,7 +163,7 @@ export function RouteStyleControls({ route, onRouteChange }: RouteStyleControlsP
                   className={cn(
                     'w-7 h-7 rounded-md border shadow-sm transition-all',
                     showColorPicker === 'start'
-                      ? 'border-blue-500 ring-2 ring-blue-500/20'
+                      ? 'border-primary ring-2 ring-primary/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   )}
                   style={{ backgroundColor: effectiveStartColor }}
@@ -205,7 +205,7 @@ export function RouteStyleControls({ route, onRouteChange }: RouteStyleControlsP
                   className={cn(
                     'w-7 h-7 rounded-md border shadow-sm transition-all',
                     showColorPicker === 'end'
-                      ? 'border-blue-500 ring-2 ring-blue-500/20'
+                      ? 'border-primary ring-2 ring-primary/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   )}
                   style={{ backgroundColor: effectiveEndColor }}

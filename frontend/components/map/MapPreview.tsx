@@ -256,7 +256,7 @@ export function MapPreview({
                   map.resize();
                 }
               }}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-sm text-primary dark:text-primary hover:underline"
             >
               Try Again
             </button>
@@ -369,7 +369,7 @@ export function MapPreview({
         )}
       >
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 flex items-center gap-2 shadow-sm">
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-600" />
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           <span className="text-[10px] font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
             Loading Tiles...
           </span>

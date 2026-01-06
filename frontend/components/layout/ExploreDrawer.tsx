@@ -80,7 +80,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-2">
-            <Compass className="w-5 h-5 text-blue-600" />
+            <Compass className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Explore
             </h2>
@@ -100,7 +100,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium border-b-2 transition-colors",
               sort === 'top'
-                ? "text-blue-600 border-blue-600"
+                ? "text-primary border-primary"
                 : "text-gray-500 border-transparent hover:text-gray-700"
             )}
           >
@@ -112,7 +112,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
             className={cn(
               "flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium border-b-2 transition-colors",
               sort === 'fresh'
-                ? "text-blue-600 border-blue-600"
+                ? "text-primary border-primary"
                 : "text-gray-500 border-transparent hover:text-gray-700"
             )}
           >
@@ -130,7 +130,7 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
               className={cn(
                 "flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
                 productType === 'all'
-                  ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                  ? "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
                   : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
@@ -141,24 +141,24 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
                 productType === 'poster'
-                  ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                  ? "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
                   : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
               <ImageIcon className="w-3 h-3" />
-              Posters
+              Prints
             </button>
             <button
               onClick={() => setProductType('sculpture')}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors",
                 productType === 'sculpture'
-                  ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                  ? "bg-journey-sculpture/10 dark:bg-journey-sculpture/20 text-journey-sculpture"
                   : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               )}
             >
               <Box className="w-3 h-3" />
-              3D
+              Sculpture
             </button>
           </div>
         </div>
@@ -167,16 +167,16 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
         <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
           ) : maps.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
               <Compass className="w-12 h-12 text-gray-300 mb-3" />
               <p className="text-gray-500 dark:text-gray-400">
-                No maps to explore yet
+                No adventures to explore yet
               </p>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Be the first to publish!
+                Be the first to share!
               </p>
             </div>
           ) : (
@@ -193,9 +193,9 @@ export function ExploreDrawer({ isOpen, onClose }: ExploreDrawerProps) {
           <Link
             href="/feed"
             onClick={onClose}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white text-sm font-medium rounded-lg transition-colors"
           >
-            Browse All Maps
+            Browse All Adventures
             <ExternalLink className="w-4 h-4" />
           </Link>
         </div>
@@ -221,7 +221,7 @@ function ExploreCard({ map, onClose }: ExploreCardProps) {
     <Link
       href={`/map/${map.id}`}
       onClick={onClose}
-      className="block bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all hover:shadow-md"
+      className="block bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary transition-all hover:shadow-md"
     >
       {/* Thumbnail */}
       <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
@@ -242,14 +242,14 @@ function ExploreCard({ map, onClose }: ExploreCardProps) {
         {/* Product Type Badge */}
         <div className="absolute top-2 left-2 z-10">
           {map.product_type === 'sculpture' ? (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-journey-sculpture text-white shadow-sm backdrop-blur-sm">
               <Box className="w-3 h-3" />
-              3D
+              Sculpture
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary/90 text-white shadow-sm backdrop-blur-sm">
               <ImageIcon className="w-3 h-3" />
-              Poster
+              Print
             </span>
           )}
         </div>

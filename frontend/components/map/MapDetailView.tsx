@@ -83,14 +83,14 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
               {/* Product Type Badge */}
               <div className="flex items-center gap-2 mb-3">
                 {isSculpture ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/90 text-white shadow-sm backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-journey-sculpture text-white shadow-sm backdrop-blur-sm">
                     <Box className="w-3 h-3" />
-                    3D
+                    Sculpture
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/90 text-white shadow-sm backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary/90 text-white shadow-sm backdrop-blur-sm">
                     <Image className="w-3 h-3" />
-                    Poster
+                    Print
                   </span>
                 )}
               </div>

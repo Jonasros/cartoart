@@ -3,8 +3,8 @@ import { FeedHeader } from '@/components/feed/FeedHeader';
 import type { TimeRange, ProductTypeFilter } from '@/lib/actions/feed';
 
 export const metadata = {
-  title: 'Browse Maps | Waymarker',
-  description: 'Discover beautiful map posters created by the community',
+  title: 'Explore Adventures | Waymarker',
+  description: 'Discover adventure prints and journey sculptures created by the community',
 };
 
 interface FeedPageProps {
@@ -31,10 +31,10 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Discover Maps
+            Explore Adventures
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Explore beautiful map posters created by the community
+            Discover adventure prints and journey sculptures created by the community
           </p>
         </div>
 

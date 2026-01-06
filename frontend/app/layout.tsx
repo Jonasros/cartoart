@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Sora, Source_Sans_3, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -7,32 +7,43 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // import { KofiWidget } from "@/components/third-party/KofiWidget";
 import { ToastProvider } from "@/components/ui/Toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Sora - Display/Headlines font (outdoorsy, modern geometric)
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Source Sans 3 - Body text (highly readable, professional)
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+// JetBrains Mono - Stats/Data display
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Waymarker | Map Poster Generator",
-  description: "Create beautifully stylized map posters from real geographic data",
+  title: "Waymarker | Turn Your Adventures Into Art",
+  description: "Create stunning adventure prints and journey sculptures from your hiking trails, runs, and travels",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "Waymarker | Map Poster Generator",
-    description: "Create beautifully stylized map posters from real geographic data",
+    title: "Waymarker | Turn Your Adventures Into Art",
+    description: "Create stunning adventure prints and journey sculptures from your hiking trails, runs, and travels",
     images: ["/hero.jpg"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Waymarker | Map Poster Generator",
-    description: "Create beautifully stylized map posters from real geographic data",
+    title: "Waymarker | Turn Your Adventures Into Art",
+    description: "Create stunning adventure prints and journey sculptures from your hiking trails, runs, and travels",
     images: ["/hero.jpg"],
   },
 };
@@ -51,7 +62,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${sora.variable} ${sourceSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>

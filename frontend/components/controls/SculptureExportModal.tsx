@@ -127,12 +127,12 @@ export function SculptureExportModal({
         <div className="relative px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-journey-sculpture to-amber-600 text-white shadow-lg shadow-journey-sculpture/25">
                 <Box className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Export 3D Sculpture
+                  Export Journey Sculpture
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Download STL for 3D printing
@@ -247,8 +247,8 @@ export function SculptureExportModal({
           )}
 
           {/* Printing Tips */}
-          <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/30">
-            <p className="text-xs text-blue-700 dark:text-blue-300">
+          <div className="p-3 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30">
+            <p className="text-xs text-primary dark:text-primary/90">
               <strong>Printing Tips:</strong> Use 0.2mm layer height, 20% infill.
               Support material may be needed for overhangs. PLA or PETG recommended.
             </p>
@@ -262,8 +262,8 @@ export function SculptureExportModal({
             disabled={isExporting || !routeData}
             className={cn(
               'w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold transition-all',
-              'bg-gradient-to-r from-emerald-600 to-teal-600 text-white',
-              'hover:shadow-lg hover:shadow-emerald-500/20',
+              'bg-gradient-to-r from-journey-sculpture to-amber-600 text-white',
+              'hover:shadow-lg hover:shadow-journey-sculpture/20',
               'active:scale-[0.98]',
               'disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none'
             )}

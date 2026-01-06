@@ -85,7 +85,7 @@ export function SavedProjects({
           {projects.map((project) => (
             <div 
               key={project.id}
-              className="group p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-900/50 transition-all"
+              className="group p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-primary/30 dark:hover:border-primary/30 transition-all"
             >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -97,7 +97,7 @@ export function SavedProjects({
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleRename(project.id)}
-                          className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-blue-500 rounded focus:outline-none disabled:opacity-50"
+                          className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-primary rounded focus:outline-none disabled:opacity-50"
                           disabled={renamingId === project.id}
                         />
                         <button 
@@ -129,14 +129,14 @@ export function SavedProjects({
                         </h4>
                         {/* Product Type Badge */}
                         {project.productType === 'sculpture' ? (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex-shrink-0">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-journey-sculpture/10 text-journey-sculpture dark:bg-journey-sculpture/20 flex-shrink-0">
                             <Box className="w-2.5 h-2.5" />
-                            3D
+                            Sculpture
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-adventure-print/10 text-adventure-print dark:bg-adventure-print/20 flex-shrink-0">
                             <Image className="w-2.5 h-2.5" />
-                            2D
+                            Print
                           </span>
                         )}
                       </div>
@@ -150,7 +150,7 @@ export function SavedProjects({
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => startEditing(project)}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-primary transition-colors"
                       title="Rename"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -172,7 +172,7 @@ export function SavedProjects({
                 
                 <button
                   onClick={() => onLoad(project)}
-                  className="w-full mt-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded transition-colors"
+                  className="w-full mt-3 py-1.5 text-xs font-medium text-primary dark:text-primary bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 rounded transition-colors"
                 >
                   Load Project
               </button>

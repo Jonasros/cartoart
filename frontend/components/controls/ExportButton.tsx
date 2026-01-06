@@ -103,10 +103,10 @@ export function ExportButton({
           isExporting && "translate-x-4"
         )}>
           {isExporting
-            ? 'Exporting...'
+            ? 'Creating...'
             : isSculptureMode
-              ? 'Export STL'
-              : 'Export Poster'}
+              ? 'Download Sculpture'
+              : 'Download Print'}
         </span>
       </button>
 

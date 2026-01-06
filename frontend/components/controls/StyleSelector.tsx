@@ -39,14 +39,14 @@ export function StyleSelector({ selectedStyleId, onStyleSelect, currentConfig }:
                 className={cn(
                   'group relative flex items-start gap-4 p-4 text-left border rounded-lg transition-all w-full',
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-500/50 ring-1 ring-blue-500/20'
+                    ? 'border-primary bg-primary/5 dark:bg-primary/10 dark:border-primary/50 ring-1 ring-primary/20'
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 )}
               >
                 <div className="flex-1 space-y-1">
                   <div className={cn(
                     "font-medium transition-colors",
-                    isSelected ? "text-blue-700 dark:text-blue-300" : "text-gray-900 dark:text-white"
+                    isSelected ? "text-primary dark:text-primary" : "text-gray-900 dark:text-white"
                   )}>
                     {style.name}
                   </div>
@@ -56,7 +56,7 @@ export function StyleSelector({ selectedStyleId, onStyleSelect, currentConfig }:
                 </div>
                 
                 {isSelected && (
-                  <div className="text-blue-500 dark:text-blue-400">
+                  <div className="text-primary dark:text-primary">
                     <Check className="w-5 h-5" />
                   </div>
                 )}

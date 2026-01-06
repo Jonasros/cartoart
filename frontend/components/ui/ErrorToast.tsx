@@ -44,10 +44,10 @@ export function ErrorToast({ error, onDismiss }: ErrorToastProps) {
     // Info-level errors (recoverable)
     return {
       icon: Info,
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-      borderColor: 'border-blue-200 dark:border-blue-800',
-      textColor: 'text-blue-800 dark:text-blue-200',
-      iconColor: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-primary/5 dark:bg-primary/10',
+      borderColor: 'border-primary/20 dark:border-primary/30',
+      textColor: 'text-primary dark:text-primary',
+      iconColor: 'text-primary dark:text-primary',
     };
   };
 

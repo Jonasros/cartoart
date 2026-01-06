@@ -141,7 +141,7 @@ export function AccountPanel({
             Quick Actions
           </h3>
 
-          <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm">
+          <div className="p-4 bg-gradient-to-br from-primary/5 to-forest-light/5 dark:from-primary/10 dark:to-forest-light/10 rounded-lg border border-primary/20 dark:border-primary/30 shadow-sm">
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
@@ -179,17 +179,17 @@ export function AccountPanel({
                 <Button
                   variant="default"
                   size="sm"
-                  className="w-full justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full justify-center gap-2"
                   onClick={() => setShowPublishModal(true)}
                 >
                   <Upload className="w-4 h-4" />
-                  Publish to Feed
+                  Share Adventure
                 </Button>
               )}
 
               {currentMapStatus.hasUnsavedChanges && !currentMapStatus.isPublished && (
-                <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-                  💡 Publishing will share the last saved version. Save your changes first!
+                <p className="text-xs text-primary dark:text-primary/80 mt-2">
+                  💡 Sharing will use the last saved version. Save your changes first!
                 </p>
               )}
             </div>
@@ -204,10 +204,10 @@ export function AccountPanel({
         </h3>
 
         {user ? (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20 dark:border-primary/30">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
-                <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-full">
+                <UserIcon className="w-5 h-5 text-primary dark:text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">

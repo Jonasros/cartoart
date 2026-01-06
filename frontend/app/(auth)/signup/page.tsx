@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Sign Up | Waymarker',
-  description: 'Create an account to save and share your map posters',
+  description: 'Create an account to save and share your adventure keepsakes',
 };
 
 export default async function SignupPage({
@@ -33,7 +33,7 @@ export default async function SignupPage({
               Create Account
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Join Waymarker to save and share your map posters
+              Join Waymarker to save and share your adventure keepsakes
             </p>
           </div>
 
@@ -44,7 +44,7 @@ export default async function SignupPage({
               Already have an account?{' '}
               <Link
                 href={params.redirect ? `/login?redirect=${encodeURIComponent(params.redirect)}` : '/login'}
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-primary dark:text-primary hover:underline font-medium"
               >
                 Sign in
               </Link>
