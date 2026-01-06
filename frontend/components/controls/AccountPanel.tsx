@@ -13,10 +13,12 @@ import {
   Share2,
   Compass,
   Upload,
-  EyeOff
+  EyeOff,
+  Palette
 } from 'lucide-react';
 import { PublishModal } from '@/components/profile/PublishModal';
 import { publishMap, unpublishMap } from '@/lib/actions/maps';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 interface AccountPanelProps {
   onShareMap?: () => void;
@@ -306,6 +308,18 @@ export function AccountPanel({
             )}
           </>
         )}
+      </div>
+
+      {/* Appearance Section */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
+          <Palette className="w-4 h-4" />
+          Appearance
+        </h3>
+        <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+          <span className="text-sm text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Info Section */}
