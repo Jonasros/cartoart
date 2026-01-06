@@ -77,8 +77,8 @@
   --trail-light: oklch(0.92 0.03 70);       /* #F5EFE6 - Light cream */
 
   /* Product Type Colors */
-  --adventure-print: oklch(0.45 0.12 145);  /* Forest green for prints */
-  --journey-sculpture: oklch(0.50 0.10 55); /* Bronze/copper for sculptures */
+  --adventure-print: oklch(0.35 0.12 145);  /* Forest green for prints - darker for contrast */
+  --journey-sculpture: oklch(0.40 0.12 55); /* Bronze/copper for sculptures - darker for contrast */
 
   /* Warm Stone Neutrals */
   --stone-warm: oklch(0.98 0.005 80);       /* #FAF9F7 - Off-white warm */
