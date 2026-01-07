@@ -14,11 +14,13 @@ import {
   Compass,
   Upload,
   EyeOff,
-  Palette
+  Palette,
+  Link2,
 } from 'lucide-react';
 import { PublishModal } from '@/components/profile/PublishModal';
 import { publishMap, unpublishMap } from '@/lib/actions/maps';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ConnectedServices } from '@/components/account/ConnectedServices';
 
 interface AccountPanelProps {
   onShareMap?: () => void;
@@ -309,6 +311,17 @@ export function AccountPanel({
           </>
         )}
       </div>
+
+      {/* Connected Services - Only show for logged-in users */}
+      {user && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wide flex items-center gap-2">
+            <Link2 className="w-4 h-4" />
+            Connected Services
+          </h3>
+          <ConnectedServices />
+        </div>
+      )}
 
       {/* Appearance Section */}
       <div className="space-y-3">

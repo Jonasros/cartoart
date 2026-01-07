@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
-import { Upload, Route, X, Mountain, Clock, Ruler, TrendingUp, TrendingDown } from 'lucide-react';
+import { useCallback, useRef, useState, useEffect } from 'react';
+import { Upload, Route, X, Mountain, Clock, Ruler, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { parseGPXFile, formatDistance, formatElevation, formatDuration } from '@/lib/route';
-import type { RouteConfig, PosterLocation } from '@/types/poster';
+import type { RouteConfig, PosterLocation, RouteData } from '@/types/poster';
 import { cn } from '@/lib/utils';
-import { ControlLabel } from '@/components/ui/control-components';
+import { ControlLabel, Button } from '@/components/ui/control-components';
+import { StravaActivityPicker } from '@/components/strava/StravaActivityPicker';
+import type { StravaConnectionStatus } from '@/types/strava';
 
 interface RouteUploadProps {
   route: RouteConfig | undefined;
@@ -18,6 +20,25 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [stravaStatus, setStravaStatus] = useState<StravaConnectionStatus | null>(null);
+  const [showActivityPicker, setShowActivityPicker] = useState(false);
+
+  // Check Strava connection status on mount
+  useEffect(() => {
+    const checkStravaStatus = async () => {
+      try {
+        const response = await fetch('/api/strava/status');
+        if (response.ok) {
+          const data = await response.json();
+          setStravaStatus(data);
+        }
+      } catch (err) {
+        // Silently fail - user just won't see the Strava option
+        console.error('Failed to check Strava status:', err);
+      }
+    };
+    checkStravaStatus();
+  }, []);
 
   const handleFileSelect = useCallback(async (file: File) => {
     // Validate file type
@@ -104,6 +125,35 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
     setError(null);
   }, [onRouteChange]);
 
+  const handleStravaImport = useCallback((routeData: RouteData) => {
+    // Create new route config with the imported data
+    const newRoute: RouteConfig = {
+      data: routeData,
+      style: route?.style ?? {
+        color: '#FF4444',
+        width: 3,
+        opacity: 0.9,
+        lineStyle: 'solid',
+        showStartEnd: true,
+        startColor: '#22C55E',
+        endColor: '#EF4444',
+      },
+      privacyZones: route?.privacyZones ?? [],
+      showStats: route?.showStats ?? true,
+      statsPosition: route?.statsPosition ?? 'bottom-left',
+    };
+
+    onRouteChange(newRoute);
+
+    // Auto-populate title from activity name
+    if (onLocationChange && routeData.name) {
+      onLocationChange({
+        name: routeData.name,
+        city: '',
+      });
+    }
+  }, [route, onRouteChange, onLocationChange]);
+
   const routeData = route?.data;
 
   return (
@@ -112,51 +162,75 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
 
       {!routeData ? (
         // Upload zone
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={cn(
-            'relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors',
-            isDragOver
-              ? 'border-primary bg-primary/5 dark:bg-primary/10'
-              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500',
-            isLoading && 'opacity-50 pointer-events-none'
-          )}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".gpx"
-            onChange={handleInputChange}
-            className="sr-only"
-          />
-
-          <div className="flex flex-col items-center gap-2">
-            {isLoading ? (
-              <>
-                <div className="h-8 w-8 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Processing GPX file...
-                </span>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700">
-                  <Upload className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload GPX file
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Drag & drop or click to browse
-                  </p>
-                </div>
-              </>
+        <div className="space-y-3">
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={cn(
+              'relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors',
+              isDragOver
+                ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500',
+              isLoading && 'opacity-50 pointer-events-none'
             )}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".gpx"
+              onChange={handleInputChange}
+              className="sr-only"
+            />
+
+            <div className="flex flex-col items-center gap-2">
+              {isLoading ? (
+                <>
+                  <div className="h-8 w-8 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Processing GPX file...
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700">
+                    <Upload className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Upload GPX file
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Drag & drop or click to browse
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
+
+          {/* Strava Import Option */}
+          {stravaStatus?.connected && (
+            <button
+              onClick={() => setShowActivityPicker(true)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#FC4C02]/50 hover:bg-[#FC4C02]/5 transition-colors text-left"
+            >
+              <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#FC4C02]/10">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#FC4C02">
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Import from Strava
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Connected as {stravaStatus.athlete?.name}
+                </p>
+              </div>
+            </button>
+          )}
         </div>
       ) : (
         // Route info display
@@ -215,6 +289,13 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
       {error && (
         <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
       )}
+
+      {/* Strava Activity Picker Modal */}
+      <StravaActivityPicker
+        isOpen={showActivityPicker}
+        onClose={() => setShowActivityPicker(false)}
+        onSelectActivity={handleStravaImport}
+      />
     </div>
   );
 }
