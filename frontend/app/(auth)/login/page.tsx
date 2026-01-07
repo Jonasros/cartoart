@@ -1,4 +1,5 @@
 import { EmailAuthForm } from '@/components/auth/EmailAuthForm';
+import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { AuthBackground } from '@/components/auth/AuthBackground';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -52,6 +53,19 @@ export default async function LoginPage({
               <p className="text-sm text-destructive">{params.error}</p>
             </div>
           )}
+
+          <OAuthButtons redirectTo={params.redirect} />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-card text-muted-foreground">
+                or continue with email
+              </span>
+            </div>
+          </div>
 
           <EmailAuthForm mode="login" redirectTo={params.redirect} />
 
