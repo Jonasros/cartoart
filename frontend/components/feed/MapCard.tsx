@@ -9,9 +9,10 @@ import type { FeedMap } from '@/lib/actions/feed';
 interface MapCardProps {
   map: FeedMap;
   userLiked?: boolean;
+  isAuthenticated?: boolean;
 }
 
-export function MapCard({ map, userLiked = false }: MapCardProps) {
+export function MapCard({ map, userLiked = false, isAuthenticated = false }: MapCardProps) {
   // Get the appropriate thumbnail
   const thumbnailUrl = map.product_type === 'sculpture'
     ? map.sculpture_thumbnail_url
@@ -104,6 +105,7 @@ export function MapCard({ map, userLiked = false }: MapCardProps) {
                 mapId={map.id}
                 initialScore={map.vote_score}
                 initialLiked={userLiked}
+                isAuthenticated={isAuthenticated}
               />
             </div>
           </div>

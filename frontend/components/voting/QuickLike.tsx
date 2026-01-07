@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { voteOnMap, removeVote } from '@/lib/actions/votes';
 import { cn } from '@/lib/utils';
@@ -10,10 +11,11 @@ interface QuickLikeProps {
   mapId: string;
   initialScore: number;
   initialLiked?: boolean;
+  isAuthenticated?: boolean;
   className?: string;
 }
 
-export function QuickLike({ mapId, initialScore, initialLiked = false, className }: QuickLikeProps) {
+export function QuickLike({ mapId, initialScore, initialLiked = false, isAuthenticated = false, className }: QuickLikeProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [score, setScore] = useState(initialScore);
   const [isPending, startTransition] = useTransition();
@@ -21,10 +23,18 @@ export function QuickLike({ mapId, initialScore, initialLiked = false, className
   const [showHeartPop, setShowHeartPop] = useState(false);
   const [showScoreBump, setShowScoreBump] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when inside a link
     e.stopPropagation();
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
 
     const newLiked = !liked;
     const scoreDelta = newLiked ? 1 : -1;

@@ -118,6 +118,7 @@ export default async function MapDetailPage({ params }: MapDetailPageProps) {
       comments={comments}
       userVote={userVote}
       isOwner={user?.id === map.user_id}
+      isAuthenticated={!!user}
     />
   );
 }

@@ -11,9 +11,10 @@ interface FeedClientProps {
   initialSort: SortOption;
   initialTimeRange: TimeRange;
   initialProductType: ProductTypeFilter;
+  isAuthenticated?: boolean;
 }
 
-export function FeedClient({ initialSort, initialTimeRange, initialProductType }: FeedClientProps) {
+export function FeedClient({ initialSort, initialTimeRange, initialProductType, isAuthenticated = false }: FeedClientProps) {
   const { maps, loadMore, hasMore, loading, initialLoading, error } = useInfiniteFeed(initialSort, initialTimeRange, initialProductType);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +57,7 @@ export function FeedClient({ initialSort, initialTimeRange, initialProductType }
         </div>
       ) : (
         <>
-          <MapGrid maps={maps} />
+          <MapGrid maps={maps} isAuthenticated={isAuthenticated} />
 
           {/* Sentinel element for infinite scroll */}
           <div ref={sentinelRef} className="h-10 flex items-center justify-center">

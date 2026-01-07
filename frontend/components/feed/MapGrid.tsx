@@ -6,6 +6,7 @@ import { MapCard } from './MapCard';
 
 interface MapGridProps {
   maps: FeedMap[];
+  isAuthenticated?: boolean;
 }
 
 const breakpointColumnsObj = {
@@ -16,7 +17,7 @@ const breakpointColumnsObj = {
   0: 1               // mobile (below 640px)
 };
 
-export function MapGrid({ maps }: MapGridProps) {
+export function MapGrid({ maps, isAuthenticated = false }: MapGridProps) {
   if (maps.length === 0) {
     return (
       <div className="text-center py-12">
@@ -34,7 +35,7 @@ export function MapGrid({ maps }: MapGridProps) {
       columnClassName="my-masonry-grid_column"
     >
       {maps.map((map) => (
-        <MapCard key={map.id} map={map} userLiked={map.user_liked} />
+        <MapCard key={map.id} map={map} userLiked={map.user_liked} isAuthenticated={isAuthenticated} />
       ))}
     </Masonry>
   );

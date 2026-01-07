@@ -1,5 +1,6 @@
 import { FeedClient } from '@/components/feed/FeedClient';
 import { FeedHeader } from '@/components/feed/FeedHeader';
+import { createClient } from '@/lib/supabase/server';
 import type { TimeRange, ProductTypeFilter, SortOption } from '@/lib/actions/feed';
 
 export const metadata = {
@@ -27,6 +28,11 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
     ? (params.type as ProductTypeFilter)
     : 'all';
 
+  // Check if user is authenticated
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAuthenticated = !!user;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <FeedHeader />
@@ -41,7 +47,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
           </p>
         </div>
 
-        <FeedClient initialSort={sort} initialTimeRange={timeRange} initialProductType={productType} />
+        <FeedClient initialSort={sort} initialTimeRange={timeRange} initialProductType={productType} isAuthenticated={isAuthenticated} />
       </div>
     </div>
   );

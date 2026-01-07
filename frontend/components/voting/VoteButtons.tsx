@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Heart } from 'lucide-react';
 import { voteOnMap, removeVote } from '@/lib/actions/votes';
 import { cn } from '@/lib/utils';
@@ -10,9 +11,10 @@ interface VoteButtonsProps {
   mapId: string;
   initialVote: number | null;
   initialScore: number;
+  isAuthenticated?: boolean;
 }
 
-export function VoteButtons({ mapId, initialVote, initialScore }: VoteButtonsProps) {
+export function VoteButtons({ mapId, initialVote, initialScore, isAuthenticated = false }: VoteButtonsProps) {
   // Convert any positive vote to "liked" state (for backwards compatibility with old +1/-1 votes)
   const [liked, setLiked] = useState(initialVote === 1);
   const [score, setScore] = useState(initialScore);
@@ -21,8 +23,16 @@ export function VoteButtons({ mapId, initialVote, initialScore }: VoteButtonsPro
   const [showHeartPop, setShowHeartPop] = useState(false);
   const [showScoreBump, setShowScoreBump] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleClick = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     const newLiked = !liked;
     const scoreDelta = newLiked ? 1 : -1;
 

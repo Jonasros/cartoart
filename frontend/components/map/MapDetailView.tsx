@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { MapPreview } from './MapPreview';
 import { TextOverlay } from './TextOverlay';
 import { SculpturePreview } from '@/components/sculpture';
@@ -16,6 +16,7 @@ import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { ShareButton } from '@/components/social';
 import { Edit, Sparkles, Loader2, Box, Image } from 'lucide-react';
 import { duplicateMap } from '@/lib/actions/maps';
+import { createClient } from '@/lib/supabase/client';
 import type { SavedMap } from '@/lib/actions/maps';
 import type { Comment } from '@/lib/actions/comments';
 import { DEFAULT_SCULPTURE_CONFIG } from '@/types/sculpture';
@@ -25,19 +26,27 @@ interface MapDetailViewProps {
   comments: Comment[];
   userVote: number | null;
   isOwner: boolean;
+  isAuthenticated: boolean;
 }
 
-export function MapDetailView({ map, comments: initialComments, userVote, isOwner }: MapDetailViewProps) {
+export function MapDetailView({ map, comments: initialComments, userVote, isOwner, isAuthenticated }: MapDetailViewProps) {
   const [comments, setComments] = useState(initialComments);
   const [isDuplicating, setIsDuplicating] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleDuplicate = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     setIsDuplicating(true);
     try {
       const newMap = await duplicateMap(map.id);
       // Redirect directly to editor with the new map loaded
-      router.push(`/?mapId=${newMap.id}`);
+      router.push(`/create?mapId=${newMap.id}`);
     } catch (error) {
       console.error('Failed to duplicate map:', error);
       alert('Failed to duplicate map. Please try again.');
@@ -278,7 +287,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <VoteButtons mapId={map.id} initialVote={userVote} initialScore={map.vote_score} />
+                  <VoteButtons mapId={map.id} initialVote={userVote} initialScore={map.vote_score} isAuthenticated={isAuthenticated} />
                   <ShareButton
                     map={{
                       id: map.id,
@@ -293,7 +302,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                 </div>
 
                 {isOwner ? (
-                  <Link href={`/?mapId=${map.id}`}>
+                  <Link href={`/create?mapId=${map.id}`}>
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
@@ -331,7 +340,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                 Comments ({comments.length})
               </h2>
               
-              <CommentForm mapId={map.id} onCommentAdded={handleCommentAdded} />
+              <CommentForm mapId={map.id} onCommentAdded={handleCommentAdded} isAuthenticated={isAuthenticated} />
               
               <div className="mt-6">
                 <CommentList 
