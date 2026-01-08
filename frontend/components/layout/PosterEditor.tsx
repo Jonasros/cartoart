@@ -7,6 +7,7 @@ import { useSavedProjects } from '@/hooks/useSavedProjects';
 import { useMapExport } from '@/hooks/useMapExport';
 import { useSculptureConfig } from '@/hooks/useSculptureConfig';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
+import { usePrintValidation } from '@/hooks/usePrintValidation';
 import type { ProductMode } from '@/types/sculpture';
 import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
@@ -48,6 +49,12 @@ export function PosterEditor() {
     updateConfig: updateSculptureConfig,
     resetConfig: resetSculptureConfig,
   } = useSculptureConfig();
+
+  // Print validation for sculpture mode (config-based quick check)
+  const {
+    validation: printValidation,
+    isValidating: isPrintValidating,
+  } = usePrintValidation(sculptureConfig);
 
   // Get poster config first so we can use route data
   const {
@@ -486,6 +493,8 @@ export function PosterEditor() {
         productMode={productMode}
         sculptureConfig={sculptureConfig}
         updateSculptureConfig={updateSculptureConfig}
+        printValidation={printValidation}
+        isPrintValidating={isPrintValidating}
         useMyLocation={useMyLocation}
         isLocating={isLocating}
         locationError={locationError}

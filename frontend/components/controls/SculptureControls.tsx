@@ -11,8 +11,11 @@ import {
   ControlInput,
 } from '@/components/ui/control-components';
 import { SculptureExportModal } from './SculptureExportModal';
+import { PrintabilityBadge } from '@/components/sculpture/PrintabilityBadge';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
+import { useQuickPrintStatus } from '@/hooks/usePrintValidation';
 import type { RouteData } from '@/types/poster';
+import type { PrintValidationResult } from '@/lib/sculpture/printValidator';
 import type {
   SculptureConfig,
   SculptureShape,
@@ -36,9 +39,20 @@ interface SculptureControlsProps {
   onConfigChange: (updates: Partial<SculptureConfig>) => void;
   routeData?: RouteData | null;
   routeName?: string;
+  /** Optional full validation result from parent (requires 3D scene) */
+  printValidation?: PrintValidationResult | null;
+  /** Whether print validation is currently running */
+  isPrintValidating?: boolean;
 }
 
-export function SculptureControls({ config, onConfigChange, routeData, routeName }: SculptureControlsProps) {
+export function SculptureControls({
+  config,
+  onConfigChange,
+  routeData,
+  routeName,
+  printValidation,
+  isPrintValidating,
+}: SculptureControlsProps) {
   const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -48,6 +62,9 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
     config.terrainResolution,
     config.terrainMode
   );
+
+  // Quick print status (always available, config-based only)
+  const quickStatus = useQuickPrintStatus(config);
 
   const updateText = (updates: Partial<SculptureTextConfig>) => {
     onConfigChange({ text: { ...config.text, ...updates } });
@@ -64,6 +81,14 @@ export function SculptureControls({ config, onConfigChange, routeData, routeName
         elevationGrid={elevationGrid ?? undefined}
         routeName={routeName}
       />
+
+      {/* Printability Status */}
+      <PrintabilityBadge
+        validation={printValidation ?? null}
+        quickStatus={quickStatus}
+        isLoading={isPrintValidating}
+      />
+
       {/* Shape Selection */}
       <ControlSection title="Shape">
         <div className="grid grid-cols-2 gap-3">

@@ -19,6 +19,7 @@ import { SculptureStylePresets } from '@/components/controls/SculptureStylePrese
 import type { Tab } from './TabNavigation';
 import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette, SavedProject, RouteConfig } from '@/types/poster';
 import type { SculptureConfig, ProductMode } from '@/types/sculpture';
+import type { PrintValidationResult } from '@/lib/sculpture/printValidator';
 
 interface ControlDrawerProps {
   activeTab: Tab;
@@ -49,6 +50,9 @@ interface ControlDrawerProps {
   productMode: ProductMode;
   sculptureConfig: SculptureConfig;
   updateSculptureConfig: (updates: Partial<SculptureConfig>) => void;
+  // Print validation props
+  printValidation?: PrintValidationResult | null;
+  isPrintValidating?: boolean;
   // Location feature
   useMyLocation: () => void;
   isLocating: boolean;
@@ -79,6 +83,8 @@ export function ControlDrawer({
   productMode,
   sculptureConfig,
   updateSculptureConfig,
+  printValidation,
+  isPrintValidating,
   useMyLocation,
   isLocating,
   locationError,
@@ -344,6 +350,8 @@ export function ControlDrawer({
             onConfigChange={updateSculptureConfig}
             routeData={config.route?.data}
             routeName={config.route?.data?.name || config.location?.name}
+            printValidation={printValidation}
+            isPrintValidating={isPrintValidating}
           />
         )}
 
