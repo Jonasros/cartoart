@@ -9,6 +9,7 @@ import { StyleShowcase } from './StyleShowcase';
 import { ProductFormats } from './ProductFormats';
 import { CommunityPreview } from './CommunityPreview';
 import { FinalCTA } from './FinalCTA';
+import { Footer } from '@/components/layout/Footer';
 
 export function LandingPage() {
   return (
@@ -39,6 +40,9 @@ export function LandingPage() {
 
       {/* Final CTA */}
       <FinalCTA />
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }

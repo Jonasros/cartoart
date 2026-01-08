@@ -7,6 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // import { KofiWidget } from "@/components/third-party/KofiWidget";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { CookieConsent } from "@/components/CookieConsent";
 
 // Sora - Display/Headlines font (outdoorsy, modern geometric)
 const sora = Sora({
@@ -85,6 +86,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ToastProvider>
             {children}
+            <CookieConsent />
           </ToastProvider>
         </ThemeProvider>
       </body>

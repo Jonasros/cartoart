@@ -28,7 +28,7 @@ export function StyleShowcase() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-stone-100 dark:bg-stone-900/50 overflow-hidden">
+    <section id="styles" className="py-24 md:py-32 bg-stone-100 dark:bg-stone-900/50 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <motion.div

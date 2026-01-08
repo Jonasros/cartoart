@@ -69,11 +69,16 @@ frontend/
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Main editor |
+| `/` | Marketing landing page |
+| `/create` | Map editor |
 | `/login`, `/signup` | Auth pages |
 | `/feed` | Published maps gallery |
 | `/map/[id]` | Single map detail view |
 | `/profile` | User's saved maps |
+| `/faq` | Frequently asked questions |
+| `/terms` | Terms of Service |
+| `/privacy` | Privacy Policy |
+| `/cookies` | Cookie Policy |
 
 ### API Routes
 
