@@ -4,7 +4,22 @@ import { motion } from 'framer-motion';
 import { Palette, Layers, Mountain, Printer } from 'lucide-react';
 import { fadeInUp } from '@/lib/animations/landing';
 
-const capabilities = [
+// Strava icon component
+const StravaIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="currentColor">
+    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7.03 13.828h4.169" />
+  </svg>
+);
+
+interface Capability {
+  icon: React.ComponentType<{ className?: string }>;
+  value: string;
+  label: string;
+  description: string;
+  isStrava?: boolean;
+}
+
+const capabilities: Capability[] = [
   {
     icon: Palette,
     value: '11',
@@ -22,6 +37,13 @@ const capabilities = [
     value: '3D',
     label: 'Terrain',
     description: 'Real elevation data',
+  },
+  {
+    icon: StravaIcon,
+    value: '',
+    label: 'Strava Sync',
+    description: 'One-click import',
+    isStrava: true,
   },
   {
     icon: Printer,
@@ -48,15 +70,25 @@ export function CapabilitiesBar() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="flex items-center gap-4 group"
             >
-              <div className="p-3 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary group-hover:scale-110 transition-transform duration-300">
+              <div className={`p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 ${
+                item.isStrava
+                  ? 'bg-[#FC4C02]/10 dark:bg-[#FC4C02]/20 text-[#FC4C02]'
+                  : 'bg-primary/10 dark:bg-primary/20 text-primary'
+              }`}>
                 <item.icon className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-stone-900 dark:text-white font-mono">
-                    {item.value}
-                  </span>
-                  <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">
+                  {item.value && (
+                    <span className="text-2xl font-bold text-stone-900 dark:text-white font-mono">
+                      {item.value}
+                    </span>
+                  )}
+                  <span className={`text-sm font-semibold ${
+                    item.isStrava
+                      ? 'text-[#FC4C02]'
+                      : 'text-stone-700 dark:text-stone-300'
+                  }`}>
                     {item.label}
                   </span>
                 </div>

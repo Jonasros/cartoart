@@ -9,10 +9,10 @@ const steps = [
   {
     number: '01',
     icon: Upload,
-    title: 'Upload or Search',
+    title: 'Connect or Upload',
     description:
-      'Drop a GPX file from your favorite tracking app, or search for any location on Earth. Your adventure awaits.',
-    features: ['GPX file support', 'Location search', 'Any adventure'],
+      'Connect your Strava account in one click, drop a GPX file, or search for any location on Earth. Your adventure awaits.',
+    features: ['Strava sync', 'GPX upload', 'Location search'],
   },
   {
     number: '02',

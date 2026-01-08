@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-06
+**Last Updated**: 2026-01-08
 
 ---
 
@@ -16,6 +16,8 @@
 | 4 | Style Expansion (3→11 styles) | ✅ Complete |
 | 5 | GPX Route Support | ✅ Complete |
 | 6 | "Trail & Summit" UI Redesign | ✅ Complete |
+| 7 | Marketing Landing Page | ✅ Complete |
+| 8 | Strava Connect Integration | ✅ Complete |
 
 ---
 
@@ -24,9 +26,18 @@
 ### Authentication & Users
 
 - ✅ Email/password authentication
-- ✅ OAuth sign-in (Google - temporarily disabled)
+- ✅ OAuth sign-in (Google)
 - ✅ Protected routes with middleware
 - ✅ User sessions via Supabase Auth
+
+### Connected Services
+
+- ✅ Strava OAuth integration (connect/disconnect)
+- ✅ Import activities from Strava
+- ✅ Auto-refresh Strava access tokens
+- ✅ Activity picker with search and filtering
+- ✅ Convert Strava streams to RouteData format
+- ✅ Connected accounts stored in Supabase
 
 ### Map Editor
 
@@ -154,6 +165,19 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 - ✅ Manual pitch (tilt) and bearing (rotation) sliders
 - ✅ Perspective settings persist in saved/published maps
 - ✅ Height-based color gradients using palette colors
+
+### Marketing Landing Page
+
+- ✅ Hero section with animated floating poster examples
+- ✅ Capabilities bar with product stats
+- ✅ Use cases section (Memories, Gifts, Souvenirs)
+- ✅ "How It Works" 3-step flow
+- ✅ Style showcase gallery (9 map styles)
+- ✅ Product formats section (Prints vs Sculptures)
+- ✅ Community preview with published examples
+- ✅ Final CTA section
+- ✅ Scroll-triggered animations (Framer Motion)
+- ✅ Animated auth page backgrounds with real poster examples
 
 ---
 

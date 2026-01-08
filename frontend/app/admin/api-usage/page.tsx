@@ -26,6 +26,20 @@ interface UsageData {
   inMemoryCounts: Record<string, { requests: number; tilejson: number; errors: number }>;
 }
 
+// Helper to check if a source is Strava-related
+const isStravaSource = (source: string) => source.startsWith('strava-');
+
+// Helper to get display name for Strava sources
+const getStravaDisplayName = (source: string) => {
+  const names: Record<string, string> = {
+    'strava-activities': 'List Activities',
+    'strava-activity': 'Activity Detail',
+    'strava-streams': 'GPS Streams',
+    'strava-token-refresh': 'Token Refresh',
+  };
+  return names[source] || source;
+};
+
 export default function ApiUsagePage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -204,9 +218,54 @@ export default function ApiUsagePage() {
               </div>
             </div>
 
-            {/* Totals by Source */}
+            {/* Strava API Usage */}
+            {(() => {
+              const stravaSources = Object.entries(data.totalsBySource).filter(([source]) => isStravaSource(source));
+              const stravaTotal = stravaSources.reduce((acc, [, stats]) => ({
+                requests: acc.requests + stats.requests,
+                errors: acc.errors + stats.errors,
+              }), { requests: 0, errors: 0 });
+
+              if (stravaSources.length > 0 || stravaTotal.requests > 0) {
+                return (
+                  <div className="bg-gray-800 rounded-lg p-6 mb-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 bg-[#FC4C02] rounded flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
+                          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7.03 13.828h4.169" />
+                        </svg>
+                      </div>
+                      <h2 className="text-lg font-semibold text-white">Strava API Usage</h2>
+                      <span className="ml-auto text-2xl font-bold text-white">
+                        {stravaTotal.requests.toLocaleString()} <span className="text-sm font-normal text-gray-400">calls</span>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {stravaSources.map(([source, stats]) => (
+                        <div key={source} className="bg-gray-700/50 rounded-lg p-3">
+                          <h3 className="text-xs font-medium text-gray-400 mb-1">{getStravaDisplayName(source)}</h3>
+                          <div className="text-xl font-bold text-white">
+                            {stats.requests.toLocaleString()}
+                          </div>
+                          {stats.errors > 0 && (
+                            <div className="text-xs text-red-400 mt-1">
+                              {stats.errors} errors
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Tile Provider Usage */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {Object.entries(data.totalsBySource).map(([source, stats]) => (
+              {Object.entries(data.totalsBySource)
+                .filter(([source]) => !isStravaSource(source))
+                .map(([source, stats]) => (
                 <div key={source} className="bg-gray-800 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-400 uppercase mb-2">{source}</h3>
                   <div className="text-2xl font-bold text-white mb-2">

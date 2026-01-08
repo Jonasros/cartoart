@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getValidAccessToken } from '@/lib/strava/refreshToken';
 import { convertStravaToRouteData } from '@/lib/strava/convertToRouteData';
+import { trackApiRequest } from '@/lib/api-usage/tracker';
 import type { StravaActivity, StravaStream } from '@/types/strava';
 
 interface RouteParams {
@@ -45,6 +46,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!activityResponse.ok) {
       console.error('Strava activity fetch failed:', await activityResponse.text());
+      trackApiRequest('strava-activity', { isError: true });
       return NextResponse.json(
         { error: 'Failed to fetch activity' },
         { status: activityResponse.status }
@@ -53,11 +55,16 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!streamsResponse.ok) {
       console.error('Strava streams fetch failed:', await streamsResponse.text());
+      trackApiRequest('strava-streams', { isError: true });
       return NextResponse.json(
         { error: 'Failed to fetch activity streams' },
         { status: streamsResponse.status }
       );
     }
+
+    // Track successful API calls
+    trackApiRequest('strava-activity');
+    trackApiRequest('strava-streams');
 
     const activity: StravaActivity = await activityResponse.json();
     const streams: StravaStream = await streamsResponse.json();

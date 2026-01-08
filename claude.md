@@ -14,11 +14,13 @@
 ### What's Working
 - 11 map styles with 15+ palettes
 - GPX route upload with styling (color, width, opacity, dash patterns)
+- Strava Connect: import activities directly from your Strava account
 - 3D terrain elevation with MapTiler terrain-rgb tiles
 - 3D buildings with style presets & perspective controls
 - High-res PNG export (up to 7200x10800px)
 - Social features (feed, likes, comments, sharing)
-- User auth & map persistence via Supabase
+- User auth (email/password + Google OAuth) via Supabase
+- Marketing landing page with scroll animations
 
 ---
 
@@ -40,19 +42,25 @@ frontend/
 ├── app/
 │   ├── (auth)/           # Login, signup
 │   ├── (main)/           # Feed, profile, map detail
-│   ├── api/              # geocode, tiles, publish
-│   └── page.tsx          # Main editor
+│   ├── api/              # geocode, tiles, publish, strava/*
+│   └── page.tsx          # Landing page
 ├── components/
+│   ├── account/          # ConnectedServices (Strava)
 │   ├── controls/         # Editor control panels
+│   ├── landing/          # Marketing landing page sections
 │   ├── map/              # MapPreview, TextOverlay
+│   ├── strava/           # StravaActivityPicker
 │   └── ui/               # Shared components
 ├── lib/
 │   ├── actions/          # Server actions (maps, votes, comments)
 │   ├── route/            # GPX parsing
+│   ├── strava/           # Strava API helpers (convertToRouteData, refreshToken)
 │   ├── styles/           # 11 map style definitions
 │   └── validation/       # Zod schemas
 └── types/
-    └── poster.ts         # Core type definitions
+    ├── poster.ts         # Core type definitions
+    ├── strava.ts         # Strava API types
+    └── database.ts       # Supabase types (includes connected_accounts)
 ```
 
 ---
@@ -68,9 +76,19 @@ frontend/
 | `/profile` | User's saved maps |
 
 ### API Routes
+
 - `/api/geocode` - Location search (Nominatim)
 - `/api/tiles/[...path]` - Tile proxy
 - `/api/publish` - Map publishing
+
+### Strava API Routes
+
+- `/api/strava/authorize` - Initiate Strava OAuth flow
+- `/api/strava/callback` - Handle OAuth callback, store tokens
+- `/api/strava/status` - Check connection status
+- `/api/strava/disconnect` - Remove Strava connection
+- `/api/strava/activities` - List user's Strava activities
+- `/api/strava/activities/[id]` - Get activity detail with GPS streams
 
 ---
 

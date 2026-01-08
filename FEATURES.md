@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-06
+**Last Updated**: 2026-01-08
 
 ---
 
@@ -180,7 +180,7 @@ See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for complete compon
 - [ ] Elevation gradient coloring
 - [ ] Glow/shadow effects on route
 - [ ] Mile/KM markers along route
-- [ ] Strava OAuth integration
+- [x] Strava OAuth integration ✅
 - [ ] AllTrails integration
 - [ ] Garmin Connect integration
 

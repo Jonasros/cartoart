@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getValidAccessToken } from '@/lib/strava/refreshToken';
+import { trackApiRequest } from '@/lib/api-usage/tracker';
 import type { StravaActivity, StravaActivitySummary } from '@/types/strava';
 
 export async function GET(request: Request) {
@@ -40,12 +41,14 @@ export async function GET(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Strava activities fetch failed:', errorText);
+      trackApiRequest('strava-activities', { isError: true });
       return NextResponse.json(
         { error: 'Failed to fetch activities' },
         { status: response.status }
       );
     }
 
+    trackApiRequest('strava-activities');
     const activities: StravaActivity[] = await response.json();
 
     // Filter to activities with GPS data and transform to summary format

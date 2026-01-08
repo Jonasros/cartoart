@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { trackApiRequest } from '@/lib/api-usage/tracker';
 import type { StravaRefreshResponse } from '@/types/strava';
 import type { Database } from '@/types/database';
 
@@ -63,9 +64,11 @@ export async function getValidAccessToken(userId: string): Promise<string | null
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Strava token refresh failed:', errorText);
+      trackApiRequest('strava-token-refresh', { isError: true });
       return null;
     }
 
+    trackApiRequest('strava-token-refresh');
     const tokenData: StravaRefreshResponse = await response.json();
 
     // Update tokens in database

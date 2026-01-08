@@ -4,6 +4,7 @@ import { HeroSection } from './HeroSection';
 import { CapabilitiesBar } from './CapabilitiesBar';
 import { UseCasesSection } from './UseCasesSection';
 import { HowItWorksSection } from './HowItWorksSection';
+import { StravaIntegration } from './StravaIntegration';
 import { StyleShowcase } from './StyleShowcase';
 import { ProductFormats } from './ProductFormats';
 import { CommunityPreview } from './CommunityPreview';
@@ -23,6 +24,9 @@ export function LandingPage() {
 
       {/* How It Works - 3 step flow */}
       <HowItWorksSection />
+
+      {/* Strava Integration - Easy import callout */}
+      <StravaIntegration />
 
       {/* Style Showcase - Gallery of 9 map styles */}
       <StyleShowcase />
