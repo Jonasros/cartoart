@@ -14,7 +14,10 @@ interface CircularBaseProps {
  * Creates a coin-like platform for the terrain relief.
  */
 export function CircularBase({ config }: CircularBaseProps) {
-  const { size, baseHeight, rimHeight, terrainColor, material } = config;
+  const { size, baseHeight, rimHeight, terrainColor, baseColor, material } = config;
+
+  // Use baseColor if set, otherwise fall back to terrainColor
+  const platformColor = baseColor || terrainColor;
 
   // Convert cm to scene units (10 cm = 1 unit, matching TerrainMesh scale)
   const sceneSize = size / 10;
@@ -25,10 +28,10 @@ export function CircularBase({ config }: CircularBaseProps) {
 
   // Create a slightly darker color for the rim
   const rimColor = useMemo(() => {
-    const color = new THREE.Color(terrainColor);
+    const color = new THREE.Color(platformColor);
     color.multiplyScalar(0.85);
     return color;
-  }, [terrainColor]);
+  }, [platformColor]);
 
   // Get material properties based on selected material
   const materialProps = getMaterialProperties(material);
@@ -40,7 +43,7 @@ export function CircularBase({ config }: CircularBaseProps) {
       <mesh position={[0, -baseThickness / 2, 0]} receiveShadow castShadow>
         <cylinderGeometry args={[radius, radius, baseThickness, 64]} />
         <meshPhysicalMaterial
-          color={terrainColor}
+          color={platformColor}
           roughness={materialProps.roughness}
           metalness={materialProps.metalness}
           clearcoat={materialProps.clearcoat ?? 0}
@@ -78,7 +81,7 @@ export function CircularBase({ config }: CircularBaseProps) {
         >
           <ringGeometry args={[radius - rimWidth, radius, 64]} />
           <meshPhysicalMaterial
-            color={terrainColor}
+            color={platformColor}
             roughness={materialProps.roughness}
             metalness={materialProps.metalness}
             clearcoat={materialProps.clearcoat ?? 0}

@@ -14,7 +14,10 @@ interface RectangularBaseProps {
  * Creates a classic rectangular platform for the terrain relief.
  */
 export function RectangularBase({ config }: RectangularBaseProps) {
-  const { size, baseHeight, rimHeight, terrainColor, material } = config;
+  const { size, baseHeight, rimHeight, terrainColor, baseColor, material } = config;
+
+  // Use baseColor if set, otherwise fall back to terrainColor
+  const platformColor = baseColor || terrainColor;
 
   // Convert cm to scene units (10 cm = 1 unit, matching TerrainMesh scale)
   const sceneSize = size / 10;
@@ -24,10 +27,10 @@ export function RectangularBase({ config }: RectangularBaseProps) {
 
   // Create a slightly darker color for the rim
   const rimColor = useMemo(() => {
-    const color = new THREE.Color(terrainColor);
+    const color = new THREE.Color(platformColor);
     color.multiplyScalar(0.85);
     return color;
-  }, [terrainColor]);
+  }, [platformColor]);
 
   // Get material properties based on selected material
   const materialProps = getMaterialProperties(material);
@@ -57,7 +60,7 @@ export function RectangularBase({ config }: RectangularBaseProps) {
       <mesh position={[0, -baseThickness / 2, 0]} receiveShadow castShadow>
         <boxGeometry args={[sceneSize, baseThickness, sceneSize]} />
         <meshPhysicalMaterial
-          color={terrainColor}
+          color={platformColor}
           roughness={materialProps.roughness}
           metalness={materialProps.metalness}
           clearcoat={materialProps.clearcoat ?? 0}

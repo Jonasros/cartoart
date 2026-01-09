@@ -53,7 +53,7 @@ export function SculptureControls({
   printValidation,
   isPrintValidating,
 }: SculptureControlsProps) {
-  const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | 'base' | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Get elevation grid for export (now with terrain mode support)
@@ -470,6 +470,59 @@ export function SculptureControls({
               <HexColorPicker
                 color={config.terrainColor}
                 onChange={(color) => onConfigChange({ terrainColor: color })}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Base/Platform Color */}
+        <div className="space-y-2 relative">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Base Color
+          </ControlLabel>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowColorPicker(showColorPicker === 'base' ? null : 'base')}
+              className={cn(
+                'w-9 h-9 rounded-md border shadow-sm transition-all',
+                showColorPicker === 'base'
+                  ? 'border-primary ring-2 ring-primary/20'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+              )}
+              style={{ backgroundColor: config.baseColor || config.terrainColor }}
+              aria-label="Toggle base color picker"
+            />
+            <ControlInput
+              type="text"
+              value={config.baseColor || ''}
+              onChange={(e) => onConfigChange({ baseColor: e.target.value || undefined })}
+              className="font-mono"
+              placeholder={config.terrainColor}
+            />
+            {config.baseColor && (
+              <button
+                type="button"
+                onClick={() => onConfigChange({ baseColor: undefined })}
+                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                title="Reset to terrain color"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          <div className="text-[10px] text-gray-400">
+            {config.baseColor ? 'Custom base color' : 'Using terrain color'}
+          </div>
+          {showColorPicker === 'base' && (
+            <div className="absolute left-0 top-full mt-2 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+              <div
+                className="fixed inset-0 z-[-1]"
+                onClick={() => setShowColorPicker(null)}
+              />
+              <HexColorPicker
+                color={config.baseColor || config.terrainColor}
+                onChange={(color) => onConfigChange({ baseColor: color })}
               />
             </div>
           )}

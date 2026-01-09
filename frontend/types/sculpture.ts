@@ -74,6 +74,8 @@ export interface SculptureConfig {
   terrainColor: string;
   /** Route color */
   routeColor: string;
+  /** Base/platform color (optional, defaults to terrain color) */
+  baseColor?: string;
   /** Text configuration */
   text: SculptureTextConfig;
   /** Terrain rotation in degrees (-1 = auto-orient start to front) */
