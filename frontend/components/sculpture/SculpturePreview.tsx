@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useMemo, useRef, useImperativeHandle, forwardRef, useCallback } from 'react';
+import { Suspense, useMemo, useRef, useImperativeHandle, forwardRef, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage, Grid } from '@react-three/drei';
+import { OrbitControls, Stage, Grid, Environment, ContactShadows } from '@react-three/drei';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
 import { TerrainMesh } from './TerrainMesh';
@@ -11,6 +11,8 @@ import { CircularBase } from './CircularBase';
 import { RectangularBase } from './RectangularBase';
 import { SimpleTextMesh } from './TextMesh';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
+import { StudioLighting } from './StudioLighting';
+import { cleanupMaterialTextures } from './materials';
 
 /**
  * Ref handle for SculpturePreview, exposing capture functionality
@@ -190,6 +192,13 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
   function SculpturePreview({ routeData, config }, ref) {
     const canvasContainerRef = useRef<HTMLDivElement>(null);
 
+    // Cleanup material textures when component unmounts
+    useEffect(() => {
+      return () => {
+        cleanupMaterialTextures();
+      };
+    }, []);
+
     // Expose capture method via ref
     const captureCanvas = useCallback((): HTMLCanvasElement | null => {
       if (!canvasContainerRef.current) return null;
@@ -200,6 +209,16 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
     useImperativeHandle(ref, () => ({
       captureCanvas,
     }), [captureCanvas]);
+
+    // Visual enhancement settings
+    // Future: These could be configurable via config.visualEnhancements
+    const useEnhancedLighting = true;
+    const environmentPreset = 'studio';
+    const lightingPreset = 'studio';
+
+    // Calculate mesh size for contact shadows positioning
+    const meshSize = config.size / 10;
+    const baseHeight = config.rimHeight > 0 ? config.rimHeight / 10 : 0.05;
 
     return (
       <div ref={canvasContainerRef} className="w-full h-full bg-neutral-900 rounded-lg overflow-hidden relative">
@@ -220,18 +239,55 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
           gl={{ preserveDrawingBuffer: true }}
         >
           <Suspense fallback={<LoadingFallback />}>
-            <Stage
-              adjustCamera={false}
-              environment="city"
-              intensity={0.5}
-              shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
-            >
-              {routeData ? (
-                <SculptureScene routeData={routeData} config={config} />
-              ) : (
-                <EmptyState />
-              )}
-            </Stage>
+            {useEnhancedLighting ? (
+              // Enhanced lighting mode: Studio 3-point lighting + HDRI environment
+              <>
+                {/* HDRI Environment for realistic reflections */}
+                <Environment
+                  preset={environmentPreset}
+                  background={false}
+                  environmentIntensity={1.2}
+                />
+
+                {/* Professional 3-point studio lighting */}
+                <StudioLighting
+                  intensity={1.0}
+                  preset={lightingPreset}
+                />
+
+                {/* Contact shadows for grounding */}
+                <ContactShadows
+                  position={[0, -baseHeight / 2, 0]}
+                  opacity={0.65}
+                  scale={meshSize * 2.5}
+                  blur={2}
+                  far={meshSize * 2}
+                  resolution={512}
+                  color="#000000"
+                />
+
+                {/* Sculpture scene */}
+                {routeData ? (
+                  <SculptureScene routeData={routeData} config={config} />
+                ) : (
+                  <EmptyState />
+                )}
+              </>
+            ) : (
+              // Legacy mode: Use Stage component's auto-lighting
+              <Stage
+                adjustCamera={false}
+                environment="city"
+                intensity={0.5}
+                shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
+              >
+                {routeData ? (
+                  <SculptureScene routeData={routeData} config={config} />
+                ) : (
+                  <EmptyState />
+                )}
+              </Stage>
+            )}
           </Suspense>
 
           {/* Camera controls - target center of sculpture, frontal view */}

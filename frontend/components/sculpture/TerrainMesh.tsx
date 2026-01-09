@@ -335,6 +335,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
   }, [routeData, config, elevationGrid]);
 
   // Get material properties based on selected material
+  // Textures temporarily disabled for debugging - will enable after refinement
   const materialProps = getMaterialProperties(config.material);
 
   return (
@@ -347,6 +348,18 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
         envMapIntensity={materialProps.envMapIntensity ?? 0.5}
         flatShading={config.material === 'wood'}
+        // Enhanced texture properties (PLA layer lines, Wood grain)
+        normalMap={materialProps.normalMap}
+        normalScale={materialProps.normalScale}
+        roughnessMap={materialProps.roughnessMap}
+        map={materialProps.map}
+        // Resin SSS properties
+        transmission={materialProps.transmission ?? 0}
+        thickness={materialProps.thickness ?? 0}
+        ior={materialProps.ior ?? 1.5}
+        sheen={materialProps.sheen ?? 0}
+        sheenRoughness={materialProps.sheenRoughness ?? 0}
+        sheenColor={materialProps.sheenColor}
       />
     </mesh>
   );

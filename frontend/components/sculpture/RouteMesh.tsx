@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
-import { getMaterialProperties } from './materials';
+import { getRouteMaterialProperties, getMaterialProperties } from './materials';
 
 interface RouteMeshProps {
   routeData: RouteData;
@@ -176,8 +176,9 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     return new THREE.TubeGeometry(curve, segments, radius, radialSegments, false);
   }, [routeData, config]);
 
-  // Get material properties based on selected material
-  const materialProps = getMaterialProperties(config.material);
+  // Get route-specific material properties (shinier than terrain to stand out)
+  // Textures temporarily disabled for debugging
+  const materialProps = getRouteMaterialProperties(config.material);
 
   // Early return for engraved style (no mesh rendered) or empty geometry
   if (!geometry || geometry.attributes.position?.count === 0) {
@@ -188,12 +189,24 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     <mesh geometry={geometry} castShadow receiveShadow>
       <meshPhysicalMaterial
         color={config.routeColor}
-        roughness={materialProps.roughness * 0.7}
-        metalness={materialProps.metalness + 0.1}
+        roughness={materialProps.roughness}
+        metalness={materialProps.metalness}
         clearcoat={materialProps.clearcoat ?? 0}
         clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
         envMapIntensity={materialProps.envMapIntensity ?? 0.5}
         side={THREE.DoubleSide}
+        // Enhanced texture properties (PLA layer lines, Wood grain)
+        normalMap={materialProps.normalMap}
+        normalScale={materialProps.normalScale}
+        roughnessMap={materialProps.roughnessMap}
+        // Note: We don't use colorMap for route to preserve routeColor
+        // Resin SSS properties
+        transmission={materialProps.transmission ?? 0}
+        thickness={materialProps.thickness ?? 0}
+        ior={materialProps.ior ?? 1.5}
+        sheen={materialProps.sheen ?? 0}
+        sheenRoughness={materialProps.sheenRoughness ?? 0}
+        sheenColor={materialProps.sheenColor}
       />
     </mesh>
   );
