@@ -718,6 +718,61 @@ export function SculptureControls({
         </div>
       </ControlSection>
 
+      {/* Preview Settings */}
+      <ControlSection title="Preview">
+        <div className="space-y-3">
+          {/* Turntable Toggle */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Turntable
+              </div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                Auto-rotate for showcase
+              </div>
+            </div>
+            <button
+              onClick={() => onConfigChange({ turntableEnabled: !config.turntableEnabled })}
+              className={cn(
+                'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                config.turntableEnabled
+                  ? 'bg-primary'
+                  : 'bg-gray-200 dark:bg-gray-700'
+              )}
+              aria-label="Toggle turntable animation"
+            >
+              <span
+                className={cn(
+                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                  config.turntableEnabled ? 'translate-x-6' : 'translate-x-1'
+                )}
+              />
+            </button>
+          </div>
+
+          {/* Turntable Speed - only shown when enabled */}
+          {config.turntableEnabled && (
+            <div>
+              <ControlLabel className="text-[10px] uppercase text-gray-500">
+                Rotation Speed
+              </ControlLabel>
+              <ControlSlider
+                min="0.1"
+                max="1.0"
+                step="0.1"
+                value={config.turntableSpeed ?? 0.3}
+                onChange={(e) => onConfigChange({ turntableSpeed: parseFloat(e.target.value) })}
+                onValueChange={(value) => onConfigChange({ turntableSpeed: value })}
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                <span>Slow</span>
+                <span>Fast</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </ControlSection>
+
     </div>
   );
 }

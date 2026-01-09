@@ -18,11 +18,11 @@ interface StudioLightingProps {
  */
 const lightingPresets = {
   studio: {
-    // Balanced professional product photography lighting - enhanced for visibility
-    key: { intensity: 1.8, color: '#fff5e6', position: [4, 6, 3] as [number, number, number] },
-    fill: { intensity: 0.5, color: '#e6f0ff', position: [-3, 3, 2] as [number, number, number] },
-    rim: { intensity: 0.8, color: '#ffffff', position: [0, 2, -4] as [number, number, number] },
-    ambient: { intensity: 0.15 },
+    // Balanced professional product photography lighting - optimized for post-processing
+    key: { intensity: 1.2, color: '#fff5e6', position: [4, 6, 3] as [number, number, number] },
+    fill: { intensity: 0.35, color: '#e6f0ff', position: [-3, 3, 2] as [number, number, number] },
+    rim: { intensity: 0.5, color: '#ffffff', position: [0, 2, -4] as [number, number, number] },
+    ambient: { intensity: 0.1 },
   },
   dramatic: {
     // High contrast with strong shadows

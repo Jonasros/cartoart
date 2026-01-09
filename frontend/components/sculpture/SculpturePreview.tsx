@@ -1,7 +1,8 @@
 'use client';
 
 import { Suspense, useMemo, useRef, useImperativeHandle, forwardRef, useCallback, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stage, Grid, Environment, ContactShadows } from '@react-three/drei';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
@@ -12,6 +13,7 @@ import { RectangularBase } from './RectangularBase';
 import { SimpleTextMesh } from './TextMesh';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
 import { StudioLighting } from './StudioLighting';
+import { PostProcessing } from './PostProcessing';
 import { cleanupMaterialTextures } from './materials';
 
 /**
@@ -180,6 +182,33 @@ function SculptureScene({
 }
 
 /**
+ * Turntable wrapper for auto-rotation animation.
+ * Rotates children around Y axis at specified speed.
+ */
+function TurntableWrapper({
+  children,
+  enabled,
+  speed = 0.3,
+}: {
+  children: React.ReactNode;
+  enabled: boolean;
+  speed?: number;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((_, delta) => {
+    if (enabled && groupRef.current) {
+      // Speed is rotations per 10 seconds, so convert to radians per frame
+      // Full rotation = 2π radians, speed=0.3 means 0.3 rotations per 10s
+      const rotationPerSecond = (speed * Math.PI * 2) / 10;
+      groupRef.current.rotation.y += rotationPerSecond * delta;
+    }
+  });
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
+/**
  * 3D Sculpture Preview using React Three Fiber.
  * Displays terrain mesh with height mapping and route tube.
  *
@@ -242,11 +271,11 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
             {useEnhancedLighting ? (
               // Enhanced lighting mode: Studio 3-point lighting + HDRI environment
               <>
-                {/* HDRI Environment for realistic reflections */}
+                {/* HDRI Environment for realistic reflections - significantly reduced */}
                 <Environment
                   preset={environmentPreset}
                   background={false}
-                  environmentIntensity={1.2}
+                  environmentIntensity={0.3}
                 />
 
                 {/* Professional 3-point studio lighting */}
@@ -266,12 +295,17 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
                   color="#000000"
                 />
 
-                {/* Sculpture scene */}
-                {routeData ? (
-                  <SculptureScene routeData={routeData} config={config} />
-                ) : (
-                  <EmptyState />
-                )}
+                {/* Sculpture scene with optional turntable animation */}
+                <TurntableWrapper
+                  enabled={config.turntableEnabled ?? false}
+                  speed={config.turntableSpeed ?? 0.3}
+                >
+                  {routeData ? (
+                    <SculptureScene routeData={routeData} config={config} />
+                  ) : (
+                    <EmptyState />
+                  )}
+                </TurntableWrapper>
               </>
             ) : (
               // Legacy mode: Use Stage component's auto-lighting
@@ -281,14 +315,26 @@ export const SculpturePreview = forwardRef<SculpturePreviewHandle, SculpturePrev
                 intensity={0.5}
                 shadows={{ type: 'contact', opacity: 0.4, blur: 2 }}
               >
-                {routeData ? (
-                  <SculptureScene routeData={routeData} config={config} />
-                ) : (
-                  <EmptyState />
-                )}
+                <TurntableWrapper
+                  enabled={config.turntableEnabled ?? false}
+                  speed={config.turntableSpeed ?? 0.3}
+                >
+                  {routeData ? (
+                    <SculptureScene routeData={routeData} config={config} />
+                  ) : (
+                    <EmptyState />
+                  )}
+                </TurntableWrapper>
               </Stage>
             )}
           </Suspense>
+
+          {/* Post-processing effects - SMAA only for anti-aliasing */}
+          <PostProcessing
+            enableSSAO={false}
+            enableBloom={false}
+            enableSMAA={true}
+          />
 
           {/* Camera controls - target center of sculpture, frontal view */}
           <OrbitControls

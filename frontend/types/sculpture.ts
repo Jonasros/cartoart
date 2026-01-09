@@ -88,6 +88,10 @@ export interface SculptureConfig {
   routeClearance: number;
   /** Terrain smoothing passes for better 3D printing (0-3) */
   terrainSmoothing: number;
+  /** Enable auto-rotation turntable animation for preview */
+  turntableEnabled?: boolean;
+  /** Turntable rotation speed (rotations per 10 seconds, default 0.3) */
+  turntableSpeed?: number;
 }
 
 /**
@@ -122,6 +126,8 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainHeightLimit: 0.8, // 80% of elevation scale - keeps terrain printable
   routeClearance: 0.05, // Terrain dips near route for visibility
   terrainSmoothing: 1, // One smoothing pass for gentle terrain
+  turntableEnabled: false, // Auto-rotation disabled by default
+  turntableSpeed: 0.3, // Slow rotation for hero shots
 };
 
 /**

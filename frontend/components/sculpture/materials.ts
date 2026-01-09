@@ -76,6 +76,7 @@ function getWoodTextures(): WoodTextures {
 
 /**
  * Get basic material properties (without textures) for simpler use cases.
+ * Note: envMapIntensity values kept low to avoid overexposure with studio lighting
  */
 export function getBasicMaterialProperties(material: SculptureMaterial): MaterialProperties {
   switch (material) {
@@ -83,14 +84,14 @@ export function getBasicMaterialProperties(material: SculptureMaterial): Materia
       return {
         roughness: 0.6,
         metalness: 0.05,
-        envMapIntensity: 0.3,
+        envMapIntensity: 0.15,
       };
 
     case 'wood':
       return {
         roughness: 0.9,
         metalness: 0.0,
-        envMapIntensity: 0.1,
+        envMapIntensity: 0.05,
       };
 
     case 'resin':
@@ -99,13 +100,14 @@ export function getBasicMaterialProperties(material: SculptureMaterial): Materia
         metalness: 0.1,
         clearcoat: 1.0,
         clearcoatRoughness: 0.1,
-        envMapIntensity: 0.8,
+        envMapIntensity: 0.4,
       };
 
     default:
       return {
         roughness: 0.7,
         metalness: 0.1,
+        envMapIntensity: 0.1,
       };
   }
 }
