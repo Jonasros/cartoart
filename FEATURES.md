@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-10
 
 ---
 
@@ -31,6 +31,51 @@ Waymarker transforms GPS activity data into gallery-worthy wall art. Starting wi
 | Social features | ✅ | ❌ |
 
 **Positioning**: "Adventure route art that looks like a design studio made it"
+
+---
+
+## Immediate: Programmatic SEO (Growth Initiative)
+
+> **Comprehensive specification**: [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md)
+
+Scale organic traffic through thousands of targeted landing pages capturing long-tail search queries.
+
+### Why This Is Priority
+
+| Factor | Opportunity |
+|--------|-------------|
+| Total pages | ~11,000+ at scale |
+| Traffic potential | 50-100K visits/month |
+| Conversion focus | High-intent keywords |
+| Competitive moat | Strava + GPX + 3D = unique |
+
+### Page Categories
+
+| Category | Pages | Target Keywords |
+|----------|-------|-----------------|
+| City Maps | ~10,000 | "[City] map poster" |
+| Marathons & Races | ~500 | "[Race] route poster 2026" |
+| Trails & Hikes | ~200 | "[Trail] map print" |
+| Cycling Routes | ~300 | "[Route] cycling poster" |
+| Triathlons | ~100 | "Ironman [Location] map" |
+| Gift Guides | ~50 | "gift for marathon runner" |
+
+### Implementation Phases
+
+1. **Phase 1 (Weeks 1-2)**: Foundation — 170 high-value pages (top cities, races, trails)
+2. **Phase 2 (Weeks 3-6)**: Scale — Expand to ~1,500 pages
+3. **Phase 3 (Weeks 7-10)**: Optimization — SEO refinement, A/B testing
+4. **Phase 4 (Weeks 11+)**: Full scale — ~11,000+ pages
+
+### Technical Approach
+
+- Next.js `generateStaticParams` for pre-rendering
+- Dynamic sitemap with priority scoring
+- JSON-LD structured data (FAQ schema)
+- Pre-loaded GPX routes for major events
+- Community content integration for unique value
+
+See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD including URL structures, data requirements, page templates, and keyword targeting.
 
 ---
 

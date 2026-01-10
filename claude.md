@@ -4,11 +4,12 @@
 > - See [STATUS.md](STATUS.md) for completed features & history
 > - See [FEATURES.md](FEATURES.md) for roadmap & strategy
 > - See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for Phase 4 specification
+> - See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for SEO growth strategy
 
 ## Quick Reference
 
 **Brand**: Waymarker (waymarker.eu)
-**Phase**: Core MVP ✅ Complete — Next: Phase 4 (3D Print)
+**Phase**: Core MVP ✅ Complete — Next: Programmatic SEO + Phase 4 (3D Print)
 **Dev Server**: http://localhost:3000
 
 ### What's Working

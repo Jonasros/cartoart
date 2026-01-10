@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-10
 
 ---
 
@@ -193,6 +193,22 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 
 ---
 
+## Recent Updates (January 2026)
+
+### 2026-01-10
+
+- ✅ Updated favicon to Waymarker mountain logo design
+- ✅ Created comprehensive Programmatic SEO PRD (`docs/PROGRAMMATIC-SEO.md`)
+- ✅ Updated FEATURES.md with SEO growth initiative
+- ✅ Fixed null safety for vote_score in voting components
+
+### 2026-01-09
+
+- ✅ Fixed PostHog analytics configuration (EU host)
+- ✅ Fixed style URL regeneration for saved projects
+
+---
+
 ## Documentation Files
 
 - `CLAUDE.md` - Development context for AI (single source of truth)
@@ -200,6 +216,8 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 - `FEATURES.md` - Roadmap and strategy
 - `SUPABASE_SETUP.md` - Database setup guide
 - `readme.md` - Project overview
+- `docs/PHASE4-3D-PRINTING.md` - 3D sculpture feature spec
+- `docs/PROGRAMMATIC-SEO.md` - SEO growth strategy PRD
 
 ---
 
