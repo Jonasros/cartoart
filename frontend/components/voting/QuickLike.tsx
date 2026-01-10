@@ -17,7 +17,7 @@ interface QuickLikeProps {
 
 export function QuickLike({ mapId, initialScore, initialLiked = false, isAuthenticated = false, className }: QuickLikeProps) {
   const [liked, setLiked] = useState(initialLiked);
-  const [score, setScore] = useState(initialScore);
+  const [score, setScore] = useState(initialScore ?? 0);
   const [isPending, startTransition] = useTransition();
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showHeartPop, setShowHeartPop] = useState(false);

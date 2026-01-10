@@ -18,7 +18,7 @@ interface VoteButtonsProps {
 export function VoteButtons({ mapId, initialVote, initialScore, isAuthenticated = false }: VoteButtonsProps) {
   // Convert any positive vote to "liked" state (for backwards compatibility with old +1/-1 votes)
   const [liked, setLiked] = useState(initialVote === 1);
-  const [score, setScore] = useState(initialScore);
+  const [score, setScore] = useState(initialScore ?? 0);
   const [isPending, startTransition] = useTransition();
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showHeartPop, setShowHeartPop] = useState(false);
