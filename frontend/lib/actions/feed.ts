@@ -56,6 +56,16 @@ export interface FeedMap {
   user_liked: boolean;
 }
 
+export interface TopExample {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  sculpture_thumbnail_url: string | null;
+  vote_score: number;
+  product_type: 'poster' | 'sculpture';
+  author_username: string;
+}
+
 /**
  * Helper to get comment counts for a list of map IDs
  */
@@ -372,5 +382,61 @@ async function getFeedFallback(
   }
 
   return results;
+}
+
+/**
+ * Get top 10 voted examples for the inspiration gallery
+ * Lightweight query optimized for quick loading
+ */
+export async function getTopExamples(
+  productType: ProductTypeFilter = 'all',
+  limit: number = 10
+): Promise<TopExample[]> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from('maps')
+    .select(`
+      id,
+      title,
+      thumbnail_url,
+      sculpture_thumbnail_url,
+      vote_score,
+      product_type,
+      profiles!left (
+        username
+      )
+    `)
+    .eq('is_published', true)
+    .not('published_at', 'is', null)
+    .gt('vote_score', 0) // Only show maps with at least 1 vote
+    .order('vote_score', { ascending: false })
+    .limit(limit);
+
+  // Apply product type filter
+  if (productType !== 'all') {
+    query = query.eq('product_type', productType);
+  }
+
+  const { data: maps, error } = await query;
+
+  if (error) {
+    logger.warn('Failed to fetch top examples:', { error });
+    return [];
+  }
+
+  if (!maps || maps.length === 0) {
+    return [];
+  }
+
+  return maps.map((map: any) => ({
+    id: map.id,
+    title: map.title,
+    thumbnail_url: map.thumbnail_url,
+    sculpture_thumbnail_url: map.sculpture_thumbnail_url,
+    vote_score: map.vote_score,
+    product_type: map.product_type || 'poster',
+    author_username: map.profiles?.username || 'unknown',
+  }));
 }
 

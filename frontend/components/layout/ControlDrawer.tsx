@@ -142,8 +142,7 @@ export function ControlDrawer({
 
             {libraryTab === 'examples' ? (
               <ExamplesGallery
-                onSelect={setConfig}
-                currentConfig={config}
+                productMode={productMode}
               />
             ) : (
               <SavedProjects

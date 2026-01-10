@@ -24,17 +24,17 @@ const RESOLUTION_META: Record<ExportResolutionKey, {
 }> = {
   SMALL: {
     icon: <Printer className="w-4 h-4" />,
-    price: '€19',
+    price: '€12',
     fileSizeEstimate: '~8-15 MB'
   },
   MEDIUM: {
     icon: <Printer className="w-4 h-4" />,
-    price: '€25',
+    price: '€15',
     fileSizeEstimate: '~15-25 MB'
   },
   LARGE: {
     icon: <Printer className="w-4 h-4" />,
-    price: '€29',
+    price: '€18',
     fileSizeEstimate: '~30-50 MB'
   },
   THUMBNAIL: {

@@ -286,6 +286,18 @@ export function SculptureExportModal({
 
         {/* Footer */}
         <div className="p-6 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-800/80 dark:to-transparent border-t border-gray-100 dark:border-gray-800">
+          {/* Price */}
+          <div className="flex items-center justify-between mb-4 px-1">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="font-medium text-gray-900 dark:text-white">3D Sculpture STL</span>
+              <span className="mx-2">·</span>
+              <span>Ready for 3D printing</span>
+            </div>
+            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              €19
+            </span>
+          </div>
+
           <button
             onClick={handleExport}
             disabled={isExporting || !routeData}
