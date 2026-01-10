@@ -17,6 +17,7 @@ import { ExportButton } from '@/components/controls/ExportButton';
 import { captureSculptureThumbnail } from '@/lib/export/sculptureThumbnail';
 import { SaveButton } from '@/components/controls/SaveButton';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
+import { getStyleById } from '@/lib/styles';
 import { throttle, cn } from '@/lib/utils';
 import { THROTTLE } from '@/lib/constants';
 import { getNumericRatio, getAspectRatioCSS } from '@/lib/styles/dimensions';
@@ -143,10 +144,23 @@ export function PosterEditor() {
 
   // Handle loading a saved project
   const handleLoadProject = useCallback(async (project: SavedProject) => {
-    setConfig(project.config);
+    // Regenerate style with current domain URLs to fix projects saved on different environments
+    // (e.g., projects saved on localhost would have localhost tile URLs baked in)
+    const freshStyle = getStyleById(project.config.style.id);
+    const configWithFreshStyle: PosterConfig = freshStyle
+      ? {
+          ...project.config,
+          style: {
+            ...project.config.style,
+            mapStyle: freshStyle.mapStyle,
+          },
+        }
+      : project.config;
+
+    setConfig(configWithFreshStyle);
     setCurrentMapId(project.id);
     setCurrentMapName(project.name);
-    setOriginalConfig(cloneConfig(project.config));
+    setOriginalConfig(cloneConfig(configWithFreshStyle));
 
     // Load sculpture config and set product mode if this is a sculpture
     if (project.productType === 'sculpture' && project.sculptureConfig) {
