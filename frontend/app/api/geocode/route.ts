@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       const cached = getFromCache(cacheKey);
       if (cached) {
         return NextResponse.json(cached, {
-          headers: { 'Cache-Control': 'public, max-age=300' },
+          headers: { 'Cache-Control': 'private, no-cache', 'CDN-Cache-Control': 'no-store' },
         });
       }
 
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
 
       setToCache(cacheKey, payload);
       return NextResponse.json(payload, {
-        headers: { 'Cache-Control': 'public, max-age=300' },
+        headers: { 'Cache-Control': 'private, no-cache', 'CDN-Cache-Control': 'no-store' },
       });
     }
 
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     const cached = getFromCache(cacheKey);
     if (cached) {
       return NextResponse.json(cached, {
-        headers: { 'Cache-Control': 'public, max-age=300' },
+        headers: { 'Cache-Control': 'private, no-cache', 'CDN-Cache-Control': 'no-store' },
       });
     }
 
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
     setToCache(cacheKey, payload);
 
     return NextResponse.json(payload, {
-      headers: { 'Cache-Control': 'public, max-age=300' },
+      headers: { 'Cache-Control': 'private, no-cache', 'CDN-Cache-Control': 'no-store' },
     });
   } catch (error) {
     logger.error('Unhandled geocode API error:', error);
