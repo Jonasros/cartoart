@@ -14,6 +14,7 @@ import {
 } from '@/lib/sculpture';
 import { ShareModal } from './ShareModal';
 import { generateShareThumbnail } from '@/lib/export/shareThumbnail';
+import posthog from 'posthog-js';
 
 interface SculptureExportModalProps {
   isOpen: boolean;
@@ -122,12 +123,22 @@ export function SculptureExportModal({
           triangles: result.stats?.triangles ?? 0,
           fileSize: result.fileSize ?? 0,
         });
+        // Track sculpture export event
+        posthog.capture('sculpture_exported', {
+          shape: config.shape,
+          size_cm: config.size,
+          material: config.material,
+          vertices: result.stats?.vertices ?? 0,
+          triangles: result.stats?.triangles ?? 0,
+          file_size_bytes: result.fileSize ?? 0,
+        });
         // Show share modal after successful export
         setShowShareModal(true);
       } else {
         setExportError(result.error ?? 'Export failed');
       }
     } catch (error) {
+      posthog.captureException(error);
       setExportError(
         error instanceof Error ? error.message : 'Unknown export error'
       );

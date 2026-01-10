@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/control-components';
 import { Loader2, Link2, Unlink } from 'lucide-react';
 import type { StravaConnectionStatus } from '@/types/strava';
+import posthog from 'posthog-js';
 
 export function ConnectedServices() {
   const [stravaStatus, setStravaStatus] = useState<StravaConnectionStatus | null>(null);
@@ -30,6 +31,10 @@ export function ConnectedServices() {
 
   const handleConnectStrava = async () => {
     setActionLoading(true);
+    // Track Strava connect initiated event
+    posthog.capture('strava_connected', {
+      action: 'initiated',
+    });
     // Redirect to Strava OAuth flow
     window.location.href = '/api/strava/authorize';
   };
@@ -46,6 +51,8 @@ export function ConnectedServices() {
       });
 
       if (response.ok) {
+        // Track Strava disconnected event
+        posthog.capture('strava_disconnected');
         setStravaStatus({ connected: false });
       }
     } catch (error) {

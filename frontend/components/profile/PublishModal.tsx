@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/control-components';
+import posthog from 'posthog-js';
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -38,8 +39,14 @@ export function PublishModal({
 
     try {
       await onPublish(subtitle.trim() || undefined);
+      // Track map published event
+      posthog.capture('map_published', {
+        map_title: mapTitle,
+        has_subtitle: !!subtitle.trim(),
+      });
       handleClose();
     } catch (err: any) {
+      posthog.captureException(err);
       setError(err.message || 'Failed to publish map. Please try again.');
     } finally {
       setLoading(false);

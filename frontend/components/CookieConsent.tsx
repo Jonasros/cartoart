@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cookie, X, ChevronDown, ChevronUp, Shield, BarChart3, Megaphone, Check } from 'lucide-react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 
 interface CookiePreferences {
   necessary: boolean;
@@ -147,6 +148,12 @@ export function CookieConsent() {
     const newPrefs = { necessary: true, analytics: true, marketing: true };
     setPreferences(newPrefs);
     storeConsent(newPrefs);
+    // Track cookie consent event
+    posthog.capture('cookie_consent_given', {
+      action: 'accept_all',
+      analytics_enabled: true,
+      marketing_enabled: true,
+    });
     setShowBanner(false);
     setShowPreferences(false);
   }, []);
@@ -155,12 +162,24 @@ export function CookieConsent() {
     const newPrefs = { necessary: true, analytics: false, marketing: false };
     setPreferences(newPrefs);
     storeConsent(newPrefs);
+    // Track cookie consent event
+    posthog.capture('cookie_consent_given', {
+      action: 'reject_all',
+      analytics_enabled: false,
+      marketing_enabled: false,
+    });
     setShowBanner(false);
     setShowPreferences(false);
   }, []);
 
   const handleSavePreferences = useCallback(() => {
     storeConsent(preferences);
+    // Track cookie consent event
+    posthog.capture('cookie_consent_given', {
+      action: 'save_preferences',
+      analytics_enabled: preferences.analytics,
+      marketing_enabled: preferences.marketing,
+    });
     setShowBanner(false);
     setShowPreferences(false);
   }, [preferences]);

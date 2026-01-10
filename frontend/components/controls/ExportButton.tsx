@@ -10,6 +10,7 @@ import type { ExportResolutionKey } from '@/lib/export/constants';
 import type { PosterConfig, RouteData } from '@/types/poster';
 import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 import type { ExportResult } from '@/hooks/useMapExport';
+import posthog from 'posthog-js';
 
 interface ExportButtonProps {
   onExport: (resolutionKey: ExportResolutionKey) => void;
@@ -64,6 +65,11 @@ export function ExportButton({
 
   const handleExport = (resolutionKey: ExportResolutionKey) => {
     onExport(resolutionKey);
+    // Track poster download event
+    posthog.capture('poster_downloaded', {
+      resolution: resolutionKey,
+      format: format,
+    });
     setShowExportModal(false);
     // Show share modal after export starts (it will display when lastExportResult is ready)
     setShowShareModal(true);

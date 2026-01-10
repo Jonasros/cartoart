@@ -6,6 +6,7 @@ import { Heart } from 'lucide-react';
 import { voteOnMap, removeVote } from '@/lib/actions/votes';
 import { cn } from '@/lib/utils';
 import { LikeAnimation, FloatingHearts } from './LikeAnimation';
+import posthog from 'posthog-js';
 
 interface VoteButtonsProps {
   mapId: string;
@@ -60,6 +61,10 @@ export function VoteButtons({ mapId, initialVote, initialScore, isAuthenticated 
       try {
         if (newLiked) {
           await voteOnMap(mapId, 1);
+          // Track map liked event
+          posthog.capture('map_liked', {
+            map_id: mapId,
+          });
         } else {
           await removeVote(mapId);
         }

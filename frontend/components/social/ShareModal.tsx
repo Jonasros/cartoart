@@ -13,6 +13,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/control-components';
+import posthog from 'posthog-js';
 
 // Pinterest icon (not in lucide)
 function PinterestIcon({ className }: { className?: string }) {
@@ -59,12 +60,17 @@ export function ShareModal({ isOpen, onClose, map }: ShareModalProps) {
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
+      // Track share event
+      posthog.capture('map_shared', {
+        map_id: map.id,
+        share_method: 'copy_link',
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
-  }, [shareUrl]);
+  }, [shareUrl, map.id]);
 
   // Handle native share
   const handleNativeShare = useCallback(async () => {
@@ -75,6 +81,11 @@ export function ShareModal({ isOpen, onClose, map }: ShareModalProps) {
           text: shareText,
           url: shareUrl,
         });
+        // Track share event
+        posthog.capture('map_shared', {
+          map_id: map.id,
+          share_method: 'native_share',
+        });
         onClose();
       } catch (err) {
         // User cancelled or error
@@ -83,7 +94,7 @@ export function ShareModal({ isOpen, onClose, map }: ShareModalProps) {
         }
       }
     }
-  }, [map.title, shareText, shareUrl, onClose]);
+  }, [map.title, map.id, shareText, shareUrl, onClose]);
 
   // Handle platform share
   const handlePlatformShare = useCallback((platform: SharePlatform) => {
@@ -111,8 +122,14 @@ export function ShareModal({ isOpen, onClose, map }: ShareModalProps) {
         return;
     }
 
+    // Track share event
+    posthog.capture('map_shared', {
+      map_id: map.id,
+      share_method: platform,
+    });
+
     window.open(platformUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
-  }, [shareUrl, shareText, map.title, map.thumbnail_url]);
+  }, [shareUrl, shareText, map.id, map.title, map.thumbnail_url]);
 
   // Close on escape
   useEffect(() => {

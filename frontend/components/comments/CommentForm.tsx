@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/Toast';
 import { addComment } from '@/lib/actions/comments';
 import { LogIn } from 'lucide-react';
 import type { Comment } from '@/lib/actions/comments';
+import posthog from 'posthog-js';
 
 interface CommentFormProps {
   mapId: string;
@@ -32,6 +33,11 @@ export function CommentForm({ mapId, onCommentAdded, isAuthenticated = false }: 
     startTransition(async () => {
       try {
         const newComment = await addComment(mapId, commentText);
+        // Track comment added event
+        posthog.capture('comment_added', {
+          map_id: mapId,
+          comment_length: commentText.length,
+        });
         onCommentAdded(newComment);
       } catch (error) {
         console.error('Failed to add comment:', error);

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/control-components';
+import posthog from 'posthog-js';
 
 interface EmailAuthFormProps {
   mode: 'login' | 'signup';
@@ -51,14 +52,29 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
 
         if (error) throw error;
 
+        // Track signup event
+        posthog.capture('user_signed_up', {
+          auth_method: 'email',
+        });
+
         setMessage('Check your email for the confirmation link!');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
+
+        // Identify user and track login event
+        if (data.user) {
+          posthog.identify(data.user.id, {
+            email: data.user.email,
+          });
+          posthog.capture('user_logged_in', {
+            auth_method: 'email',
+          });
+        }
 
         router.push(redirectTo || '/profile');
         router.refresh();

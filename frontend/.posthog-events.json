@@ -1,0 +1,72 @@
+[
+  {
+    "event_name": "user_signed_up",
+    "description": "User successfully created a new account via email or OAuth",
+    "file_path": "components/auth/EmailAuthForm.tsx"
+  },
+  {
+    "event_name": "user_logged_in",
+    "description": "User successfully signed in via email",
+    "file_path": "components/auth/EmailAuthForm.tsx"
+  },
+  {
+    "event_name": "route_uploaded",
+    "description": "User uploaded a GPX file to create an adventure map",
+    "file_path": "components/controls/RouteUpload.tsx"
+  },
+  {
+    "event_name": "strava_activity_imported",
+    "description": "User imported a route from their Strava activities",
+    "file_path": "components/controls/RouteUpload.tsx"
+  },
+  {
+    "event_name": "project_saved",
+    "description": "User saved a new map project or updated an existing one",
+    "file_path": "components/controls/SaveButton.tsx"
+  },
+  {
+    "event_name": "map_published",
+    "description": "User published their map to the community feed",
+    "file_path": "components/profile/PublishModal.tsx"
+  },
+  {
+    "event_name": "poster_downloaded",
+    "description": "User downloaded their adventure print as an image",
+    "file_path": "components/controls/ExportButton.tsx"
+  },
+  {
+    "event_name": "sculpture_exported",
+    "description": "User exported their journey sculpture for 3D printing",
+    "file_path": "components/controls/ExportButton.tsx"
+  },
+  {
+    "event_name": "map_liked",
+    "description": "User liked a map in the community feed",
+    "file_path": "components/voting/VoteButtons.tsx"
+  },
+  {
+    "event_name": "comment_added",
+    "description": "User posted a comment on a published map",
+    "file_path": "components/comments/CommentForm.tsx"
+  },
+  {
+    "event_name": "map_shared",
+    "description": "User shared a map via social platforms or copied the link",
+    "file_path": "components/social/ShareModal.tsx"
+  },
+  {
+    "event_name": "strava_connected",
+    "description": "User connected their Strava account",
+    "file_path": "components/account/ConnectedServices.tsx"
+  },
+  {
+    "event_name": "strava_disconnected",
+    "description": "User disconnected their Strava account",
+    "file_path": "components/account/ConnectedServices.tsx"
+  },
+  {
+    "event_name": "cookie_consent_given",
+    "description": "User accepted or configured cookie preferences",
+    "file_path": "components/CookieConsent.tsx"
+  }
+]

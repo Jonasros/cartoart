@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { ControlLabel, Button } from '@/components/ui/control-components';
 import { StravaActivityPicker } from '@/components/strava/StravaActivityPicker';
 import type { StravaConnectionStatus } from '@/types/strava';
+import posthog from 'posthog-js';
 
 interface RouteUploadProps {
   route: RouteConfig | undefined;
@@ -76,6 +77,14 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
 
       onRouteChange(newRoute);
 
+      // Track GPX route upload event
+      posthog.capture('route_uploaded', {
+        source: 'gpx_file',
+        distance_meters: routeData.stats.distance,
+        elevation_gain_meters: routeData.stats.elevationGain,
+        has_timestamps: !!routeData.stats.duration,
+      });
+
       // Auto-populate title and subtitle from GPX metadata
       if (onLocationChange && routeData.name) {
         onLocationChange({
@@ -85,6 +94,7 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
         });
       }
     } catch (err) {
+      posthog.captureException(err);
       setError(err instanceof Error ? err.message : 'Failed to parse GPX file');
     } finally {
       setIsLoading(false);
@@ -144,6 +154,13 @@ export function RouteUpload({ route, onRouteChange, onLocationChange }: RouteUpl
     };
 
     onRouteChange(newRoute);
+
+    // Track Strava import event
+    posthog.capture('strava_activity_imported', {
+      distance_meters: routeData.stats.distance,
+      elevation_gain_meters: routeData.stats.elevationGain,
+      has_timestamps: !!routeData.stats.duration,
+    });
 
     // Auto-populate title from activity name
     if (onLocationChange && routeData.name) {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save, Loader2, Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/tooltip';
+import posthog from 'posthog-js';
 
 interface SaveButtonProps {
   onSave: (name: string) => Promise<void>;
@@ -57,9 +58,15 @@ export function SaveButton({
     setError(null);
     try {
       await onUpdate();
+      // Track project update event
+      posthog.capture('project_saved', {
+        action: 'update_existing',
+        project_name: currentMapName,
+      });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
     } catch (err: any) {
+      posthog.captureException(err);
       setError(err.message || 'Failed to save. Please try again.');
     } finally {
       setIsSaving(false);
@@ -80,11 +87,17 @@ export function SaveButton({
     setError(null);
     try {
       await onSave(name.trim());
+      // Track project creation event
+      posthog.capture('project_saved', {
+        action: 'create_new',
+        project_name: name.trim(),
+      });
       setShowDialog(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
       setIsSaving(false);
     } catch (err: any) {
+      posthog.captureException(err);
       setError(err.message || 'Failed to save project. Please try again.');
       setIsSaving(false);
     }
