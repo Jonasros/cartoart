@@ -38,18 +38,18 @@
 
 ### 1. Visual Quality Enhancements
 
-#### 1.1 Material Realism Upgrade
+#### 1.1 Material Realism Upgrade - DONE
 - **PLA Material**: Subtle layer lines texture, glossy finish variation
 - **Wood PLA Material**: Anisotropic wood grain shader with natural variation
 - **Resin Material**: High-gloss finish with subsurface scattering effect
 
-#### 1.2 Lighting & Environment
+#### 1.2 Lighting & Environment - DONE
 - Studio-style 3-point lighting for dramatic shadows
 - HDRI environment for realistic reflections
 - Soft shadows with contact shadows for grounding
 - Optional "turntable" ambient animation
 
-#### 1.3 Post-Processing Pipeline
+#### 1.3 Post-Processing Pipeline - DONE
 - SSAO (Screen Space Ambient Occlusion) for depth
 - Subtle bloom on route highlights
 - SMAA anti-aliasing for smooth edges
