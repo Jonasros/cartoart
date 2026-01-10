@@ -7,6 +7,7 @@ import { MapPreview } from './MapPreview';
 import { TextOverlay } from './TextOverlay';
 import { SculpturePreview } from '@/components/sculpture';
 import { applyPaletteToStyle } from '@/lib/styles/applyPalette';
+import { getStyleById } from '@/lib/styles';
 import { getAspectRatioCSS } from '@/lib/styles/dimensions';
 import { VoteButtons } from '@/components/voting/VoteButtons';
 import { CommentList } from '@/components/comments/CommentList';
@@ -72,14 +73,18 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
   }, [map.sculpture_config]);
 
   // Apply palette colors and visibility to the current map style
+  // Use fresh style to get correct tile URLs for current environment
+  // (saved projects may have localhost URLs baked in)
   const mapStyle = useMemo(() => {
+    const freshStyle = getStyleById(map.config.style.id);
+    const baseMapStyle = freshStyle?.mapStyle ?? map.config.style.mapStyle;
     return applyPaletteToStyle(
-      map.config.style.mapStyle,
+      baseMapStyle,
       map.config.palette,
       map.config.layers,
       map.config.style.layerToggles
     );
-  }, [map.config.style.mapStyle, map.config.palette, map.config.layers, map.config.style.layerToggles]);
+  }, [map.config.style.id, map.config.style.mapStyle, map.config.palette, map.config.layers, map.config.style.layerToggles]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
