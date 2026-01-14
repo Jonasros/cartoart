@@ -1,8 +1,8 @@
 # Waymarker
 
-Create beautiful, personalized map posters from your adventures. Upload GPX routes, connect Strava, customize styles, and export high-resolution prints.
+Create beautiful, personalized map posters and 3D sculptures from your adventures. Upload GPX routes, connect Strava, customize styles, and export high-resolution prints or 3D-printable STL files.
 
-**Live site**: [waymarker.eu](https://waymarker.eu) *(coming soon)*
+**Live site**: [waymarker.eu](https://waymarker.eu)
 
 ## Features
 
@@ -11,7 +11,9 @@ Create beautiful, personalized map posters from your adventures. Upload GPX rout
 - **Strava Connect** - Import activities directly from your account
 - **3D Terrain** elevation with MapTiler terrain-rgb tiles
 - **3D Buildings** with style presets & perspective controls
+- **3D Sculptures** - Export routes as STL files for 3D printing
 - **High-res Export** up to 7200x10800px (24x36" at 300 DPI)
+- **Stripe Payments** - Secure checkout for exports
 - **Social Features** - Feed, likes, comments, sharing
 
 ## Gallery
@@ -28,7 +30,10 @@ Create beautiful, personalized map posters from your adventures. Upload GPX rout
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Map**: MapLibre GL JS + React Map GL
+- **3D**: React Three Fiber + Three.js
 - **Database**: Supabase (PostgreSQL + Auth + Storage)
+- **Payments**: Stripe Checkout
+- **Analytics**: PostHog
 - **Tiles**: OpenFreeMap / MapTiler
 
 ## Getting Started
@@ -40,10 +45,15 @@ npm run dev
 ```
 
 Create `frontend/.env.local` with:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_MAPTILER_KEY=your-maptiler-key
+STRIPE_SECRET_KEY=your-stripe-secret-key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
+NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
 ```
 
 ## Attribution

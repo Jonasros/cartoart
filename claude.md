@@ -5,11 +5,12 @@
 > - See [FEATURES.md](FEATURES.md) for roadmap & strategy
 > - See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for Phase 4 specification
 > - See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for SEO growth strategy
+> - See [docs/PRD-FAMOUS-ROUTES-SEEDING.md](docs/PRD-FAMOUS-ROUTES-SEEDING.md) for famous routes database seeding
 
 ## Quick Reference
 
 **Brand**: Waymarker (waymarker.eu)
-**Phase**: Core MVP ✅ Complete — Next: Programmatic SEO + Phase 4 (3D Print)
+**Phase**: Core Features ✅ Complete — Next: Programmatic SEO
 **Dev Server**: http://localhost:3000
 
 ### What's Working
@@ -18,10 +19,14 @@
 - Strava Connect: import activities directly from your Strava account
 - 3D terrain elevation with MapTiler terrain-rgb tiles
 - 3D buildings with style presets & perspective controls
+- 3D Journey Sculptures with STL export for 3D printing
 - High-res PNG export (up to 7200x10800px)
+- Stripe payment integration for poster and sculpture exports
 - Social features (feed, likes, comments, sharing)
 - User auth (email/password + Google OAuth) via Supabase
 - Marketing landing page with scroll animations
+- PostHog analytics (14 custom events)
+- GDPR-compliant cookie consent
 
 ---
 
@@ -31,7 +36,10 @@
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Map**: MapLibre GL JS + React Map GL
+- **3D**: React Three Fiber + Three.js (sculptures)
 - **Database**: Supabase (PostgreSQL + Auth + Storage)
+- **Payments**: Stripe Checkout
+- **Analytics**: PostHog
 - **Tiles**: OpenFreeMap / MapTiler
 
 ---
@@ -43,25 +51,28 @@ frontend/
 ├── app/
 │   ├── (auth)/           # Login, signup
 │   ├── (main)/           # Feed, profile, map detail
-│   ├── api/              # geocode, tiles, publish, strava/*
+│   ├── api/              # geocode, tiles, publish, strava/*, orders/*
 │   └── page.tsx          # Landing page
 ├── components/
 │   ├── account/          # ConnectedServices (Strava)
 │   ├── controls/         # Editor control panels
 │   ├── landing/          # Marketing landing page sections
 │   ├── map/              # MapPreview, TextOverlay
+│   ├── sculpture/        # 3D sculpture viewer (R3F components)
 │   ├── strava/           # StravaActivityPicker
 │   └── ui/               # Shared components
 ├── lib/
 │   ├── actions/          # Server actions (maps, votes, comments)
 │   ├── route/            # GPX parsing
-│   ├── strava/           # Strava API helpers (convertToRouteData, refreshToken)
+│   ├── strava/           # Strava API helpers
+│   ├── stripe/           # Stripe checkout helpers
 │   ├── styles/           # 11 map style definitions
 │   └── validation/       # Zod schemas
 └── types/
     ├── poster.ts         # Core type definitions
     ├── strava.ts         # Strava API types
-    └── database.ts       # Supabase types (includes connected_accounts)
+    ├── sculpture.ts      # Sculpture config types
+    └── database.ts       # Supabase types (includes orders)
 ```
 
 ---
@@ -95,6 +106,12 @@ frontend/
 - `/api/strava/disconnect` - Remove Strava connection
 - `/api/strava/activities` - List user's Strava activities
 - `/api/strava/activities/[id]` - Get activity detail with GPS streams
+
+### Stripe/Orders API Routes
+
+- `/api/orders` - Create Stripe checkout session for export
+- `/api/orders/complete` - Complete order after successful payment
+- `/api/orders/[id]` - Get order status and download link
 
 ---
 
@@ -144,6 +161,21 @@ interface RouteConfig {
   showStartMarker: boolean;
   showEndMarker: boolean;
   privacyZone: { enabled: boolean; distance: number; };
+}
+```
+
+### SculptureConfig
+
+```typescript
+interface SculptureConfig {
+  baseShape: 'rectangular' | 'circular' | 'organic' | 'terrain';
+  baseColor: string;
+  size: '10cm' | '15cm' | '20cm';
+  material: 'matte' | 'glossy' | 'metallic' | 'wood' | 'stone';
+  texture: 'smooth' | 'brushed' | 'rough';
+  routeColor: string;
+  elevationExaggeration: number;  // 1.0-3.0
+  turntableEnabled: boolean;
 }
 ```
 

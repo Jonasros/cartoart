@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-14
 
 ---
 
@@ -18,6 +18,8 @@
 | 6 | "Trail & Summit" UI Redesign | ✅ Complete |
 | 7 | Marketing Landing Page | ✅ Complete |
 | 8 | Strava Connect Integration | ✅ Complete |
+| 9 | 3D Journey Sculpture | ✅ Complete |
+| 10 | Payments & Analytics | ✅ Complete |
 
 ---
 
@@ -178,6 +180,76 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 - ✅ Final CTA section
 - ✅ Scroll-triggered animations (Framer Motion)
 - ✅ Animated auth page backgrounds with real poster examples
+- ✅ Dynamic examples gallery with real user creations
+- ✅ Strava Connect showcase section
+
+### 3D Journey Sculpture
+
+Complete 3D sculpture system for creating printable route models from GPS data.
+
+**Core Features**:
+
+- ✅ React Three Fiber (R3F) + Three.js rendering engine
+- ✅ GPS route extrusion as 3D ribbon geometry
+- ✅ Elevation profile visualization with vertical exaggeration
+- ✅ STL export for 3D printing
+- ✅ Mode toggle between Adventure Print and Journey Sculpture
+
+**Base & Styling**:
+
+- ✅ 4 base shapes (Rectangular, Circular, Organic, Terrain)
+- ✅ Independent base color control
+- ✅ Material presets (Matte, Glossy, Metallic, Wood, Stone)
+- ✅ Surface texture options (Smooth, Brushed, Rough)
+- ✅ Route color customization
+
+**Rendering & Presentation**:
+
+- ✅ Studio lighting system with environment presets
+- ✅ Post-processing pipeline (bloom, ambient occlusion, tone mapping)
+- ✅ Turntable animation for showcase views
+- ✅ OrbitControls for interactive 3D preview
+- ✅ Camera presets for optimal viewing angles
+
+**Print Preparation**:
+
+- ✅ Printability indicators with "Print Ready" badge
+- ✅ Mesh optimization for 3D printing
+- ✅ Size controls (10cm, 15cm, 20cm)
+- ✅ Wall thickness validation
+
+### Stripe Payment Integration
+
+- ✅ Stripe Checkout for poster exports
+- ✅ Stripe Checkout for sculpture exports
+- ✅ Order tracking in Supabase `orders` table
+- ✅ Payment success/cancel redirect handling
+- ✅ Export state management (free preview vs paid download)
+- ✅ Order completion with secure download links
+
+### PostHog Analytics
+
+- ✅ Client-side initialization via instrumentation
+- ✅ Server-side tracking with posthog-node
+- ✅ Reverse proxy configuration through `/ingest`
+- ✅ User identification linking anonymous and authenticated sessions
+- ✅ 14 custom events tracking conversion funnel:
+  - `user_signed_up`, `user_logged_in`
+  - `route_uploaded`, `strava_activity_imported`
+  - `project_saved`, `map_published`
+  - `poster_downloaded`, `sculpture_exported`
+  - `map_liked`, `comment_added`, `map_shared`
+  - `strava_connected`, `strava_disconnected`
+  - `cookie_consent_given`
+
+### GDPR Compliance & Legal
+
+- ✅ Cookie consent banner with preference controls
+- ✅ Terms of Service page (`/terms`)
+- ✅ Privacy Policy page (`/privacy`)
+- ✅ Cookie Policy page (`/cookies`)
+- ✅ FAQ page (`/faq`)
+- ✅ Consent state persistence
 
 ---
 
@@ -194,6 +266,34 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-14
+
+- ✅ Stripe payment integration for poster and sculpture exports
+- ✅ Fixed TypeScript errors in orders.ts with proper type casts
+- ✅ Documentation cleanup and update for public repository
+
+### 2026-01-13
+
+- ✅ Added post-processing pipeline (bloom, AO, tone mapping) to sculpture viewer
+- ✅ Added turntable animation toggle for showcase views
+- ✅ Added independent base color control for sculptures
+- ✅ Added studio lighting system with environment presets
+- ✅ Added material texture foundation (smooth, brushed, rough)
+- ✅ Added printability indicators with "Print Ready" badge
+
+### 2026-01-12
+
+- ✅ PostHog analytics integration (14 custom events)
+- ✅ Dynamic examples gallery on landing page
+- ✅ Updated pricing display
+
+### 2026-01-11
+
+- ✅ GDPR-compliant cookie consent implementation
+- ✅ Added Terms of Service, Privacy Policy, Cookie Policy pages
+- ✅ Added FAQ page
+- ✅ Strava Connect showcase on landing page
 
 ### 2026-01-10
 
@@ -216,9 +316,14 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 - `FEATURES.md` - Roadmap and strategy
 - `SUPABASE_SETUP.md` - Database setup guide
 - `readme.md` - Project overview
+- `design.md` - Comprehensive design guide for map posters
 - `docs/PHASE4-3D-PRINTING.md` - 3D sculpture feature spec
+- `docs/3D-SCULPTURE-GUIDE.md` - Developer guide for sculpture system
+- `docs/SCULPTURE-ENHANCEMENTS.md` - Sculpture enhancement ideas
 - `docs/PROGRAMMATIC-SEO.md` - SEO growth strategy PRD
+- `docs/PRD-FAMOUS-ROUTES-SEEDING.md` - Famous routes database seeding
+- `docs/EXPORT-PAYMENT-SAFETY.md` - Export & payment flow safety system
 
 ---
 
-**Status**: Production-ready. All core features implemented and working.
+**Status**: Production-ready. All core features implemented and working. Payments integrated via Stripe.

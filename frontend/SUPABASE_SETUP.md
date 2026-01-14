@@ -18,6 +18,8 @@ This guide will help you set up Supabase for the Waymarker social features.
    - `maps` table
    - `votes` table
    - `comments` table
+   - `connected_accounts` table (for Strava OAuth)
+   - `orders` table (for Stripe payments)
    - All necessary indexes, triggers, and RLS policies
 
 ## 3. Set Up Storage Bucket
@@ -40,16 +42,6 @@ This guide will help you set up Supabase for the Waymarker social features.
    - Add authorized redirect URI: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
    - Copy Client ID and Client Secret to Supabase
 
-### GitHub OAuth
-
-1. Go to Authentication > Providers in Supabase dashboard
-2. Enable GitHub provider
-3. Follow the instructions to set up OAuth credentials:
-   - Go to GitHub Settings > Developer settings > OAuth Apps
-   - Create a new OAuth App
-   - Set Authorization callback URL: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
-   - Copy Client ID and Client Secret to Supabase
-
 ## 5. Configure Environment Variables
 
 1. Copy `.env.example` to `.env.local`
@@ -69,10 +61,12 @@ This guide will help you set up Supabase for the Waymarker social features.
 ## 7. Test the Setup
 
 1. Start your development server: `npm run dev`
-2. Navigate to `/login` and try signing in with Google or GitHub
+2. Navigate to `/login` and try signing in with Google
 3. Verify that a profile is created automatically
 4. Try creating and saving a map
 5. Publish a map and verify it appears in the feed
+6. Test Strava connection (if configured)
+7. Test payment flow (if Stripe configured)
 
 ## Troubleshooting
 

@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-14
 
 ---
 
@@ -25,10 +25,12 @@ Waymarker transforms GPS activity data into gallery-worthy wall art. Starting wi
 | Map styles | 11 | 3-5 typically |
 | Color palettes | 15+ | Limited |
 | 3D buildings | ✅ 4 presets | ❌ |
-| 3D terrain | ✅ (coming) | ❌ |
+| 3D terrain | ✅ | ❌ |
+| 3D sculptures | ✅ STL export | ❌ |
 | Privacy zones | ✅ | Some |
 | High-res export | 7200x10800px | Varies |
 | Social features | ✅ | ❌ |
+| Stripe payments | ✅ | Varies |
 
 **Positioning**: "Adventure route art that looks like a design studio made it"
 
@@ -79,119 +81,38 @@ See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD includ
 
 ---
 
-## Immediate: 3D Terrain Support
+## Recently Completed
 
-Add 3D terrain rendering to poster editor. Enables dramatic mountain/valley visualization for both posters and future 3D printing.
+### 3D Journey Sculptures ✅
 
-### Implementation (MapLibre Native)
-
-```javascript
-// Add terrain source
-map.addSource('terrain', {
-  type: 'raster-dem',
-  url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=API_KEY',
-  tileSize: 256
-});
-
-// Enable 3D terrain
-map.setTerrain({
-  source: 'terrain',
-  exaggeration: 1.5  // 1.0 = realistic, 2-3 = dramatic
-});
-
-// Query elevation at point
-const elevation = map.queryTerrainElevation([lng, lat]);
-```
-
-### MapTiler Elevation API (for 3D Print Mesh)
-
-```typescript
-// Single point elevation
-const point = await maptilersdk.elevation.at([lng, lat]);
-// Returns: { lng, lat, elevation }
-
-// Batch elevation for route
-const lineWithElevation = await maptilersdk.elevation.fromLineString(routeGeoJSON);
-// Returns: LineString with Z coordinates
-```
-
-### Layer Controls Addition
-
-| Control | Type | Default | Description |
-| ------- | ---- | ------- | ----------- |
-| `terrain3d` | boolean | false | Enable 3D terrain rendering |
-| `terrain3dExaggeration` | number | 1.5 | Vertical exaggeration (0.5-3.0) |
-
-### Applies To
-
-- Single point locations (city/landmark posters)
-- Multiple points (coming soon)
-- GPX routes (especially mountain trails)
-
----
-
-## Next Priority: Phase 4 — 3D Printed Route Sculptures
-
-> **Comprehensive specification**: [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md)
+> **Specification**: [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md)
 
 Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
-### Why This Is Next
+**Completed Features**:
 
-| Factor | Advantage |
-| ------ | --------- |
-| Zero competition | Nobody does route-specific 3D sculptures |
-| Premium pricing | €79-249 vs €20-40 posters |
-| Tactile value | Physical object > flat print |
-| Data ready | Already have GPX + elevation |
-| Existing 3D infra | 3D terrain & buildings already implemented |
+- ✅ React Three Fiber rendering engine with OrbitControls
+- ✅ GPS route extrusion as 3D ribbon geometry
+- ✅ 4 base shapes (Rectangular, Circular, Organic, Terrain)
+- ✅ Material presets (Matte, Glossy, Metallic, Wood, Stone)
+- ✅ Studio lighting with environment presets
+- ✅ Post-processing pipeline (bloom, AO, tone mapping)
+- ✅ Turntable animation for showcase views
+- ✅ STL export for 3D printing
+- ✅ Printability indicators with "Print Ready" badge
 
-### Product Concept
+### Stripe Payment Integration ✅
 
-- GPS track extruded as 3D ribbon/line using Three.js TubeGeometry
-- Z-axis = actual elevation profile from route data
-- Mounted on stylized base (rectangular, circular, organic, or terrain)
-- Sizes: 10cm (€79-99), 15cm (€119-149), 20cm+ (€179-249)
-- Materials: PLA, wood-fill PLA, resin
+- ✅ Stripe Checkout for poster exports
+- ✅ Stripe Checkout for sculpture exports
+- ✅ Order tracking in Supabase
+- ✅ Secure download flow after payment
 
-### UX Strategy
+### 3D Terrain ✅
 
-Mode toggle below logo in left navigation:
-
-- **Adventure Print Mode**: Current functionality (map styles, typography, export PNG)
-- **Journey Sculpture Mode**: Sculpture preview (R3F), base/material selection, export STL
-
-Tabs adapt per mode:
-
-- Shared: Library, Location, Style
-- Print only: Text, Frame
-- Sculpture only: Base, Size, Material
-
-### Technical Stack
-
-- **React Three Fiber** (@react-three/fiber) - React renderer for Three.js
-- **Drei** (@react-three/drei) - R3F helpers (OrbitControls, Stage, Line)
-- **Three.js** - TubeGeometry, PlaneGeometry, STLExporter
-- **MapTiler Elevation API** - Already integrated for 3D terrain
-
-### Leveraging Existing Code
-
-| Existing Feature | Location | Reuse |
-| ---------------- | -------- | ----- |
-| 3D Terrain | `applyPalette.ts` | Elevation source |
-| 3D Buildings | `buildings3d.ts` | Style/camera presets |
-| Route Elevation | `RoutePoint.elevation` | Direct mesh input |
-| Route Stats | min/max elevation | Normalization |
-
-### Implementation Phases
-
-1. **Phase 4.1**: Mode switching + basic R3F preview
-2. **Phase 4.2**: Sculpture controls (base, size, material)
-3. **Phase 4.3**: STL export + mesh optimization
-4. **Phase 4.4**: Terrain-based sculptures (premium)
-5. **Phase 4.5**: Fulfillment integration + checkout
-
-See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for complete component architecture, state management, Three.js/R3F reference, and implementation details.
+- ✅ MapLibre raster-dem terrain rendering
+- ✅ Vertical exaggeration controls (0.5-3.0)
+- ✅ Applied to map posters and route visualization
 
 ---
 
@@ -277,19 +198,20 @@ See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for complete compon
 
 ## Monetization
 
-### Current Model: One-Time Purchase Per Export
+### Current Model: One-Time Purchase Per Export (Stripe)
 
-| Product | Price | Margin |
-| ------- | ----- | ------ |
-| Digital Download | €19-29 | High |
-| Print Delivered | €49-89 | Medium |
-| 3D Sculpture (future) | €79-249 | High |
+| Product | Price | Margin | Status |
+| ------- | ----- | ------ | ------ |
+| Adventure Print (Digital) | €19-29 | High | ✅ Live |
+| Journey Sculpture (STL) | €29-49 | High | ✅ Live |
+| Print Delivered | €49-89 | Medium | Planned |
 
 ### Future Options
 
 - Premium tier (multiple exports, saved designs)
-- Print partnerships
+- Print partnerships (Printful, Gelato)
 - Subscription for power users
+- Physical 3D print fulfillment
 
 ---
 
@@ -306,4 +228,4 @@ See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for complete compon
 
 **Brand**: Waymarker (waymarker.eu)
 
-**Focus**: 3D Printed Route Sculptures as next major feature
+**Focus**: Programmatic SEO for organic growth + Print fulfillment partnerships
