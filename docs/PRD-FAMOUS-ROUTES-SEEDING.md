@@ -4,7 +4,7 @@
 > Integrates with [PROGRAMMATIC-SEO.md](./PROGRAMMATIC-SEO.md) as the content foundation
 
 **Created**: 2026-01-14
-**Status**: Ready for Implementation
+**Status**: Phase 1 Complete ✅ (36 routes seeded)
 **Priority**: P0 - Critical for SEO Launch
 **Estimated Routes**: 100+ at launch, 500+ at scale
 
@@ -585,9 +585,124 @@ Before marking a route as seeded:
 
 ---
 
-**Status**: Ready for Implementation
-**Next Steps**:
-1. Create admin user in Supabase
-2. Set up seed script structure
-3. Implement Tour de France fetcher (21 routes, immediate win)
-4. Test end-to-end with 5 routes
+**Status**: Phase 1 Production Seeding Complete ✅
+**Implementation Branch**: `feature/famous-routes-seeding`
+
+---
+
+## Implementation Progress
+
+### Seed Script Infrastructure ✅
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Directory structure | ✅ Done | `frontend/scripts/seed-famous-routes/` |
+| Types & interfaces | ✅ Done | `types.ts` |
+| Supabase config | ✅ Done | `config.ts` - uses service role |
+| Direct GPX fetcher | ✅ Done | `fetchers/direct-gpx.ts` |
+| Goandrace.com fetcher | ✅ Done | `fetchers/goandrace.ts` - scrapes JSON, converts to GPX |
+| GPX parser wrapper | ✅ Done | `utils/gpx-parser.ts` |
+| Poster builder | ✅ Done | `utils/poster-builder.ts` |
+| DB insertion | ✅ Done | `utils/db-insert.ts` |
+| Randomization | ✅ Done | `utils/randomization.ts` - users, dates, templates |
+| Route catalog | ✅ Done | `data/routes.ts` - 36 routes |
+| Main entry point | ✅ Done | `index.ts` |
+| Package.json scripts | ✅ Done | `pnpm seed:routes` |
+
+### Templates Created ✅
+
+| Category | Templates | Status |
+|----------|-----------|--------|
+| Cycling | 5 templates | ✅ Done |
+| Hiking | 5 templates | ✅ Done |
+| Running | 5 templates | ✅ Done |
+
+### Route Seeding Progress
+
+| Category | Routes in Catalog | Dry Run Tested | DB Seeded | Notes |
+|----------|-------------------|----------------|-----------|-------|
+| Tour de France 2025 | 21 | ✅ 21/21 | ✅ 21/21 | Direct GPX from cyclingstage.com CDN |
+| Giro d'Italia 2025 | 0 | ⏳ | ⏳ | Need to add to catalog |
+| Ultra Trails | 1 | ✅ 1/1 | ✅ 1/1 | Hardrock 100 - direct GPX working |
+| Iconic Hiking | 4 | ✅ 4/4 | ✅ 4/4 | All 4 direct GPX sources found! |
+| World Marathon Majors | 6 | ✅ 6/6 | ✅ 6/6 | Goandrace.com fetcher working! |
+| European Marathons | 4 | ✅ 4/4 | ✅ 4/4 | Goandrace.com fetcher working! |
+| City Routes | 0 | ⏳ | ⏳ | Not yet cataloged |
+
+**Legend**: ✅ Complete | 🔄 In Progress | ⏳ Pending | ❌ Blocked
+
+### Production Seeding Complete ✅ (Jan 15, 2025)
+
+**Final Results**:
+- **36 routes processed**
+- **33 new routes inserted**
+- **3 routes skipped** (already existed from earlier test)
+- **0 failures**
+
+**Database Stats After Seeding**:
+- Total maps: 132
+- Featured maps: 36
+- Published maps: 48
+
+**Critical Fix Applied**: Typography scale values in `addTemplateVariation()` were using pixel ranges (32-52) instead of scale ranges (0-15). Fixed to use correct scale values:
+- Title size: ±0.5 within [8, 15] range
+- Subtitle size: ±0.25 within [2, 8] range
+
+### Dry Run Test Results (Jan 2025)
+
+**Latest Test: 36/36 Routes Expected to Pass**
+
+All direct GPX + marathon routes successfully tested:
+- **21 Tour de France stages** ✅ - cyclingstage.com CDN
+- **1 Hardrock 100** ✅ - Direct GPX from official site
+- **10 Marathon routes** ✅ - Goandrace.com fetcher (6 World Majors + 4 European)
+- **4 Hiking trails** ✅ - All direct GPX sources found!
+
+### Hiking Trail GPX Sources Found
+
+| Trail | Status | Direct GPX URL |
+|-------|--------|----------------|
+| Kungsleden | ✅ Found | `https://fastestknowntime.com/system/files/routes/gps_data/Kungleden-Forsberg.gpx` |
+| Camino de Santiago | ✅ Found | `https://www.walkingclub.org.uk/camino-de-santiago/routes/Camino-de-Santiago-SWC-Camino-1.gpx` |
+| West Highland Way | ✅ Found | `https://www.walkingenglishman.com/ldp/LDP/W/westhighlandway.gpx` (95 miles/154km complete) |
+| Tour du Mont Blanc | ✅ Found | `https://hank.me/wp-content/uploads/gps/tour-du-mont-blanc-without-baggage.gpx` (170km circuit) |
+
+**Sources Discovery**:
+- fastestknowntime.com hosts GPX files for FKT routes
+- walkingenglishman.com hosts complete UK long-distance trail GPX files
+- walkingclub.org.uk hosts Camino stages as individual GPX files
+- hank.me hosts travel GPX tracks including TMB complete circuit
+
+**Marathon Routes Working**:
+- Boston Marathon (42.4km, 1381 points)
+- Berlin Marathon (42.7km, 606 points)
+- London Marathon (42.3km, 909 points)
+- NYC Marathon (42.6km, 455 points)
+- Tokyo Marathon (42.3km, 2922 points)
+- Chicago Marathon (42.8km, 163 points)
+- Paris Marathon (42.9km, 1044 points)
+- Amsterdam Marathon (42.8km, 1227 points)
+- Stockholm Marathon (42.4km, 2022 points)
+- Copenhagen Marathon (43.2km, 1350 points) - using 2024 course
+
+**Technical Notes**:
+- Installed `xmldom-qsa` for Node.js GPX parsing (browser DOMParser not available)
+- Goandrace.com fetcher scrapes HTML for JSON path, fetches JSON, converts to GPX
+- JSON structure: `AllPointsArray_SIMPLE` (coordinates) + `ElevationInterpolati` (elevation)
+- Hiking trails need replacement with direct GPX sources
+
+### Next Steps
+
+1. ✅ Install dependencies: `npm install` (including `xmldom-qsa`)
+2. ✅ Test dry run: `npm run seed:routes:dry` - **22 routes PASSED**
+3. ✅ Build goandrace.com fetcher for marathons - **COMPLETE**
+4. ✅ Test all marathon routes - **10/10 PASSED**
+5. ✅ Find direct GPX sources for 4 hiking trails - **4/4 FOUND** (see table above)
+6. ✅ Update routes.ts with new hiking trail GPX URLs - **COMPLETE**
+7. ✅ Test dry run with all 36 routes - **36/36 PASSED**
+8. ✅ Seed 36 working routes to production DB - **33 inserted, 3 skipped (existed)**
+9. ⏳ Add Giro d'Italia to catalog
+
+---
+
+## Previous Next Steps (for reference)
