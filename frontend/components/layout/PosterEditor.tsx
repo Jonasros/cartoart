@@ -43,6 +43,14 @@ export function PosterEditor() {
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [productMode, setProductMode] = useState<ProductMode>('poster');
   const [isLoadingMap, setIsLoadingMap] = useState(false);
+  // Track pending auto-export from paid download flow
+  const [pendingAutoExport, setPendingAutoExport] = useState<{
+    resolution: import('@/lib/export/constants').ExportResolutionKey;
+    mode: ProductMode;
+  } | null>(null);
+
+  // Track if we've already processed a paid download to prevent infinite loops
+  const paidDownloadProcessedRef = useRef<string | null>(null);
 
   // Sculpture configuration (separate from poster config)
   const {
@@ -111,6 +119,9 @@ export function PosterEditor() {
 
   // Sculpture thumbnail for sharing
   const [sculptureThumbnail, setSculptureThumbnail] = useState<Blob | null>(null);
+
+  // Track if map is idle (fully rendered) for safe export
+  const [mapIsIdle, setMapIsIdle] = useState(false);
 
   // Capture sculpture thumbnail when in sculpture mode (for share modal)
   useEffect(() => {
@@ -196,32 +207,149 @@ export function PosterEditor() {
     });
   }, [setConfig, isAuthenticated, updateSculptureConfig]);
 
-  // Load map from URL param on mount (for edit/duplicate links)
+  // Load map from URL param on mount (for edit/duplicate links and paid download flow)
   useEffect(() => {
     const mapId = searchParams.get('mapId');
-    if (!mapId || currentMapId === mapId || isLoadingMap) return;
+    const autoExport = searchParams.get('autoExport');
+    const resolution = searchParams.get('resolution');
+    const mode = searchParams.get('mode');
+    const hasPaidSnapshot = searchParams.get('hasPaidSnapshot');
+
+    // CRITICAL: Paid downloads must ALWAYS load the config snapshot from sessionStorage
+    // even if we already have the same mapId loaded (user may have edited since purchasing)
+    const isPaidDownload = hasPaidSnapshot === 'true' && autoExport === 'true';
+
+    // Skip if no mapId
+    if (!mapId) return;
+
+    // Skip if already loading
+    if (isLoadingMap) return;
+
+    // For paid downloads: check if we've already processed this download
+    // Just return early - URL params were already cleared in the main flow
+    if (isPaidDownload && paidDownloadProcessedRef.current) {
+      return;
+    }
+
+    // For non-paid downloads: skip if already loaded this map
+    if (!isPaidDownload && currentMapId === mapId) return;
 
     const loadMapFromUrl = async () => {
       setIsLoadingMap(true);
       try {
-        const map = await getMapById(mapId);
-        if (map) {
-          // Create a SavedProject-like object to load
-          const projectToLoad: SavedProject = {
-            id: map.id,
-            name: map.title,
-            config: map.config,
-            updatedAt: new Date(map.updated_at).getTime(),
-            productType: map.product_type,
-            sculptureConfig: map.sculpture_config ?? undefined,
-          };
-          await handleLoadProject(projectToLoad);
+        // CRITICAL: For paid downloads, use the config snapshot from sessionStorage
+        // This ensures the customer gets EXACTLY the design they paid for
+        let configToLoad: PosterConfig | null = null;
+        let sculptureConfigToLoad: import('@/types/sculpture').SculptureConfig | undefined;
+        let productTypeToLoad: 'poster' | 'sculpture' = 'poster';
 
-          // Clear the mapId from URL to prevent reloading
+        if (hasPaidSnapshot === 'true' && autoExport === 'true') {
+          console.log('[PAID DOWNLOAD] Attempting to load config from sessionStorage');
+          try {
+            const storedData = sessionStorage.getItem('waymarker_paid_export_config');
+            if (storedData) {
+              const parsed = JSON.parse(storedData);
+              console.log('[PAID DOWNLOAD] Found stored config, orderId:', parsed.orderId, 'timestamp:', parsed.timestamp);
+              // Verify the snapshot is recent (within 5 minutes) and valid
+              if (parsed.timestamp && Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+                if (parsed.configSnapshot) {
+                  configToLoad = parsed.configSnapshot as PosterConfig;
+                  sculptureConfigToLoad = parsed.sculptureConfigSnapshot;
+                  productTypeToLoad = parsed.productType || 'poster';
+                  console.log('[PAID DOWNLOAD] Using config snapshot from order:', parsed.orderId);
+                } else {
+                  console.warn('[PAID DOWNLOAD] Config snapshot is empty in stored data');
+                }
+              } else {
+                console.warn('[PAID DOWNLOAD] Stored config is too old, age:', Date.now() - parsed.timestamp, 'ms');
+              }
+              // Clear the snapshot after use
+              sessionStorage.removeItem('waymarker_paid_export_config');
+            } else {
+              console.warn('[PAID DOWNLOAD] No config found in sessionStorage');
+            }
+          } catch (e) {
+            console.warn('[PAID DOWNLOAD] Failed to load config snapshot:', e);
+          }
+        }
+
+        // If no paid snapshot, load from database (normal edit flow)
+        if (!configToLoad) {
+          const map = await getMapById(mapId);
+          if (map) {
+            configToLoad = map.config;
+            sculptureConfigToLoad = map.sculpture_config ?? undefined;
+            productTypeToLoad = map.product_type;
+          }
+        }
+
+        if (configToLoad) {
+          // Regenerate style with current domain URLs
+          const freshStyle = getStyleById(configToLoad.style.id);
+          const configWithFreshStyle: PosterConfig = freshStyle
+            ? {
+                ...configToLoad,
+                style: {
+                  ...configToLoad.style,
+                  mapStyle: freshStyle.mapStyle,
+                },
+              }
+            : configToLoad;
+
+          // Apply the config
+          setConfig(configWithFreshStyle);
+          setCurrentMapId(mapId);
+          setOriginalConfig(cloneConfig(configWithFreshStyle));
+
+          // Load sculpture config if applicable
+          if (productTypeToLoad === 'sculpture' && sculptureConfigToLoad) {
+            updateSculptureConfig(sculptureConfigToLoad);
+            setProductMode('sculpture');
+          } else {
+            setProductMode('poster');
+          }
+
+          // Fetch map name if authenticated (for display purposes)
+          if (isAuthenticated) {
+            try {
+              const map = await getMapById(mapId);
+              if (map) {
+                setCurrentMapName(map.title);
+                setCurrentMapStatus({
+                  isSaved: true,
+                  isPublished: map.is_published,
+                  hasUnsavedChanges: false,
+                });
+              }
+            } catch (e) {
+              console.warn('Failed to fetch map metadata:', e);
+            }
+          }
+
+          // Clear URL params to prevent reloading
           const params = new URLSearchParams(searchParams.toString());
           params.delete('mapId');
+          params.delete('autoExport');
+          params.delete('resolution');
+          params.delete('mode');
+          params.delete('hasPaidSnapshot');
           const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
           router.replace(newUrl, { scroll: false });
+
+          // If auto-export is requested (from paid download flow), set pending state
+          if (autoExport === 'true' && resolution) {
+            const exportMode: ProductMode = mode === 'sculpture' ? 'sculpture' : 'poster';
+            setPendingAutoExport({
+              resolution: resolution as import('@/lib/export/constants').ExportResolutionKey,
+              mode: exportMode,
+            });
+
+            // Mark this paid download as processed to prevent infinite loops
+            if (isPaidDownload) {
+              paidDownloadProcessedRef.current = mapId;
+              console.log('[PAID DOWNLOAD] Marked as processed, mapId:', mapId);
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to load map from URL:', error);
@@ -230,8 +358,71 @@ export function PosterEditor() {
       }
     };
 
+    // For paid downloads, immediately mark as processing to prevent re-runs
+    if (isPaidDownload) {
+      paidDownloadProcessedRef.current = mapId;
+    }
+
     loadMapFromUrl();
-  }, [searchParams, pathname, router, handleLoadProject, currentMapId, isLoadingMap]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, pathname, router, setConfig, updateSculptureConfig, isAuthenticated]);
+
+  // Trigger auto-export when pending and map is ready (from paid download flow)
+  // For posters: directly trigger PNG export
+  // For sculptures: set flag to auto-open modal and trigger STL export
+  const [autoTriggerSculptureExport, setAutoTriggerSculptureExport] = useState(false);
+  // Flag to show share modal after poster auto-export completes
+  const [showShareModalAfterAutoExport, setShowShareModalAfterAutoExport] = useState(false);
+  // Track auto-export timeout start time for fallback
+  const autoExportStartTimeRef = useRef<number | null>(null);
+  // Maximum time to wait for map idle before forcing export (15 seconds)
+  const AUTO_EXPORT_TIMEOUT_MS = 15000;
+
+  useEffect(() => {
+    if (!pendingAutoExport || !currentMapId || isLoadingMap || isExporting) return;
+
+    if (pendingAutoExport.mode === 'sculpture') {
+      // For sculptures, use a small delay since they use 3D canvas (not MapLibre)
+      const sculptureTimeout = setTimeout(() => {
+        setAutoTriggerSculptureExport(true);
+        setPendingAutoExport(null);
+      }, 1000);
+      return () => clearTimeout(sculptureTimeout);
+    } else {
+      // Track when we started waiting for the map to be idle
+      if (autoExportStartTimeRef.current === null) {
+        autoExportStartTimeRef.current = Date.now();
+      }
+
+      // For posters, wait for map to be idle (fully rendered) before exporting
+      // This prevents "already running" errors with 3D terrain
+      // But add a timeout fallback to prevent infinite waiting
+      const timeWaiting = Date.now() - autoExportStartTimeRef.current;
+      const shouldForceExport = timeWaiting >= AUTO_EXPORT_TIMEOUT_MS;
+
+      if (!mapIsIdle && !shouldForceExport) {
+        // Check again in 500ms
+        const checkTimeout = setTimeout(() => {
+          // Force re-evaluation by updating state
+        }, 500);
+        return () => clearTimeout(checkTimeout);
+      }
+
+      if (shouldForceExport && !mapIsIdle) {
+        console.warn('Auto-export timeout: forcing export even though map is not idle');
+        handleError(new Error('Map tiles may not be fully loaded. If the export looks incomplete, please try downloading again.'));
+      }
+
+      // Additional small delay after idle/timeout to ensure stability
+      const posterTimeout = setTimeout(() => {
+        setShowShareModalAfterAutoExport(true);
+        setPendingAutoExport(null);
+        autoExportStartTimeRef.current = null;
+        handleExport(pendingAutoExport.resolution);
+      }, mapIsIdle ? 500 : 1000);
+      return () => clearTimeout(posterTimeout);
+    }
+  }, [pendingAutoExport, currentMapId, isLoadingMap, isExporting, mapIsIdle, handleExport, handleError]);
 
   // Handle saving a project (wraps saveProject to track currentMapId)
   const handleSaveProject = useCallback(async (name: string, posterConfig: PosterConfig) => {
@@ -272,6 +463,39 @@ export function PosterEditor() {
   const handleSaveClick = useCallback(async (name: string) => {
     await handleSaveProject(name, config);
   }, [handleSaveProject, config]);
+
+  // Auto-save map for paid exports (returns mapId or null)
+  // Always creates a NEW copy - so the purchased version is a snapshot
+  // This prevents confusion between "what was purchased" and "current edits"
+  const handleAutoSaveForExport = useCallback(async (): Promise<string | null> => {
+    // Can't save if not authenticated
+    if (!isAuthenticated) {
+      return null;
+    }
+
+    // Generate a name from location or use default
+    const baseName = config.location?.name || config.route?.data?.name || 'Untitled Map';
+    // Add suffix to indicate this is a purchased export copy
+    const mapName = currentMapId ? `${baseName} (Export Copy)` : baseName;
+
+    try {
+      // Always create a NEW save (don't reuse existing mapId)
+      // This is important for paid exports so the purchased version is preserved
+      const savedProject = await saveProject(mapName, config, undefined, {
+        productType: productMode,
+        sculptureConfig: productMode === 'sculpture' ? sculptureConfig : undefined,
+      });
+
+      // Note: We intentionally DON'T call handleLoadProject here
+      // because we want to keep the user's current editing context
+      // The new save is just for the purchase/download
+
+      return savedProject.id;
+    } catch (error) {
+      console.error('Failed to auto-save map for export:', error);
+      return null;
+    }
+  }, [isAuthenticated, config, saveProject, productMode, sculptureConfig, currentMapId]);
 
   // Handler for updating existing project (overwrite)
   const handleUpdateProject = useCallback(async () => {
@@ -362,10 +586,16 @@ export function PosterEditor() {
     );
   }, [config.style.mapStyle, config.palette, config.layers, config.style.layerToggles]);
 
-  const handleMapLoad = (map: MapLibreGL.Map) => {
+  const handleMapLoad = useCallback((map: MapLibreGL.Map) => {
     setMapRef(map);
     mapInstanceRef.current = map;
-  };
+
+    // Track when map becomes idle (fully rendered) for safe export
+    setMapIsIdle(false);
+    map.on('idle', () => {
+      setMapIsIdle(true);
+    });
+  }, [setMapRef]);
 
   // Throttle the location update to prevent excessive style re-renders
   const throttledUpdateLocation = useMemo(
@@ -397,6 +627,20 @@ export function PosterEditor() {
     // Clear URL state parameter by navigating to clean URL
     router.replace(pathname, { scroll: false });
   }, [setConfig, router, pathname, resetSculptureConfig]);
+
+  // Handle mode change - clears saved map state since poster/sculpture are different designs
+  const handleModeChange = useCallback((newMode: ProductMode) => {
+    if (newMode !== productMode) {
+      // Clear saved map state when switching modes - treat as new design
+      setCurrentMapId(null);
+      setCurrentMapName(null);
+      setOriginalConfig(null);
+      setCurrentMapStatus(null);
+      // Clear URL mapId parameter
+      router.replace(pathname, { scroll: false });
+    }
+    setProductMode(newMode);
+  }, [productMode, router, pathname]);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -463,6 +707,14 @@ export function PosterEditor() {
             isPublished={currentMapStatus?.isPublished}
             isSaved={!!currentMapId}
             onPublish={currentMapId ? handlePublishFromShareModal : undefined}
+            mapId={currentMapId}
+            onSaveMap={handleAutoSaveForExport}
+            autoTriggerSculptureExport={autoTriggerSculptureExport}
+            onAutoExportTriggered={() => setAutoTriggerSculptureExport(false)}
+            autoShowShareModal={showShareModalAfterAutoExport}
+            onShareModalShown={() => setShowShareModalAfterAutoExport(false)}
+            getCurrentConfig={() => config}
+            getSculptureConfig={() => sculptureConfig}
           />
         </div>
       </div>
@@ -474,7 +726,7 @@ export function PosterEditor() {
         onToggleDrawer={setIsDrawerOpen}
         onOpenExplore={() => setIsExploreOpen(true)}
         productMode={productMode}
-        onModeChange={setProductMode}
+        onModeChange={handleModeChange}
         hasRoute={!!config.route?.data}
       />
 
@@ -581,6 +833,14 @@ export function PosterEditor() {
             isPublished={currentMapStatus?.isPublished}
             isSaved={!!currentMapId}
             onPublish={currentMapId ? handlePublishFromShareModal : undefined}
+            mapId={currentMapId}
+            onSaveMap={handleAutoSaveForExport}
+            autoTriggerSculptureExport={autoTriggerSculptureExport}
+            onAutoExportTriggered={() => setAutoTriggerSculptureExport(false)}
+            autoShowShareModal={showShareModalAfterAutoExport}
+            onShareModalShown={() => setShowShareModalAfterAutoExport(false)}
+            getCurrentConfig={() => config}
+            getSculptureConfig={() => sculptureConfig}
           />
         </div>
 

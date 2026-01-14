@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Forest to sunset gradient -->
+    <linearGradient id="mountain-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2d6a4f" />
+      <stop offset="100%" stop-color="#e07b3a" />
+    </linearGradient>
+    <!-- Trail gradient -->
+    <linearGradient id="trail-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#40916c" />
+      <stop offset="100%" stop-color="#f4a261" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main mountain shape -->
+  <path d="M256 64L448 416H64L256 64Z" fill="url(#mountain-gradient)" />
+
+  <!-- Secondary peak (smaller, offset) -->
+  <path d="M352 192L448 416H256L352 192Z" fill="url(#mountain-gradient)" opacity="0.7" />
+
+  <!-- Trail/path winding up the mountain -->
+  <path d="M160 384C192 352 208 320 224 288C240 256 248 224 256 192C264 160 269.6 128 272 96" stroke="url(#trail-gradient)" stroke-width="24" stroke-linecap="round" fill="none" opacity="0.9" />
+
+  <!-- Trail marker dots -->
+  <circle cx="176" cy="368" r="16" fill="#f8f9fa" opacity="0.9" />
+  <circle cx="232" cy="272" r="16" fill="#f8f9fa" opacity="0.9" />
+  <circle cx="264" cy="160" r="16" fill="#f8f9fa" opacity="0.9" />
+
+  <!-- Summit marker -->
+  <circle cx="256" cy="96" r="24" fill="#e07b3a" />
+</svg>

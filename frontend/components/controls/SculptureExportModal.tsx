@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { X, Download, Loader2, Box, Ruler, Package } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { X, Download, Loader2, Box, Ruler, Package, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { RouteData } from '@/types/poster';
+import type { RouteData, PosterConfig } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
-import { SCULPTURE_SIZES, SCULPTURE_MATERIALS, SCULPTURE_SHAPES } from '@/types/sculpture';
+import { SCULPTURE_MATERIALS, SCULPTURE_SHAPES } from '@/types/sculpture';
 import {
   generateSculptureMeshes,
   exportToSTL,
@@ -29,6 +29,15 @@ interface SculptureExportModalProps {
   isPublished?: boolean;
   isSaved?: boolean;
   onPublish?: () => Promise<void>;
+  // Map ID for paid exports
+  mapId?: string | null;
+  // Auto-save callback for paid exports (returns mapId or null)
+  onSaveMap?: () => Promise<string | null>;
+  // Auto-trigger export when opened (from paid download flow)
+  autoTriggerExport?: boolean;
+  // CRITICAL: Fresh config getters for checkout integrity
+  getCurrentConfig?: () => PosterConfig;
+  getSculptureConfig?: () => SculptureConfig | undefined;
 }
 
 export function SculptureExportModal({
@@ -43,6 +52,11 @@ export function SculptureExportModal({
   isPublished = false,
   isSaved = false,
   onPublish,
+  mapId,
+  onSaveMap,
+  autoTriggerExport = false,
+  getCurrentConfig,
+  getSculptureConfig,
 }: SculptureExportModalProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -53,6 +67,9 @@ export function SculptureExportModal({
   } | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareThumbnail, setShareThumbnail] = useState<Blob | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Generate share thumbnail when export is successful and we have a source thumbnail
   useEffect(() => {
@@ -66,7 +83,31 @@ export function SculptureExportModal({
     }
   }, [exportStats, sculptureThumbnail, routeName]);
 
-  const handleExport = useCallback(async () => {
+  // Track if we've already auto-triggered to prevent duplicate exports
+  const [hasAutoTriggered, setHasAutoTriggered] = useState(false);
+
+  // Auto-trigger export ref - we use a ref to avoid dependency cycles
+  const autoTriggerRef = useRef(false);
+
+  // Auto-trigger export when modal opens from paid download flow
+  useEffect(() => {
+    if (isOpen && autoTriggerExport && !autoTriggerRef.current && !isExporting && routeData) {
+      autoTriggerRef.current = true;
+      // Small delay to ensure modal is fully rendered
+      const triggerTimeout = setTimeout(() => {
+        setHasAutoTriggered(true);
+      }, 500);
+      return () => clearTimeout(triggerTimeout);
+    }
+    // Reset the flag when modal closes
+    if (!isOpen) {
+      autoTriggerRef.current = false;
+      setHasAutoTriggered(false);
+    }
+  }, [isOpen, autoTriggerExport, isExporting, routeData]);
+
+  // Internal export function that can be called from both button click and auto-trigger
+  const handleExportInternal = useCallback(async () => {
     if (!routeData) {
       setExportError('No route data available for export');
       return;
@@ -146,6 +187,80 @@ export function SculptureExportModal({
       setIsExporting(false);
     }
   }, [routeData, config, elevationGrid, routeName]);
+
+  // Effect that actually triggers the export when hasAutoTriggered becomes true
+  useEffect(() => {
+    if (hasAutoTriggered && !isExporting) {
+      // Reset immediately to prevent re-triggering when isExporting becomes false
+      setHasAutoTriggered(false);
+      handleExportInternal();
+    }
+  }, [hasAutoTriggered, isExporting, handleExportInternal]);
+
+  // Handle checkout for paid STL download
+  const handleCheckout = useCallback(async () => {
+    if (!routeData) {
+      setCheckoutError('No route data available');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    setCheckoutError(null);
+
+    try {
+      // Auto-save the map first if not already saved (to get mapId for download flow)
+      let effectiveMapId = mapId;
+      if (!effectiveMapId && onSaveMap) {
+        setIsSaving(true);
+        try {
+          effectiveMapId = await onSaveMap();
+        } catch (saveError) {
+          console.error('Failed to auto-save map:', saveError);
+          // Continue without mapId - user can still purchase but download flow may be limited
+        } finally {
+          setIsSaving(false);
+        }
+      }
+
+      // CRITICAL: Capture fresh configs right before checkout
+      // This ensures we store the EXACT design the user is purchasing
+      const currentPosterConfig = getCurrentConfig?.();
+      const currentSculptureConfig = getSculptureConfig?.() || config;
+
+      console.log('[SCULPTURE CHECKOUT] Capturing config snapshot');
+      console.log('[SCULPTURE CHECKOUT] Sculpture config shape:', currentSculptureConfig.shape);
+      console.log('[SCULPTURE CHECKOUT] Sculpture config size:', currentSculptureConfig.size);
+
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: 'sculpture-stl',
+          mapId: effectiveMapId || undefined,
+          // CRITICAL: Include full config snapshots for purchase integrity
+          exportConfig: {
+            productMode: 'sculpture',
+            configSnapshot: currentPosterConfig || null,
+            sculptureConfigSnapshot: currentSculptureConfig,
+            routeName: routeName?.substring(0, 100),
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout');
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Checkout error:', error);
+      setCheckoutError(error instanceof Error ? error.message : 'Checkout failed');
+      setIsCheckingOut(false);
+    }
+  }, [routeData, config, mapId, routeName, onSaveMap, getCurrentConfig, getSculptureConfig]);
 
   if (!isOpen) return null;
 
@@ -297,6 +412,14 @@ export function SculptureExportModal({
 
         {/* Footer */}
         <div className="p-6 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-800/80 dark:to-transparent border-t border-gray-100 dark:border-gray-800">
+          {/* Checkout Error */}
+          {checkoutError && (
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+              <p className="text-sm text-red-600 dark:text-red-400">{checkoutError}</p>
+            </div>
+          )}
+
           {/* Price */}
           <div className="flex items-center justify-between mb-4 px-1">
             <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -310,25 +433,30 @@ export function SculptureExportModal({
           </div>
 
           <button
-            onClick={handleExport}
-            disabled={isExporting || !routeData}
+            onClick={handleCheckout}
+            disabled={isCheckingOut || isSaving || !routeData}
             className={cn(
               'w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold transition-all',
-              'bg-gradient-to-r from-journey-sculpture to-amber-600 text-white',
-              'hover:shadow-lg hover:shadow-journey-sculpture/20',
+              'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white',
+              'hover:shadow-lg hover:shadow-emerald-500/20',
               'active:scale-[0.98]',
               'disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none'
             )}
           >
-            {isExporting ? (
+            {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Generating STL...</span>
+                <span>Saving your sculpture...</span>
+              </>
+            ) : isCheckingOut ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Redirecting to checkout...</span>
               </>
             ) : (
               <>
                 <Download className="w-5 h-5" />
-                <span>Download STL</span>
+                <span>Purchase & Download STL</span>
               </>
             )}
           </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Loader2, Box } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ShareModal } from './ShareModal';
@@ -30,6 +30,19 @@ interface ExportButtonProps {
   isPublished?: boolean;
   isSaved?: boolean;
   onPublish?: () => Promise<void>;
+  // Map ID for paid exports
+  mapId?: string | null;
+  // Auto-save callback for paid exports
+  onSaveMap?: () => Promise<string | null>;
+  // Auto-trigger sculpture export (from paid download flow)
+  autoTriggerSculptureExport?: boolean;
+  onAutoExportTriggered?: () => void;
+  // Auto-show share modal after poster auto-export completes
+  autoShowShareModal?: boolean;
+  onShareModalShown?: () => void;
+  // CRITICAL: Fresh config getters for checkout integrity
+  getCurrentConfig?: () => PosterConfig;
+  getSculptureConfig?: () => SculptureConfig | undefined;
 }
 
 export function ExportButton({
@@ -48,12 +61,42 @@ export function ExportButton({
   isPublished = false,
   isSaved = false,
   onPublish,
+  mapId,
+  onSaveMap,
+  autoTriggerSculptureExport = false,
+  onAutoExportTriggered,
+  autoShowShareModal = false,
+  onShareModalShown,
+  getCurrentConfig,
+  getSculptureConfig,
 }: ExportButtonProps) {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSculptureModal, setShowSculptureModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  // Local state to persist the auto-export flag after parent clears it
+  const [shouldAutoExportSculpture, setShouldAutoExportSculpture] = useState(false);
 
   const isSculptureMode = productMode === 'sculpture';
+
+  // Auto-open sculpture modal when triggered from paid download flow
+  useEffect(() => {
+    if (autoTriggerSculptureExport && isSculptureMode) {
+      // Store the flag locally before parent clears it
+      setShouldAutoExportSculpture(true);
+      setShowSculptureModal(true);
+      // Clear the parent flag
+      onAutoExportTriggered?.();
+    }
+  }, [autoTriggerSculptureExport, isSculptureMode, onAutoExportTriggered]);
+
+  // Auto-show share modal after poster auto-export completes (from paid download flow)
+  useEffect(() => {
+    if (autoShowShareModal && lastExportResult && !isSculptureMode) {
+      setShowShareModal(true);
+      // Clear the parent flag
+      onShareModalShown?.();
+    }
+  }, [autoShowShareModal, lastExportResult, isSculptureMode, onShareModalShown]);
 
   const handleButtonClick = () => {
     if (isSculptureMode) {
@@ -81,6 +124,8 @@ export function ExportButton({
 
   const handleCloseSculptureModal = () => {
     setShowSculptureModal(false);
+    // Reset the auto-export flag when modal closes
+    setShouldAutoExportSculpture(false);
   };
 
   const handleCloseShareModal = () => {
@@ -140,6 +185,11 @@ export function ExportButton({
         onExport={handleExport}
         isExporting={isExporting}
         format={format}
+        mapId={mapId}
+        onSaveMap={onSaveMap}
+        getCurrentConfig={getCurrentConfig}
+        getSculptureConfig={getSculptureConfig}
+        productMode={productMode}
       />
 
       {/* Sculpture Export Modal */}
@@ -156,6 +206,11 @@ export function ExportButton({
           isPublished={isPublished}
           isSaved={isSaved}
           onPublish={onPublish}
+          mapId={mapId}
+          onSaveMap={onSaveMap}
+          autoTriggerExport={shouldAutoExportSculpture}
+          getCurrentConfig={getCurrentConfig}
+          getSculptureConfig={getSculptureConfig}
         />
       )}
 

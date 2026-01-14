@@ -16,8 +16,10 @@ import {
   EyeOff,
   Palette,
   Link2,
+  Package,
 } from 'lucide-react';
 import { PublishModal } from '@/components/profile/PublishModal';
+import { MyDownloadsModal } from '@/components/account/MyDownloadsModal';
 import { publishMap, unpublishMap } from '@/lib/actions/maps';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ConnectedServices } from '@/components/account/ConnectedServices';
@@ -44,6 +46,7 @@ export function AccountPanel({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showDownloadsModal, setShowDownloadsModal] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
@@ -248,6 +251,15 @@ export function AccountPanel({
             <Button
               variant="outline"
               className="w-full justify-start gap-3"
+              onClick={() => setShowDownloadsModal(true)}
+            >
+              <Package className="w-4 h-4" />
+              My Downloads
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3"
               onClick={() => router.push('/feed')}
             >
               <Compass className="w-4 h-4" />
@@ -355,6 +367,12 @@ export function AccountPanel({
           onPublish={handlePublish}
         />
       )}
+
+      {/* My Downloads Modal */}
+      <MyDownloadsModal
+        isOpen={showDownloadsModal}
+        onClose={() => setShowDownloadsModal(false)}
+      />
     </div>
   );
 }

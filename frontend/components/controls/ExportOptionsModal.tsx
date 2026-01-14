@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Check, Loader2, Printer, Monitor, Smartphone, Laptop, Tv, Image, Download, Frame, Palette } from 'lucide-react';
+import { X, Check, Loader2, Printer, Monitor, Smartphone, Laptop, Tv, Image, Download, Frame, Palette, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EXPORT_RESOLUTIONS, type BaseExportResolution, type ExportResolutionKey } from '@/lib/export/constants';
 import { calculateTargetResolution, getPhysicalDimensions } from '@/lib/export/resolution';
 import type { PosterConfig } from '@/types/poster';
+import type { ExportProduct } from '@/lib/stripe/products';
 
 interface ExportOptionsModalProps {
   isOpen: boolean;
@@ -13,6 +14,21 @@ interface ExportOptionsModalProps {
   onExport: (resolutionKey: ExportResolutionKey) => void;
   isExporting: boolean;
   format: PosterConfig['format'];
+  mapId?: string | null;
+  onSaveMap?: () => Promise<string | null>; // Returns mapId after save
+  /**
+   * CRITICAL: Get fresh config right before checkout.
+   * This prevents stale config issues where user edits after opening modal.
+   */
+  getCurrentConfig?: () => PosterConfig;
+  /**
+   * Optional: Get current sculpture config for sculpture purchases
+   */
+  getSculptureConfig?: () => import('@/types/sculpture').SculptureConfig | undefined;
+  /**
+   * Product mode: 'poster' or 'sculpture'
+   */
+  productMode?: import('@/types/sculpture').ProductMode;
 }
 
 // Resolution metadata with icons and pricing
@@ -78,11 +94,32 @@ const MATERIAL_OPTIONS = [
 const PRINT_RESOLUTIONS: ExportResolutionKey[] = ['SMALL', 'MEDIUM', 'LARGE'];
 const DIGITAL_RESOLUTIONS: ExportResolutionKey[] = ['THUMBNAIL', 'PHONE_WALLPAPER', 'LAPTOP_WALLPAPER', 'DESKTOP_4K'];
 
-export function ExportOptionsModal({ isOpen, onClose, onExport, isExporting, format }: ExportOptionsModalProps) {
+// Map resolution keys to Stripe product IDs
+const RESOLUTION_TO_PRODUCT: Partial<Record<ExportResolutionKey, ExportProduct>> = {
+  SMALL: 'poster-small',
+  MEDIUM: 'poster-medium',
+  LARGE: 'poster-large',
+};
+
+export function ExportOptionsModal({
+  isOpen,
+  onClose,
+  onExport,
+  isExporting,
+  format,
+  mapId,
+  onSaveMap,
+  getCurrentConfig,
+  getSculptureConfig,
+  productMode = 'poster',
+}: ExportOptionsModalProps) {
   const [selectedKey, setSelectedKey] = useState<ExportResolutionKey>('SMALL');
   const [selectedFrame, setSelectedFrame] = useState('none');
   const [selectedMaterial, setSelectedMaterial] = useState('matte');
   const [showPrintOptions, setShowPrintOptions] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen) return null;
 
@@ -106,6 +143,80 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, isExporting, for
       if (materialPrice) total += parseFloat(materialPrice.replace('€', ''));
     }
     return total > 0 ? `€${total.toFixed(2)}` : 'Free';
+  };
+
+  // Check if selected resolution requires payment
+  const isPaidResolution = RESOLUTION_TO_PRODUCT[selectedKey] !== undefined;
+
+  // Handle checkout for paid resolutions
+  const handleCheckout = async () => {
+    const product = RESOLUTION_TO_PRODUCT[selectedKey];
+    if (!product) return;
+
+    setIsCheckingOut(true);
+    setCheckoutError(null);
+
+    try {
+      // CRITICAL: Get FRESH config right before checkout
+      // This prevents stale config issues where user edits after opening modal
+      const freshConfig = getCurrentConfig?.();
+      const freshSculptureConfig = getSculptureConfig?.();
+
+      // Auto-save map if not saved yet
+      let currentMapId = mapId;
+      if (!currentMapId && onSaveMap) {
+        setIsSaving(true);
+        currentMapId = await onSaveMap();
+        setIsSaving(false);
+
+        if (!currentMapId) {
+          throw new Error('Please save your map before purchasing. Sign in to save your design.');
+        }
+      }
+
+      // Build the full export config with complete snapshot
+      const exportConfig = {
+        resolutionKey: selectedKey,
+        format: format,
+        productMode: productMode,
+        // CRITICAL: Include full config snapshot for integrity
+        // This is stored in orders.config_snapshot via webhook
+        configSnapshot: freshConfig || undefined,
+        sculptureConfigSnapshot: freshSculptureConfig || undefined,
+      };
+
+      const response = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product,
+          mapId: currentMapId || undefined,
+          exportConfig,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout');
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Checkout error:', error);
+      setCheckoutError(error instanceof Error ? error.message : 'Checkout failed');
+      setIsCheckingOut(false);
+    }
+  };
+
+  // Handle export button click
+  const handleExportClick = () => {
+    if (isPaidResolution) {
+      handleCheckout();
+    } else {
+      onExport(selectedKey);
+    }
   };
 
   return (
@@ -404,6 +515,14 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, isExporting, for
 
         {/* Footer */}
         <div className="p-6 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-800/80 dark:to-transparent border-t border-gray-100 dark:border-gray-800">
+          {/* Checkout Error */}
+          {checkoutError && (
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+              <p className="text-sm text-red-600 dark:text-red-400">{checkoutError}</p>
+            </div>
+          )}
+
           {/* Selected resolution summary */}
           <div className="flex items-center justify-between mb-4 px-1">
             <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -420,21 +539,36 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, isExporting, for
           </div>
 
           <button
-            onClick={() => onExport(selectedKey)}
-            disabled={isExporting}
+            onClick={handleExportClick}
+            disabled={isExporting || isCheckingOut}
             className={cn(
               "w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold transition-all",
-              "bg-gradient-to-r from-gray-900 to-gray-800 text-white",
-              "dark:from-white dark:to-gray-100 dark:text-gray-900",
-              "hover:shadow-lg hover:shadow-gray-900/20 dark:hover:shadow-white/20",
+              isPaidResolution
+                ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:shadow-lg hover:shadow-emerald-500/20"
+                : "bg-gradient-to-r from-gray-900 to-gray-800 text-white dark:from-white dark:to-gray-100 dark:text-gray-900 hover:shadow-lg hover:shadow-gray-900/20 dark:hover:shadow-white/20",
               "active:scale-[0.98]",
               "disabled:opacity-70 disabled:cursor-wait disabled:hover:shadow-none"
             )}
           >
-            {isExporting ? (
+            {isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Saving your map...</span>
+              </>
+            ) : isCheckingOut ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Redirecting to checkout...</span>
+              </>
+            ) : isExporting ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Generating...</span>
+              </>
+            ) : isPaidResolution ? (
+              <>
+                <Download className="w-5 h-5" />
+                <span>Purchase & Download</span>
               </>
             ) : (
               <>

@@ -245,6 +245,77 @@ export interface Database {
           updated_at?: string;
         };
       };
+      orders: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string;
+          stripe_session_id: string;
+          stripe_payment_intent: string | null;
+          product: string;
+          amount: number;
+          currency: string;
+          status: 'pending' | 'completed' | 'failed' | 'refunded';
+          map_id: string | null;
+          export_config: Json | null;
+          download_count: number;
+          max_downloads: number;
+          download_token: string;
+          created_at: string;
+          completed_at: string | null;
+          // Config snapshot fields (added for purchase integrity)
+          config_snapshot: Json | null;
+          sculpture_config_snapshot: Json | null;
+          product_type: 'poster' | 'sculpture';
+          config_hash: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email: string;
+          stripe_session_id: string;
+          stripe_payment_intent?: string | null;
+          product: string;
+          amount: number;
+          currency?: string;
+          status?: 'pending' | 'completed' | 'failed' | 'refunded';
+          map_id?: string | null;
+          export_config?: Json | null;
+          download_count?: number;
+          max_downloads?: number;
+          download_token: string;
+          created_at?: string;
+          completed_at?: string | null;
+          // Config snapshot fields (added for purchase integrity)
+          config_snapshot?: Json | null;
+          sculpture_config_snapshot?: Json | null;
+          product_type?: 'poster' | 'sculpture';
+          config_hash?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string;
+          stripe_session_id?: string;
+          stripe_payment_intent?: string | null;
+          product?: string;
+          amount?: number;
+          currency?: string;
+          status?: 'pending' | 'completed' | 'failed' | 'refunded';
+          map_id?: string | null;
+          export_config?: Json | null;
+          download_count?: number;
+          max_downloads?: number;
+          download_token?: string;
+          created_at?: string;
+          completed_at?: string | null;
+          // Config snapshot fields (added for purchase integrity)
+          config_snapshot?: Json | null;
+          sculpture_config_snapshot?: Json | null;
+          product_type?: 'poster' | 'sculpture';
+          config_hash?: string | null;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

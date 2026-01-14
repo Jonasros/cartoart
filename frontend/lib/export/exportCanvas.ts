@@ -13,8 +13,69 @@ interface ExportOptions {
   resolution?: BaseExportResolution;
 }
 
+/**
+ * Wait for the map to be in a stable state for export.
+ * This waits for idle (or timeout), then waits additional frames to ensure
+ * no render is in progress (prevents "already running" errors with 3D terrain).
+ */
+async function waitForMapStable(map: MapLibreGL.Map, timeoutMs = 5000): Promise<void> {
+  // First wait for idle - but don't fail if timeout (3D terrain may never fully idle)
+  await new Promise<void>((resolve) => {
+    const timeout = setTimeout(() => {
+      logger.warn('Map stability timeout - proceeding with export anyway');
+      resolve();
+    }, timeoutMs);
+
+    if (map.isStyleLoaded() && !map.isMoving()) {
+      clearTimeout(timeout);
+      resolve();
+    } else {
+      map.once('idle', () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+    }
+  });
+
+  // Wait multiple animation frames to ensure render cycle is complete
+  // This is especially important for 3D terrain which has async tile loading
+  for (let i = 0; i < 3; i++) {
+    await new Promise<void>(resolve => {
+      requestAnimationFrame(() => resolve());
+    });
+  }
+}
+
+/**
+ * Wait for map to become idle after a state change, with timeout.
+ */
+async function waitForIdle(map: MapLibreGL.Map, timeoutMs = 15000): Promise<void> {
+  await new Promise<void>((resolve) => {
+    const timeout = setTimeout(() => {
+      // Don't reject, just resolve - the map might be stable enough
+      logger.warn('Map idle wait timed out, proceeding anyway');
+      resolve();
+    }, timeoutMs);
+
+    map.once('idle', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+
+  // Additional frame wait for safety
+  await new Promise<void>(resolve => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
 export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
   const { map, config, resolution = DEFAULT_EXPORT_RESOLUTION } = options;
+
+  // Wait for map to be stable before starting export
+  await waitForMapStable(map);
 
   // 1. CALCULATE ACTUAL RESOLUTION
   const exportResolution = calculateTargetResolution(
@@ -56,23 +117,31 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
     const drawHeight = exportResolution.height - (marginPx * 2);
 
     // 3. APPLY HIGH-RES SCALING TO MAP
-    if (typeof (map as any).setMaxZoom === 'function') {
-      (map as any).setMaxZoom(24); // Temporarily allow higher zoom for export
-    }
-    map.setZoom(originalZoom + zoomOffset);
-    map.getCanvas().width = drawWidth;
-    map.getCanvas().height = drawHeight;
-    
-    map.jumpTo({
-      center: config.location.center,
-      zoom: originalZoom + zoomOffset
-    });
-
-    map.resize();
-
+    // Do this in a single requestAnimationFrame to batch changes
     await new Promise<void>(resolve => {
-      map.once('idle', resolve);
+      requestAnimationFrame(() => {
+        if (typeof (map as any).setMaxZoom === 'function') {
+          (map as any).setMaxZoom(24); // Temporarily allow higher zoom for export
+        }
+
+        // Set canvas dimensions first (doesn't trigger render)
+        map.getCanvas().width = drawWidth;
+        map.getCanvas().height = drawHeight;
+
+        // Apply zoom and center in a single jumpTo call (triggers one render)
+        map.jumpTo({
+          center: config.location.center,
+          zoom: originalZoom + zoomOffset
+        });
+
+        // Resize triggers another render but now we're at frame boundary
+        map.resize();
+        resolve();
+      });
     });
+
+    // Wait for map to become idle, but with timeout for slow terrain tiles
+    await waitForIdle(map, 15000);
 
     const mapCanvas = map.getCanvas();
     const exportCanvas = document.createElement('canvas');
@@ -210,13 +279,26 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
       }, 'image/png');
     });
   } finally {
-    map.setZoom(originalZoom);
-    if (typeof (map as any).setMaxZoom === 'function' && originalMaxZoom !== undefined) {
-      (map as any).setMaxZoom(originalMaxZoom);
-    }
-    map.getCanvas().width = originalWidth;
-    map.getCanvas().height = originalHeight;
-    map.resize();
+    // Restore map state in a single requestAnimationFrame to batch changes
+    requestAnimationFrame(() => {
+      try {
+        map.getCanvas().width = originalWidth;
+        map.getCanvas().height = originalHeight;
+
+        map.jumpTo({
+          center: config.location.center,
+          zoom: originalZoom
+        });
+
+        if (typeof (map as any).setMaxZoom === 'function' && originalMaxZoom !== undefined) {
+          (map as any).setMaxZoom(originalMaxZoom);
+        }
+
+        map.resize();
+      } catch (e) {
+        logger.warn('Error restoring map state after export:', e);
+      }
+    });
   }
 }
 
