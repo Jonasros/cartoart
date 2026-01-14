@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import type { Database } from '@/types/database';
+import type { Database, Json } from '@/types/database';
 import type { ExportProduct } from '@/lib/stripe/products';
 import { logger } from '@/lib/logger';
 import { randomBytes, createHash } from 'crypto';
@@ -106,19 +106,20 @@ export async function createPendingOrder(data: {
     status: 'pending',
     user_id: data.userId || null,
     map_id: data.mapId || null,
-    export_config: data.exportConfig || null,
+    export_config: (data.exportConfig as Json) ?? null,
     download_count: 0,
     max_downloads: 5,
     download_token: downloadToken,
     completed_at: null,
     // Config snapshot fields - CRITICAL for purchase integrity
-    config_snapshot: configSnapshot || null,
-    sculpture_config_snapshot: sculptureConfigSnapshot || null,
+    config_snapshot: (configSnapshot as Json) ?? null,
+    sculpture_config_snapshot: (sculptureConfigSnapshot as Json) ?? null,
     product_type: productMode,
     config_hash: configHash,
   };
 
-  const { data: order, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: order, error } = await (supabase as any)
     .from('orders')
     .insert(insertData)
     .select('id')
@@ -153,7 +154,8 @@ export async function completePendingOrder(data: {
 }): Promise<Order | null> {
   const supabase = createServiceClient();
 
-  const { data: order, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: order, error } = await (supabase as any)
     .from('orders')
     .update({
       email: data.email,
@@ -245,19 +247,20 @@ export async function createOrder(data: {
     status: 'completed',
     user_id: data.userId || null,
     map_id: data.mapId || null,
-    export_config: data.exportConfig || null,
+    export_config: (data.exportConfig as Json) ?? null,
     download_count: 0,
     max_downloads: 5,
     download_token: downloadToken,
     completed_at: new Date().toISOString(),
     // Config snapshot fields - CRITICAL for purchase integrity
-    config_snapshot: configSnapshot || null,
-    sculpture_config_snapshot: sculptureConfigSnapshot || null,
+    config_snapshot: (configSnapshot as Json) ?? null,
+    sculpture_config_snapshot: (sculptureConfigSnapshot as Json) ?? null,
     product_type: productMode,
     config_hash: configHash,
   };
 
-  const { data: order, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: order, error } = await (supabase as any)
     .from('orders')
     .insert(insertData)
     .select()
@@ -320,7 +323,8 @@ export async function incrementDownloadCount(
   const supabase = createServiceClient();
 
   // Get current order
-  const { data: order, error: fetchError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: order, error: fetchError } = await (supabase as any)
     .from('orders')
     .select('download_count, max_downloads')
     .eq('id', orderId)
@@ -336,7 +340,8 @@ export async function incrementDownloadCount(
   }
 
   // Increment count
-  const { error: updateError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateError } = await (supabase as any)
     .from('orders')
     .update({ download_count: order.download_count + 1 })
     .eq('id', orderId);
@@ -410,7 +415,8 @@ export async function updateOrderStatus(
 ): Promise<boolean> {
   const supabase = createServiceClient();
 
-  const { error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
     .from('orders')
     .update({ status })
     .eq('id', orderId);
