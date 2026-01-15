@@ -341,7 +341,7 @@ export const trailRoutes: SEORouteMetadata[] = [
     paletteId: 'sepia',
     tags: ['pilgrimage', 'spain', 'hiking', 'long-distance', 'cultural'],
     website: 'https://oficinadelperegrino.com/',
-    mapTitle: 'camino-de-santiago',
+    mapTitle: 'camino-frances',
     introText:
       'The Camino de Santiago is a transformative journey that has drawn pilgrims for over a thousand years. Walking the 800km from France to Santiago de Compostela is a life-changing experience worth commemorating.',
   },
@@ -440,6 +440,172 @@ export const trailRoutes: SEORouteMetadata[] = [
     mapTitle: 'hardrock-100',
     introText:
       'Hardrock 100 is the ultimate test of mountain running—100 miles through the rugged San Juan Mountains with 33,000 feet of elevation change. Finishing Hardrock is a lifetime achievement.',
+  },
+  // UK National Trails
+  {
+    id: 'cotswold-way',
+    slug: 'cotswold-way',
+    category: 'trail',
+    name: 'Cotswold Way',
+    shortName: 'Cotswold Way',
+    subtitle: 'Chipping Campden → Bath',
+    description:
+      'A 102-mile National Trail through quintessential English countryside, passing honey-colored stone villages.',
+    country: 'United Kingdom',
+    region: 'Cotswolds',
+    distance: 164,
+    elevationGain: 4300,
+    difficulty: 'moderate',
+    duration: '7-10 days',
+    routeColor: '#8B7355',
+    styleId: 'minimal',
+    paletteId: 'sage',
+    tags: ['england', 'cotswolds', 'national-trail', 'scenic', 'villages'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/cotswold-way/',
+    mapTitle: 'cotswold-way',
+    introText:
+      "The Cotswold Way winds through 102 miles of quintessential English countryside—honey-colored stone villages, rolling hills, ancient woodlands, and historic sites including Broadway Tower and Bath's Georgian splendor. It's the perfect trail for those seeking pastoral beauty.",
+    routeSpecificFAQs: [
+      {
+        question: 'What villages does the Cotswold Way pass through?',
+        answer:
+          'The trail passes through charming villages including Broadway, Stanton, Winchcombe, Painswick, and ends in the UNESCO World Heritage city of Bath.',
+      },
+    ],
+  },
+  {
+    id: 'south-downs-way',
+    slug: 'south-downs-way',
+    category: 'trail',
+    name: 'South Downs Way',
+    shortName: 'South Downs Way',
+    subtitle: 'Winchester → Eastbourne',
+    description:
+      'A 100-mile National Trail along the chalk ridge of the South Downs with views to the English Channel.',
+    country: 'United Kingdom',
+    region: 'South Downs',
+    distance: 160,
+    elevationGain: 4000,
+    difficulty: 'moderate',
+    duration: '7-9 days',
+    routeColor: '#4CAF50',
+    styleId: 'topographic',
+    paletteId: 'classic',
+    tags: ['england', 'south-downs', 'national-trail', 'chalk', 'coastal'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/south-downs-way/',
+    mapTitle: 'south-downs-way',
+    introText:
+      'The South Downs Way follows the ancient chalk ridge from Winchester Cathedral to the white cliffs at Beachy Head. Walking this 100-mile trail, you traverse rolling downland with sweeping views to the English Channel—a classic English hiking experience.',
+    routeSpecificFAQs: [
+      {
+        question: 'What is the terrain like on the South Downs Way?',
+        answer:
+          'The trail follows chalk downland ridges with gentle rolling hills, ancient woodland, and dramatic cliff-top sections near Eastbourne. Most of the route is on well-maintained bridleways.',
+      },
+    ],
+  },
+  {
+    id: 'cleveland-way',
+    slug: 'cleveland-way',
+    category: 'trail',
+    name: 'Cleveland Way',
+    shortName: 'Cleveland Way',
+    subtitle: 'Helmsley → Filey',
+    description:
+      'A 109-mile National Trail around the North York Moors and along the dramatic Yorkshire coastline.',
+    country: 'United Kingdom',
+    region: 'North Yorkshire',
+    distance: 175,
+    elevationGain: 3500,
+    difficulty: 'moderate',
+    duration: '8-10 days',
+    routeColor: '#795548',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['england', 'yorkshire', 'national-trail', 'moors', 'coastal'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/cleveland-way/',
+    mapTitle: 'cleveland-way',
+    introText:
+      "The Cleveland Way combines the wild heather moorland of the North York Moors with the dramatic cliffs of the Yorkshire coast. This horseshoe-shaped trail offers some of England's finest scenery—from Roseberry Topping to Whitby Abbey to the sea cliffs at Filey.",
+    routeSpecificFAQs: [
+      {
+        question: 'What makes the Cleveland Way unique?',
+        answer:
+          "It's one of the few National Trails that combines both inland moorland and coastal walking. The route passes Whitby Abbey (inspiration for Bram Stoker's Dracula) and offers stunning views of the North Sea.",
+      },
+    ],
+  },
+  {
+    id: 'coast-to-coast',
+    slug: 'coast-to-coast',
+    category: 'trail',
+    name: 'Coast to Coast Walk',
+    shortName: 'Coast to Coast',
+    subtitle: "St Bees → Robin Hood's Bay",
+    description:
+      "Alfred Wainwright's famous 192-mile route across northern England, traversing three national parks.",
+    country: 'United Kingdom',
+    region: 'Northern England',
+    distance: 309,
+    elevationGain: 8500,
+    difficulty: 'hard',
+    duration: '12-15 days',
+    routeColor: '#E74C3C',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['england', 'wainwright', 'lake-district', 'yorkshire-dales', 'iconic'],
+    website: 'https://www.wainwright.org.uk/coast-to-coast/',
+    mapTitle: 'coast-to-coast',
+    introText:
+      "Alfred Wainwright's Coast to Coast is Britain's most popular long-distance walk. Starting at St Bees on the Irish Sea and finishing at Robin Hood's Bay on the North Sea, the 192-mile journey crosses three national parks: the Lake District, Yorkshire Dales, and North York Moors.",
+    routeSpecificFAQs: [
+      {
+        question: 'Who created the Coast to Coast Walk?',
+        answer:
+          "The route was devised by Alfred Wainwright, the famous guidebook writer, and published in 1973. It's not an official National Trail but has become Britain's most popular long-distance path.",
+      },
+      {
+        question: 'Which national parks does the Coast to Coast cross?',
+        answer:
+          'The walk traverses three national parks: the Lake District (with dramatic mountain scenery), the Yorkshire Dales (limestone landscapes), and the North York Moors (heather moorland).',
+      },
+    ],
+  },
+  {
+    id: 'hadrians-wall-path',
+    slug: 'hadrians-wall-path',
+    category: 'trail',
+    name: "Hadrian's Wall Path",
+    shortName: "Hadrian's Wall",
+    subtitle: 'Wallsend → Bowness-on-Solway',
+    description:
+      'An 84-mile National Trail following the UNESCO World Heritage Site of the Roman frontier.',
+    country: 'United Kingdom',
+    region: 'Northumberland',
+    distance: 135,
+    elevationGain: 2800,
+    difficulty: 'moderate',
+    duration: '6-8 days',
+    routeColor: '#8B4513',
+    styleId: 'vintage',
+    paletteId: 'sepia',
+    tags: ['england', 'roman', 'history', 'national-trail', 'unesco'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/hadrians-wall-path/',
+    mapTitle: 'hadrians-wall-path',
+    introText:
+      "Walk in the footsteps of Roman legionaries along Hadrian's Wall, the most impressive Roman frontier monument in Britain. This 84-mile trail follows the UNESCO World Heritage Site coast to coast, passing forts, milecastles, and the wild Northumberland landscape.",
+    routeSpecificFAQs: [
+      {
+        question: "What is Hadrian's Wall?",
+        answer:
+          "Built by Emperor Hadrian in AD 122, Hadrian's Wall was the north-western frontier of the Roman Empire for nearly 300 years. The 73-mile wall stretched coast to coast across northern Britain.",
+      },
+      {
+        question: 'What Roman sites can I see along the path?',
+        answer:
+          'Major sites include Housesteads Fort (the most complete Roman fort in Britain), Vindolanda (with its famous writing tablets), Chesters Fort, and Birdoswald Fort.',
+      },
+    ],
   },
 ];
 
