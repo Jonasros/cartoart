@@ -12,7 +12,9 @@
     "seed:routes:dry": "tsx scripts/seed-famous-routes/index.ts --dry-run",
     "seed:routes:cycling": "tsx scripts/seed-famous-routes/index.ts --category=cycling --direct-only",
     "seed:routes:hiking": "tsx scripts/seed-famous-routes/index.ts --category=hiking --direct-only",
-    "seed:routes:direct": "tsx scripts/seed-famous-routes/index.ts --direct-only"
+    "seed:routes:direct": "tsx scripts/seed-famous-routes/index.ts --direct-only",
+    "seed:thumbnails": "tsx scripts/seed-famous-routes/generate-thumbnails.ts",
+    "seed:thumbnails:dry": "tsx scripts/seed-famous-routes/generate-thumbnails.ts --dry-run"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -52,8 +54,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "playwright": "^1.57.0",
     "supabase": "^2.72.7",
     "tailwindcss": "^4",
     "tsx": "^4.19.0",

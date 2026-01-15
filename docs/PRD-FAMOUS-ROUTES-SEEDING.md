@@ -585,8 +585,64 @@ Before marking a route as seeded:
 
 ---
 
-**Status**: Phase 1 Production Seeding Complete ✅
+**Status**: Phase 1 Production Seeding Complete ✅ | Phase 2 Thumbnails Complete ✅
 **Implementation Branch**: `feature/famous-routes-seeding`
+
+---
+
+## Thumbnail Generation
+
+### Overview
+
+Automated thumbnail generation for seeded routes using Playwright headless browser. Thumbnails are captured directly from the map detail page and uploaded to Supabase Storage.
+
+### Script: `generate-thumbnails.ts`
+
+**Location**: `frontend/scripts/seed-famous-routes/generate-thumbnails.ts`
+
+**Usage**:
+```bash
+# Generate all missing thumbnails
+npm run seed:thumbnails
+
+# Dry run (see what would be processed)
+npm run seed:thumbnails:dry
+
+# Generate limited batch
+npm run seed:thumbnails -- --limit=10
+```
+
+### Technical Details
+
+| Setting | Value |
+|---------|-------|
+| Thumbnail width | 800px |
+| Thumbnail height | 1200px (2:3 aspect ratio) |
+| Device scale factor | 2x (Retina quality) |
+| Map render wait | 3000ms |
+| Output format | PNG |
+
+### Key Implementation Features
+
+1. **Cookie Consent Bypass**: Pre-sets localStorage `waymarker_cookie_consent` to prevent banner appearing in screenshots
+
+2. **UI Overlay Hiding**: Hides all UI overlays before screenshot:
+   - `.z-30, .z-20` - Custom overlays (zoom indicator, loading indicator)
+   - `.maplibregl-ctrl-*` - MapLibre control containers
+
+3. **Canvas Screenshot**: Captures `.maplibregl-canvas` directly for clean map-only thumbnail
+
+4. **Supabase Storage**: Uploads to `map-thumbnails` bucket with path `{user_id}/{map_id}.png`
+
+### Generation Results (Jan 15, 2025)
+
+| Batch | Maps | Success | Failed |
+|-------|------|---------|--------|
+| Initial test | 6 | 6 | 0 |
+| Remaining | 34 | 34 | 0 |
+| **Total** | **41** | **41** | **0** |
+
+All 41 featured routes now have thumbnails for social sharing and OG images.
 
 ---
 
