@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-14
+**Last Updated**: 2026-01-15
 
 ---
 
@@ -20,6 +20,7 @@
 | 8 | Strava Connect Integration | ✅ Complete |
 | 9 | 3D Journey Sculpture | ✅ Complete |
 | 10 | Payments & Analytics | ✅ Complete |
+| 11 | Famous Routes Seeding | ✅ Complete |
 
 ---
 
@@ -218,6 +219,35 @@ Complete 3D sculpture system for creating printable route models from GPS data.
 - ✅ Size controls (10cm, 15cm, 20cm)
 - ✅ Wall thickness validation
 
+### Famous Routes Seeding
+
+Programmatic content generation for iconic hiking, cycling, and running routes worldwide.
+
+**Infrastructure**:
+
+- ✅ Seed script with GPX fetchers (direct URL, goandrace.com scraper)
+- ✅ 15 poster templates (5 cycling, 5 hiking, 5 running)
+- ✅ Randomization system for realistic feed variation
+- ✅ Supabase admin client for direct database insertion
+
+**Routes Seeded (41 total)**:
+
+- ✅ Tour de France 2025 (21 stages) - cyclingstage.com CDN
+- ✅ World Marathon Majors (6) - Boston, London, Berlin, NYC, Chicago, Tokyo
+- ✅ European Marathons (4) - Paris, Amsterdam, Stockholm, Copenhagen
+- ✅ UK Long-Distance Trails (5) - West Highland Way, Cotswold Way, South Downs Way, Cleveland Way, Coast to Coast, Hadrian's Wall Path
+- ✅ Iconic Hiking (4) - Kungsleden, Camino de Santiago, Tour du Mont Blanc, West Highland Way
+- ✅ Ultra Trails (1) - Hardrock 100
+
+**Thumbnail Generation**:
+
+- ✅ Playwright headless browser capture
+- ✅ Cookie consent bypass via localStorage
+- ✅ UI overlay hiding for clean screenshots
+- ✅ 41/41 thumbnails generated (100% success rate)
+
+**npm scripts**: `seed:routes`, `seed:routes:dry`, `seed:thumbnails`, `seed:thumbnails:dry`
+
 ### Stripe Payment Integration
 
 - ✅ Stripe Checkout for poster exports
@@ -266,6 +296,13 @@ Complete 3D sculpture system for creating printable route models from GPS data.
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-15
+
+- ✅ Famous Routes Seeding feature complete (41 routes)
+- ✅ Playwright thumbnail generation script
+- ✅ 5 UK long-distance trails added (walkingenglishman.com)
+- ✅ All featured routes have thumbnails (41/41)
 
 ### 2026-01-14
 
