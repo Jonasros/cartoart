@@ -698,6 +698,37 @@ export async function duplicateMap(sourceMapId: string): Promise<SavedMap> {
 }
 
 /**
+ * Get a featured route by slug pattern (for SEO landing pages)
+ * Searches for is_featured=true maps where title contains the slug
+ * @param slug - The route slug (e.g., "boston-marathon")
+ * @returns The featured map config or null if not found
+ */
+export async function getFeaturedRouteBySlug(slug: string): Promise<SavedMap | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await (supabase as any)
+    .from('maps')
+    .select('*')
+    .eq('is_featured', true)
+    .ilike('title', `%${slug}%`)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // Not found
+    }
+    logger.error('Failed to fetch featured route:', { error, slug });
+    return null;
+  }
+
+  return {
+    ...data,
+    config: deserializeMapConfig(data.config),
+    sculpture_config: data.sculpture_config as SculptureConfig | null,
+  } as SavedMap;
+}
+
+/**
  * Get a single map by ID (checks permissions)
  */
 export async function getMapById(id: string): Promise<SavedMap | null> {

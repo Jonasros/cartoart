@@ -28,7 +28,7 @@ import { ErrorToastContainer } from '@/components/ui/ErrorToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import Link from 'next/link';
 import type MapLibreGL from 'maplibre-gl';
-import { getMapById, publishMap } from '@/lib/actions/maps';
+import { getMapById, getFeaturedRouteBySlug, publishMap } from '@/lib/actions/maps';
 import { isConfigEqual, cloneConfig } from '@/lib/utils/configComparison';
 import type { SavedProject, PosterConfig } from '@/types/poster';
 import { generateThumbnail } from '@/lib/export/thumbnail';
@@ -366,6 +366,85 @@ export function PosterEditor() {
     loadMapFromUrl();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, pathname, router, setConfig, updateSculptureConfig, isAuthenticated]);
+
+  // Load featured route from SEO page (e.g., /race/boston-marathon CTA)
+  // Track processed route slug to prevent re-loading
+  const processedRouteSeoRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const routeSlug = searchParams.get('route');
+    const source = searchParams.get('source');
+
+    // Only handle SEO page redirects with route param
+    if (!routeSlug || source !== 'seo') return;
+
+    // Skip if already processed this route
+    if (processedRouteSeoRef.current === routeSlug) return;
+
+    // Skip if already loading
+    if (isLoadingMap) return;
+
+    const loadFeaturedRoute = async () => {
+      setIsLoadingMap(true);
+      processedRouteSeoRef.current = routeSlug;
+
+      try {
+        console.log('[SEO ROUTE] Loading featured route:', routeSlug);
+        const featuredMap = await getFeaturedRouteBySlug(routeSlug);
+
+        if (featuredMap) {
+          console.log('[SEO ROUTE] Found featured map:', featuredMap.title);
+
+          // Regenerate style with current domain URLs
+          const freshStyle = getStyleById(featuredMap.config.style.id);
+          const configWithFreshStyle: PosterConfig = freshStyle
+            ? {
+                ...featuredMap.config,
+                style: {
+                  ...featuredMap.config.style,
+                  mapStyle: freshStyle.mapStyle,
+                },
+              }
+            : featuredMap.config;
+
+          // Apply the config - user starts with fresh design based on route
+          setConfig(configWithFreshStyle);
+
+          // Don't set currentMapId since this is a new design, not editing existing
+          // User can save as their own map later
+          setCurrentMapId(null);
+          setCurrentMapName(null);
+          setOriginalConfig(null);
+          setCurrentMapStatus(null);
+
+          // Set product mode based on map type
+          if (featuredMap.product_type === 'sculpture' && featuredMap.sculpture_config) {
+            updateSculptureConfig(featuredMap.sculpture_config);
+            setProductMode('sculpture');
+          } else {
+            setProductMode('poster');
+          }
+        } else {
+          console.warn('[SEO ROUTE] Featured route not found:', routeSlug);
+        }
+
+        // Clear URL params to prevent reloading
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('route');
+        params.delete('source');
+        const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+        router.replace(newUrl, { scroll: false });
+
+      } catch (error) {
+        console.error('[SEO ROUTE] Failed to load featured route:', error);
+      } finally {
+        setIsLoadingMap(false);
+      }
+    };
+
+    loadFeaturedRoute();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, pathname, router, setConfig, updateSculptureConfig]);
 
   // Trigger auto-export when pending and map is ready (from paid download flow)
   // For posters: directly trigger PNG export
