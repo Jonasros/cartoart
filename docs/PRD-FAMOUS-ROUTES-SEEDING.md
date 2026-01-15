@@ -622,7 +622,7 @@ Before marking a route as seeded:
 | Category | Routes in Catalog | Dry Run Tested | DB Seeded | Notes |
 |----------|-------------------|----------------|-----------|-------|
 | Tour de France 2025 | 21 | ✅ 21/21 | ✅ 21/21 | Direct GPX from cyclingstage.com CDN |
-| Giro d'Italia 2025 | 0 | ⏳ | ⏳ | Need to add to catalog |
+| Giro d'Italia 2025 | 0 | ⏳ | ⏳ | GPX not yet available on cyclingstage.com |
 | Ultra Trails | 1 | ✅ 1/1 | ✅ 1/1 | Hardrock 100 - direct GPX working |
 | Iconic Hiking | 4 | ✅ 4/4 | ✅ 4/4 | All 4 direct GPX sources found! |
 | World Marathon Majors | 6 | ✅ 6/6 | ✅ 6/6 | Goandrace.com fetcher working! |
@@ -701,7 +701,7 @@ All direct GPX + marathon routes successfully tested:
 6. ✅ Update routes.ts with new hiking trail GPX URLs - **COMPLETE**
 7. ✅ Test dry run with all 36 routes - **36/36 PASSED**
 8. ✅ Seed 36 working routes to production DB - **33 inserted, 3 skipped (existed)**
-9. ⏳ Add Giro d'Italia to catalog
+9. ⏳ Add Giro d'Italia to catalog - **Blocked**: GPX not yet available on cyclingstage.com (checked Jan 15, 2026)
 
 ---
 
