@@ -625,6 +625,7 @@ Before marking a route as seeded:
 | Giro d'Italia 2025 | 0 | ⏳ | ⏳ | GPX not yet available on cyclingstage.com |
 | Ultra Trails | 1 | ✅ 1/1 | ✅ 1/1 | Hardrock 100 - direct GPX working |
 | Iconic Hiking | 4 | ✅ 4/4 | ✅ 4/4 | All 4 direct GPX sources found! |
+| UK Long-Distance Trails | 5 | ✅ 5/5 | ✅ 5/5 | walkingenglishman.com GPX sources |
 | World Marathon Majors | 6 | ✅ 6/6 | ✅ 6/6 | Goandrace.com fetcher working! |
 | European Marathons | 4 | ✅ 4/4 | ✅ 4/4 | Goandrace.com fetcher working! |
 | City Routes | 0 | ⏳ | ⏳ | Not yet cataloged |
@@ -672,6 +673,20 @@ All direct GPX + marathon routes successfully tested:
 - walkingenglishman.com hosts complete UK long-distance trail GPX files
 - walkingclub.org.uk hosts Camino stages as individual GPX files
 - hank.me hosts travel GPX tracks including TMB complete circuit
+
+### UK Long-Distance Trails ✅ Seeded (Jan 15, 2026)
+
+| Trail | Distance | Status | Direct GPX URL |
+|-------|----------|--------|----------------|
+| Cotswold Way | 153.8km | ✅ Seeded | `https://www.walkingenglishman.com/ldp/LDP/C/cotswoldway.gpx` |
+| South Downs Way | 152.8km | ✅ Seeded | `https://www.walkingenglishman.com/ldp/LDP/S/southdownsway.gpx` |
+| Cleveland Way | 167.7km | ✅ Seeded | `https://www.walkingenglishman.com/ldp/LDP/C/clevelandway.gpx` |
+| Coast to Coast Walk | 281.1km | ✅ Seeded | `https://www.walkingenglishman.com/ldp/LDP/C/coasttocoast.gpx` |
+| Hadrian's Wall Path | 130.3km | ✅ Seeded | `https://www.walkingenglishman.com/ldp/LDP/H/hadrianswall.gpx` |
+
+**Source**: walkingenglishman.com - consistent URL pattern: `https://www.walkingenglishman.com/ldp/LDP/{first-letter}/{trailname}.gpx`
+
+**Result**: 5/5 routes seeded successfully (Jan 15, 2026)
 
 **Marathon Routes Working**:
 - Boston Marathon (42.4km, 1381 points)
