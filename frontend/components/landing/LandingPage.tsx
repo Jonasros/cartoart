@@ -21,9 +21,10 @@ interface LandingPageProps {
 }
 
 export function LandingPage({ featuredThumbnails = [] }: LandingPageProps) {
-  // Split thumbnails: first 4 for hero, all for style showcase
+  // Split thumbnails across sections
   const heroThumbnails = featuredThumbnails.slice(0, 4);
   const styleThumbnails = featuredThumbnails;
+  const communityThumbnails = featuredThumbnails.slice(0, 6);
 
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-stone-900 overflow-x-hidden">
@@ -49,7 +50,7 @@ export function LandingPage({ featuredThumbnails = [] }: LandingPageProps) {
       <ProductFormats />
 
       {/* Community Preview - Showcase examples */}
-      <CommunityPreview />
+      <CommunityPreview thumbnails={communityThumbnails} />
 
       {/* Final CTA */}
       <FinalCTA />

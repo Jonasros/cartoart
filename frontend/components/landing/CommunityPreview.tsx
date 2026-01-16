@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Compass } from 'lucide-react';
 import { POSTER_EXAMPLES } from '@/lib/config/examples';
 import { PosterThumbnail } from '../map/PosterThumbnail';
@@ -17,7 +18,16 @@ const PREVIEW_EXAMPLES = [
   POSTER_EXAMPLES[1], // Salt Lake City - Midnight
 ];
 
-export function CommunityPreview() {
+interface RouteThumbnail {
+  url: string;
+  title: string;
+}
+
+interface CommunityPreviewProps {
+  thumbnails?: RouteThumbnail[];
+}
+
+export function CommunityPreview({ thumbnails = [] }: CommunityPreviewProps) {
   return (
     <section className="py-24 md:py-32 bg-stone-100 dark:bg-stone-900/50">
       <div className="max-w-6xl mx-auto px-6">
@@ -51,32 +61,66 @@ export function CommunityPreview() {
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-12"
         >
-          {PREVIEW_EXAMPLES.map((example, index) => (
-            <motion.div
-              key={example.id}
-              variants={staggerItem}
-              className="group relative"
-            >
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
-                <PosterThumbnail
-                  config={example.config}
-                  className="w-full h-full"
-                />
+          {thumbnails.length >= 6 ? (
+            // Use real route thumbnails from database
+            thumbnails.slice(0, 6).map((thumbnail) => (
+              <motion.div
+                key={thumbnail.url}
+                variants={staggerItem}
+                className="group relative"
+              >
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
+                  <Image
+                    src={thumbnail.url}
+                    alt={thumbnail.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
 
-                {/* Overlay with info */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="text-white font-semibold text-sm">
-                      {example.name}
-                    </p>
-                    <p className="text-white/70 text-xs">
-                      {example.config.style.name}
-                    </p>
+                  {/* Overlay with info */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="text-white font-semibold text-sm">
+                        {thumbnail.title}
+                      </p>
+                      <p className="text-white/70 text-xs">
+                        Featured Route
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          ) : (
+            // Fallback to static examples
+            PREVIEW_EXAMPLES.map((example) => (
+              <motion.div
+                key={example.id}
+                variants={staggerItem}
+                className="group relative"
+              >
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
+                  <PosterThumbnail
+                    config={example.config}
+                    className="w-full h-full"
+                  />
+
+                  {/* Overlay with info */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="text-white font-semibold text-sm">
+                        {example.name}
+                      </p>
+                      <p className="text-white/70 text-xs">
+                        {example.config.style.name}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
         </motion.div>
 
         {/* CTA */}
