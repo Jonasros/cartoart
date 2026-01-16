@@ -3,12 +3,13 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, MapPin, Mountain } from 'lucide-react';
 import { POSTER_EXAMPLES } from '@/lib/config/examples';
 import { PosterThumbnail } from '../map/PosterThumbnail';
 import { floatingPoster } from '@/lib/animations/landing';
 
-// Select featured examples for hero display
+// Fallback to static examples if no thumbnails provided
 const HERO_POSTERS = [
   POSTER_EXAMPLES[0], // Chesapeake Bay - Vintage
   POSTER_EXAMPLES[1], // Salt Lake City - Midnight
@@ -16,7 +17,17 @@ const HERO_POSTERS = [
   POSTER_EXAMPLES[8], // Kennedy Space Center - Topographic
 ];
 
-export function HeroSection() {
+interface RouteThumbnail {
+  url: string;
+  title: string;
+}
+
+interface HeroSectionProps {
+  thumbnails?: RouteThumbnail[];
+}
+
+export function HeroSection({ thumbnails = [] }: HeroSectionProps) {
+  const useThumbnails = thumbnails.length >= 4;
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -48,7 +59,7 @@ export function HeroSection() {
 
       {/* Floating Posters - Desktop Only */}
       <div className="hidden lg:block absolute inset-0 pointer-events-none">
-        {HERO_POSTERS.map((example, index) => {
+        {(useThumbnails ? thumbnails.slice(0, 4) : HERO_POSTERS).map((item, index) => {
           // Position posters around the edges
           const positions = [
             { left: '8%', top: '15%', rotate: -8 },
@@ -57,10 +68,12 @@ export function HeroSection() {
             { right: '8%', bottom: '15%', rotate: 5 },
           ];
           const pos = positions[index];
+          const isThumbnail = useThumbnails && 'url' in item;
+          const key = isThumbnail ? (item as RouteThumbnail).title : (item as typeof HERO_POSTERS[0]).id;
 
           return (
             <motion.div
-              key={example.id}
+              key={key}
               className="absolute"
               style={{
                 ...pos,
@@ -74,15 +87,25 @@ export function HeroSection() {
                 className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 dark:border-white/10 transform-gpu hover:scale-105 transition-transform duration-500"
                 style={{ transform: `rotate(${pos.rotate}deg)` }}
               >
-                <PosterThumbnail
-                  config={example.config}
-                  className="w-full h-full"
-                />
+                {isThumbnail ? (
+                  <Image
+                    src={(item as RouteThumbnail).url}
+                    alt={(item as RouteThumbnail).title}
+                    fill
+                    className="object-cover"
+                    sizes="220px"
+                  />
+                ) : (
+                  <PosterThumbnail
+                    config={(item as typeof HERO_POSTERS[0]).config}
+                    className="w-full h-full"
+                  />
+                )}
               </div>
               {/* Style badge */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm shadow-lg">
                 <span className="text-[10px] font-semibold text-stone-600 dark:text-stone-300 whitespace-nowrap">
-                  {example.config.style.name}
+                  {isThumbnail ? (item as RouteThumbnail).title : (item as typeof HERO_POSTERS[0]).config.style.name}
                 </span>
               </div>
             </motion.div>
@@ -158,23 +181,38 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="lg:hidden mt-16 flex justify-center gap-4 overflow-x-auto pb-4 px-4 -mx-6"
         >
-          {HERO_POSTERS.slice(0, 3).map((example, index) => (
-            <div
-              key={example.id}
-              className="flex-shrink-0 w-32 sm:w-40"
-              style={{ transform: `rotate(${-4 + index * 4}deg)` }}
-            >
-              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-xl border border-white/20">
-                <PosterThumbnail
-                  config={example.config}
-                  className="w-full h-full"
-                />
+          {(useThumbnails ? thumbnails.slice(0, 3) : HERO_POSTERS.slice(0, 3)).map((item, index) => {
+            const isThumbnail = useThumbnails && 'url' in item;
+            const key = isThumbnail ? (item as RouteThumbnail).title : (item as typeof HERO_POSTERS[0]).id;
+
+            return (
+              <div
+                key={key}
+                className="flex-shrink-0 w-32 sm:w-40"
+                style={{ transform: `rotate(${-4 + index * 4}deg)` }}
+              >
+                <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-xl border border-white/20 relative">
+                  {isThumbnail ? (
+                    <Image
+                      src={(item as RouteThumbnail).url}
+                      alt={(item as RouteThumbnail).title}
+                      fill
+                      className="object-cover"
+                      sizes="160px"
+                    />
+                  ) : (
+                    <PosterThumbnail
+                      config={(item as typeof HERO_POSTERS[0]).config}
+                      className="w-full h-full"
+                    />
+                  )}
+                </div>
+                <p className="mt-2 text-[10px] font-medium text-stone-500 dark:text-stone-400 text-center">
+                  {isThumbnail ? (item as RouteThumbnail).title : (item as typeof HERO_POSTERS[0]).config.style.name}
+                </p>
               </div>
-              <p className="mt-2 text-[10px] font-medium text-stone-500 dark:text-stone-400 text-center">
-                {example.config.style.name}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </motion.div>
       </div>
 

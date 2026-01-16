@@ -3,12 +3,22 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { POSTER_EXAMPLES } from '@/lib/config/examples';
 import { PosterThumbnail } from '../map/PosterThumbnail';
 import { fadeInUp } from '@/lib/animations/landing';
 
-export function StyleShowcase() {
+interface RouteThumbnail {
+  url: string;
+  title: string;
+}
+
+interface StyleShowcaseProps {
+  thumbnails?: RouteThumbnail[];
+}
+
+export function StyleShowcase({ thumbnails = [] }: StyleShowcaseProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -71,53 +81,103 @@ export function StyleShowcase() {
           className="flex gap-6 overflow-x-auto pb-8 px-6 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {POSTER_EXAMPLES.map((example, index) => (
-            <motion.div
-              key={example.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="flex-shrink-0 snap-center group cursor-pointer"
-              onMouseEnter={() => setActiveIndex(index)}
-            >
-              <div className="w-64 sm:w-72 md:w-80">
-                {/* Poster Card */}
-                <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border-2 border-white dark:border-stone-700">
-                  <PosterThumbnail
-                    config={example.config}
-                    className="w-full h-full"
-                  />
+          {thumbnails.length > 0 ? (
+            // Use real route thumbnails from database
+            thumbnails.map((thumbnail, index) => (
+              <motion.div
+                key={thumbnail.url}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="flex-shrink-0 snap-center group cursor-pointer"
+                onMouseEnter={() => setActiveIndex(index)}
+              >
+                <div className="w-64 sm:w-72 md:w-80">
+                  {/* Poster Card */}
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border-2 border-white dark:border-stone-700">
+                    <Image
+                      src={thumbnail.url}
+                      alt={thumbnail.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 256px, (max-width: 768px) 288px, 320px"
+                    />
 
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                    <Link
-                      href={`/create?style=${example.config.style.id}`}
-                      className="flex items-center gap-2 text-white font-semibold"
-                    >
-                      Create with this style
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                      <Link
+                        href="/create"
+                        className="flex items-center gap-2 text-white font-semibold"
+                      >
+                        Create your own
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="mt-4 text-center">
+                    <h3 className="font-semibold text-stone-900 dark:text-white mb-1">
+                      {thumbnail.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">
+                      Featured Route
+                    </p>
                   </div>
                 </div>
+              </motion.div>
+            ))
+          ) : (
+            // Fallback to static examples
+            POSTER_EXAMPLES.map((example, index) => (
+              <motion.div
+                key={example.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="flex-shrink-0 snap-center group cursor-pointer"
+                onMouseEnter={() => setActiveIndex(index)}
+              >
+                <div className="w-64 sm:w-72 md:w-80">
+                  {/* Poster Card */}
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border-2 border-white dark:border-stone-700">
+                    <PosterThumbnail
+                      config={example.config}
+                      className="w-full h-full"
+                    />
 
-                {/* Info */}
-                <div className="mt-4 text-center">
-                  <h3 className="font-semibold text-stone-900 dark:text-white mb-1">
-                    {example.name}
-                  </h3>
-                  <p className="text-sm text-stone-500 dark:text-stone-400">
-                    {example.config.style.name} Style
-                  </p>
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                      <Link
+                        href={`/create?style=${example.config.style.id}`}
+                        className="flex items-center gap-2 text-white font-semibold"
+                      >
+                        Create with this style
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="mt-4 text-center">
+                    <h3 className="font-semibold text-stone-900 dark:text-white mb-1">
+                      {example.name}
+                    </h3>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">
+                      {example.config.style.name} Style
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          )}
         </div>
 
         {/* Mobile scroll indicator */}
         <div className="flex md:hidden justify-center gap-1.5 mt-4">
-          {POSTER_EXAMPLES.map((_, index) => (
+          {(thumbnails.length > 0 ? thumbnails : POSTER_EXAMPLES).map((_, index) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-colors ${
