@@ -9,7 +9,7 @@ import {
   MapPin,
   Mountain,
   Globe,
-  Compass,
+  Bike,
   Gift,
   Heart,
   Palette,
@@ -37,7 +37,7 @@ interface Props {
   thumbnailUrl: string | null;
 }
 
-export function TrailLandingPageClient({
+export function CyclingLandingPageClient({
   route,
   faqs,
   relatedRoutes,
@@ -86,11 +86,11 @@ export function TrailLandingPageClient({
 function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbnailUrl: string | null }) {
   return (
     <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-stone-50 to-primary/5 dark:from-stone-900 dark:via-stone-900 dark:to-primary/10" />
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 via-stone-50 to-primary/5 dark:from-stone-900 dark:via-stone-900 dark:to-primary/10" />
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C20 15 10 20 5 30s5 20 25 25c20-5 25-15 25-25S40 15 30 5z' fill='none' stroke='%232D5A3D' stroke-width='0.5'/%3E%3Cpath d='M30 15C23 22 18 25 15 30s3 12 15 15c12-3 15-8 15-15s-8-13-15-15z' fill='none' stroke='%232D5A3D' stroke-width='0.5'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C20 15 10 20 5 30s5 20 25 25c20-5 25-15 25-25S40 15 30 5z' fill='none' stroke='%23FFD700' stroke-width='0.5'/%3E%3Cpath d='M30 15C23 22 18 25 15 30s3 12 15 15c12-3 15-8 15-15s-8-13-15-15z' fill='none' stroke='%23FFD700' stroke-width='0.5'/%3E%3C/svg%3E")`,
         }}
       />
 
@@ -101,10 +101,10 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 mb-6"
             >
-              <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Hiking Trail</span>
+              <Bike className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Tour de France 2025</span>
             </motion.div>
 
             <motion.h1
@@ -114,8 +114,8 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-[1.1] tracking-tight mb-4"
             >
               {route.name}{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-primary to-accent">
-                Trail Poster
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600">
+                Route Poster
               </span>
             </motion.h1>
 
@@ -126,7 +126,7 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-xl text-stone-600 dark:text-stone-400 mb-6"
               >
-                {route.subtitle} · {route.distance}km {route.duration && `· ${route.duration}`}
+                {route.subtitle} · {route.distance}km
               </motion.p>
             )}
 
@@ -148,8 +148,8 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
               className="flex flex-wrap gap-4"
             >
               <Link
-                href={`/create?route=${route.slug}&source=seo`}
-                className="group inline-flex items-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:-translate-y-0.5"
+                href={`/create?route=${route.mapTitle}&source=seo`}
+                className="group inline-flex items-center gap-2 px-8 py-4 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <MapPin className="w-5 h-5" />
                 Create Your Poster
@@ -195,7 +195,7 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
               {(route.posterImageUrl || thumbnailUrl) ? (
                 <Image
                   src={route.posterImageUrl || thumbnailUrl!}
-                  alt={`${route.name} trail map poster`}
+                  alt={`${route.name} route map poster`}
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -207,7 +207,7 @@ function HeroSection({ route, thumbnailUrl }: { route: SEORouteMetadata; thumbna
                   style={{ backgroundColor: route.routeColor + '15' }}
                 >
                   <div className="text-center p-8">
-                    <Mountain
+                    <Bike
                       className="w-16 h-16 mx-auto mb-4"
                       style={{ color: route.routeColor }}
                     />
@@ -255,7 +255,7 @@ function RouteDetailsSection({ route }: { route: SEORouteMetadata }) {
           className="flex flex-wrap gap-6 justify-center"
         >
           <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800">
-            <RouteIcon className="w-5 h-5 text-primary" />
+            <RouteIcon className="w-5 h-5 text-yellow-500" />
             <div>
               <p className="text-xs text-stone-500 dark:text-stone-400">Distance</p>
               <p className="font-semibold text-stone-900 dark:text-white">{route.distance} km</p>
@@ -264,7 +264,7 @@ function RouteDetailsSection({ route }: { route: SEORouteMetadata }) {
 
           {route.elevationGain && (
             <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800">
-              <Mountain className="w-5 h-5 text-primary" />
+              <Mountain className="w-5 h-5 text-yellow-500" />
               <div>
                 <p className="text-xs text-stone-500 dark:text-stone-400">Elevation Gain</p>
                 <p className="font-semibold text-stone-900 dark:text-white">{route.elevationGain.toLocaleString()}m</p>
@@ -272,29 +272,19 @@ function RouteDetailsSection({ route }: { route: SEORouteMetadata }) {
             </div>
           )}
 
-          {route.duration && (
-            <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800">
-              <Calendar className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Duration</p>
-                <p className="font-semibold text-stone-900 dark:text-white">{route.duration}</p>
-              </div>
-            </div>
-          )}
-
           <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800">
-            <Globe className="w-5 h-5 text-primary" />
+            <Globe className="w-5 h-5 text-yellow-500" />
             <div>
               <p className="text-xs text-stone-500 dark:text-stone-400">Location</p>
               <p className="font-semibold text-stone-900 dark:text-white">
-                {route.countries ? route.countries.join(' → ') : route.country}
+                {route.region}, {route.country}
               </p>
             </div>
           </div>
 
           {route.difficulty && (
             <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800">
-              <Compass className="w-5 h-5 text-primary" />
+              <Bike className="w-5 h-5 text-yellow-500" />
               <div>
                 <p className="text-xs text-stone-500 dark:text-stone-400">Difficulty</p>
                 <span className={`px-2 py-0.5 rounded text-sm font-medium capitalize ${difficultyColors[route.difficulty]}`}>
@@ -309,10 +299,10 @@ function RouteDetailsSection({ route }: { route: SEORouteMetadata }) {
               href={route.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-6 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="flex items-center gap-3 px-6 py-3 rounded-xl bg-yellow-100 dark:bg-yellow-900/20 hover:bg-yellow-200 dark:hover:bg-yellow-900/30 transition-colors"
             >
-              <Globe className="w-5 h-5 text-primary" />
-              <span className="font-medium text-primary">Official Website</span>
+              <Globe className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <span className="font-medium text-yellow-700 dark:text-yellow-400">Official Website</span>
             </a>
           )}
         </motion.div>
@@ -322,26 +312,30 @@ function RouteDetailsSection({ route }: { route: SEORouteMetadata }) {
 }
 
 function GiftMessagingSection({ route }: { route: SEORouteMetadata }) {
+  const isMountainStage = route.elevationGain && route.elevationGain > 2000;
+
   const messages = [
     {
-      icon: Compass,
-      title: 'Capture the Adventure',
-      description: `The ${route.name} is a bucket-list journey. Turn ${route.distance}km of adventure into art you can hang on your wall.`,
+      icon: Bike,
+      title: 'Tour de France Legacy',
+      description: `Own a piece of cycling's greatest race—the ${route.shortName} as stunning wall art.`,
     },
     {
       icon: Gift,
-      title: 'The Ultimate Hiker Gift',
-      description: 'Know someone who completed this epic trail? Give them a gift that celebrates their achievement.',
+      title: 'The Perfect Cycling Gift',
+      description: 'Know a cycling fan? Give them a piece of Tour de France history they can display proudly.',
     },
     {
       icon: Heart,
-      title: 'Relive the Journey',
-      description: 'Every mountain pass, every valley, every step—preserved as a beautiful reminder of your adventure.',
+      title: isMountainStage ? 'Legendary Mountain Stage' : 'Iconic Stage',
+      description: isMountainStage
+        ? 'Capture the drama of one of cycling\'s legendary mountain climbs forever.'
+        : 'Every kilometer of the official Tour de France route beautifully rendered.',
     },
     {
       icon: Mountain,
       title: '3D Terrain Available',
-      description: 'See the actual elevation profile with 3D terrain visualization. Every climb and descent captured.',
+      description: 'See the actual elevation profile with 3D terrain visualization. Every climb captured.',
     },
   ];
 
@@ -358,7 +352,7 @@ function GiftMessagingSection({ route }: { route: SEORouteMetadata }) {
             Why This Makes a Perfect Gift
           </h2>
           <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-            More than a poster—it&apos;s a celebration of an incredible journey
+            More than a poster—it&apos;s a piece of Tour de France history
           </p>
         </motion.div>
 
@@ -372,8 +366,8 @@ function GiftMessagingSection({ route }: { route: SEORouteMetadata }) {
               transition={{ delay: index * 0.1 }}
               className="p-6 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:shadow-lg transition-shadow"
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
-                <item.icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-4">
+                <item.icon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <h3 className="font-display text-lg font-semibold text-stone-900 dark:text-white mb-2">
                 {item.title}
@@ -414,7 +408,7 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
             onClick={() => setActiveTab('poster')}
             className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'poster'
-                ? 'bg-primary text-white shadow-lg'
+                ? 'bg-yellow-500 text-black shadow-lg'
                 : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
             }`}
           >
@@ -425,7 +419,7 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
             onClick={() => setActiveTab('sculpture')}
             className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'sculpture'
-                ? 'bg-primary text-white shadow-lg'
+                ? 'bg-yellow-500 text-black shadow-lg'
                 : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700'
             }`}
           >
@@ -475,14 +469,14 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
                       <div className="relative w-32 h-32 mx-auto mb-4">
                         <Box className="w-full h-full text-stone-300 dark:text-stone-600" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Mountain className="w-12 h-12 text-emerald-500/60" />
+                          <Mountain className="w-12 h-12 text-yellow-500/60" />
                         </div>
                       </div>
                       <p className="font-display text-xl font-semibold text-stone-700 dark:text-stone-300">
                         3D Terrain Sculpture
                       </p>
                       <p className="text-stone-500 dark:text-stone-400 mt-2 max-w-xs mx-auto">
-                        Feel every mountain pass and valley in your hands
+                        Feel every climb in your hands
                       </p>
                     </>
                   )}
@@ -497,8 +491,8 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
             </h3>
             <p className="text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
               {activeTab === 'poster'
-                ? `Download your ${route.name} trail as a stunning high-resolution poster. Perfect for printing at any size from A4 to 24x36 inches at professional 300 DPI quality.`
-                : `Turn your ${route.name} journey into a 3D sculpture showing the actual terrain elevation. Feel every mountain pass and valley. Download the STL file and print it yourself.`}
+                ? `Download your ${route.shortName} as a stunning high-resolution poster. Perfect for printing at any size from A4 to 24x36 inches at professional 300 DPI quality.`
+                : `Turn the ${route.shortName} into a 3D sculpture showing the actual terrain elevation. Feel every mountain pass. Download the STL file and print it yourself.`}
             </p>
 
             <ul className="space-y-3 mb-8">
@@ -517,7 +511,7 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
                   ]
               ).map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <span className="text-emerald-600 mt-1 font-bold">+</span>
+                  <span className="text-yellow-600 mt-1 font-bold">+</span>
                   <span className="text-stone-600 dark:text-stone-400">{item}</span>
                 </li>
               ))}
@@ -531,8 +525,8 @@ function ProductShowcaseSection({ route, thumbnailUrl }: { route: SEORouteMetada
                 </p>
               </div>
               <Link
-                href={`/create?route=${route.slug}&source=seo`}
-                className="group inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl transition-all"
+                href={`/create?route=${route.mapTitle}&source=seo`}
+                className="group inline-flex items-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl transition-all"
               >
                 Create Yours
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -550,22 +544,22 @@ function PersonalizationSection() {
     {
       Icon: LinkIcon,
       title: 'Import from Strava',
-      description: 'Connect your Strava and import your exact GPS track from your hike.',
+      description: 'Connect your Strava and import your exact GPS track from your ride.',
     },
     {
       Icon: Palette,
       title: '11 Map Styles',
-      description: 'From topographic to vintage, find the style that matches your adventure.',
+      description: 'From topographic to vintage, find the style that matches your space.',
     },
     {
       Icon: Mountain,
       title: '3D Terrain',
-      description: 'Enable 3D terrain to see the elevation along your trail.',
+      description: 'Enable 3D terrain to see the elevation profile of the stage.',
     },
     {
       Icon: Layers,
       title: '15+ Color Palettes',
-      description: 'Forest greens, alpine blues, or match your home decor.',
+      description: 'Yellow jersey gold, classic blues, or match your home decor.',
     },
   ];
 
@@ -582,7 +576,7 @@ function PersonalizationSection() {
             Make It Truly Yours
           </h2>
           <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-            Every poster is completely customizable. Start with the official trail or import your own GPS data.
+            Every poster is completely customizable. Start with the official stage or import your own GPS data.
           </p>
         </motion.div>
 
@@ -596,8 +590,8 @@ function PersonalizationSection() {
               transition={{ delay: index * 0.1 }}
               className="text-center p-6"
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
-                <feature.Icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mx-auto mb-4">
+                <feature.Icon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
               </div>
               <h3 className="font-display text-lg font-semibold text-stone-900 dark:text-white mb-2">
                 {feature.title}
@@ -617,8 +611,8 @@ function HowItWorksSection({ route }: { route: SEORouteMetadata }) {
   const steps = [
     {
       number: '01',
-      title: 'Start with This Trail',
-      description: `Begin with the official ${route.name} trail or import your own GPS data from Strava.`,
+      title: 'Start with This Stage',
+      description: `Begin with the official ${route.shortName} route or import your own GPS data from Strava.`,
       icon: MapPin,
     },
     {
@@ -648,7 +642,7 @@ function HowItWorksSection({ route }: { route: SEORouteMetadata }) {
             How It Works
           </h2>
           <p className="text-lg text-stone-600 dark:text-stone-400">
-            Create your custom trail poster in just 3 simple steps
+            Create your custom stage poster in just 3 simple steps
           </p>
         </motion.div>
 
@@ -663,13 +657,13 @@ function HowItWorksSection({ route }: { route: SEORouteMetadata }) {
               className="relative"
             >
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-emerald-500/50 to-transparent" />
+                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-yellow-500/50 to-transparent" />
               )}
 
               <div className="text-center">
-                <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 mb-6">
-                  <step.icon className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
-                  <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-accent text-white text-sm font-bold flex items-center justify-center">
+                <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 mb-6">
+                  <step.icon className="w-10 h-10 text-yellow-600 dark:text-yellow-400" />
+                  <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-yellow-500 text-black text-sm font-bold flex items-center justify-center">
                     {step.number}
                   </span>
                 </div>
@@ -691,8 +685,8 @@ function HowItWorksSection({ route }: { route: SEORouteMetadata }) {
           className="text-center mt-12"
         >
           <Link
-            href={`/create?route=${route.slug}&source=seo`}
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl shadow-lg shadow-accent/25 transition-all duration-300 hover:-translate-y-0.5"
+            href={`/create?route=${route.mapTitle}&source=seo`}
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl shadow-lg shadow-yellow-500/25 transition-all duration-300 hover:-translate-y-0.5"
           >
             <Sparkles className="w-5 h-5" />
             Start Creating Now
@@ -706,6 +700,8 @@ function HowItWorksSection({ route }: { route: SEORouteMetadata }) {
 
 function FAQSection({ faqs, routeName }: { faqs: FAQ[]; routeName: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  if (faqs.length === 0) return null;
 
   return (
     <section className="py-20 bg-stone-50 dark:bg-stone-900/50">
@@ -773,10 +769,10 @@ function RelatedRoutesSection({ routes }: { routes: SEORouteMetadata[] }) {
           className="text-center mb-12"
         >
           <h2 className="font-display text-3xl md:text-4xl font-bold text-stone-900 dark:text-white mb-4">
-            Explore More Trails
+            More Tour de France Stages
           </h2>
           <p className="text-lg text-stone-600 dark:text-stone-400">
-            Other iconic trails you might like
+            Other iconic stages you might like
           </p>
         </motion.div>
 
@@ -790,20 +786,20 @@ function RelatedRoutesSection({ routes }: { routes: SEORouteMetadata[] }) {
               transition={{ delay: index * 0.1 }}
             >
               <Link
-                href={`/trail/${route.slug}`}
+                href={`/cycling/${route.slug}`}
                 className="block p-6 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 hover:shadow-lg hover:-translate-y-1 transition-all"
               >
                 <div
                   className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center"
                   style={{ backgroundColor: route.routeColor + '20' }}
                 >
-                  <Mountain className="w-6 h-6" style={{ color: route.routeColor }} />
+                  <Bike className="w-6 h-6" style={{ color: route.routeColor }} />
                 </div>
                 <h3 className="font-display text-lg font-semibold text-stone-900 dark:text-white mb-1">
-                  {route.name}
+                  {route.shortName}
                 </h3>
                 <p className="text-sm text-stone-500 dark:text-stone-400">
-                  {route.distance}km · {route.country}
+                  {route.distance}km · {route.region}
                 </p>
               </Link>
             </motion.div>
@@ -817,28 +813,28 @@ function RelatedRoutesSection({ routes }: { routes: SEORouteMetadata[] }) {
 function FinalCTASection({ route }: { route: SEORouteMetadata }) {
   return (
     <section className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-primary to-emerald-800" />
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 via-amber-500 to-yellow-600" />
       <div className="absolute inset-0 opacity-10">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C20 15 10 20 5 30s5 20 25 25c20-5 25-15 25-25S40 15 30 5z' fill='none' stroke='white' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C20 15 10 20 5 30s5 20 25 25c20-5 25-15 25-25S40 15 30 5z' fill='none' stroke='black' stroke-width='0.5'/%3E%3C/svg%3E")`,
           }}
         />
       </div>
 
       <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-10 right-10 w-96 h-96 bg-black/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/10 backdrop-blur-sm border border-black/20 mb-8"
         >
-          <Timer className="w-4 h-4 text-accent" />
-          <span className="text-sm font-medium text-white/90">Takes just 5 minutes</span>
+          <Timer className="w-4 h-4 text-black" />
+          <span className="text-sm font-medium text-black/90">Takes just 5 minutes</span>
         </motion.div>
 
         <motion.h2
@@ -846,9 +842,9 @@ function FinalCTASection({ route }: { route: SEORouteMetadata }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6"
+          className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-black leading-tight mb-6"
         >
-          Ready to Create Your {route.name} Poster?
+          Ready to Create Your {route.shortName} Poster?
         </motion.h2>
 
         <motion.p
@@ -856,9 +852,9 @@ function FinalCTASection({ route }: { route: SEORouteMetadata }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10"
+          className="text-lg md:text-xl text-black/80 max-w-2xl mx-auto mb-10"
         >
-          Turn your adventure into stunning wall art. Import your Strava data or start with the official trail.
+          Turn this iconic Tour de France stage into stunning wall art. Import your Strava data or start with the official route.
         </motion.p>
 
         <motion.div
@@ -868,8 +864,8 @@ function FinalCTASection({ route }: { route: SEORouteMetadata }) {
           transition={{ delay: 0.3 }}
         >
           <Link
-            href={`/create?route=${route.slug}&source=seo`}
-            className="group inline-flex items-center gap-2 px-10 py-5 bg-white hover:bg-stone-100 text-emerald-700 font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 text-lg"
+            href={`/create?route=${route.mapTitle}&source=seo`}
+            className="group inline-flex items-center gap-2 px-10 py-5 bg-black hover:bg-stone-900 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 text-lg"
           >
             <MapPin className="w-5 h-5" />
             Create Your Poster Now
@@ -882,7 +878,7 @@ function FinalCTASection({ route }: { route: SEORouteMetadata }) {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="mt-8 text-sm text-white/60"
+          className="mt-8 text-sm text-black/60"
         >
           Starting at €12 - High-resolution download - No subscription required
         </motion.p>

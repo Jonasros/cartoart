@@ -25,6 +25,7 @@ import {
   Box,
 } from 'lucide-react';
 import type { SEORouteMetadata, FAQ } from '@/types/seo';
+import { RouteDisclaimer } from '@/components/seo/RouteDisclaimer';
 
 interface Props {
   route: SEORouteMetadata;
@@ -93,6 +94,11 @@ export function RaceLandingPageClient({
 
       {/* FINAL CTA */}
       <FinalCTASection route={route} />
+
+      {/* DISCLAIMER */}
+      <div className="pb-8 px-6">
+        <RouteDisclaimer />
+      </div>
     </main>
   );
 }
