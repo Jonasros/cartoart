@@ -85,7 +85,7 @@ export function CommunityPreview({ thumbnails = [] }: CommunityPreviewProps) {
                         {thumbnail.title}
                       </p>
                       <p className="text-white/70 text-xs">
-                        Featured Route
+                        Community Creation
                       </p>
                     </div>
                   </div>

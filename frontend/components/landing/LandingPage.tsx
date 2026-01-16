@@ -18,13 +18,13 @@ interface RouteThumbnail {
 
 interface LandingPageProps {
   featuredThumbnails?: RouteThumbnail[];
+  communityThumbnails?: RouteThumbnail[];
 }
 
-export function LandingPage({ featuredThumbnails = [] }: LandingPageProps) {
-  // Split thumbnails across sections
+export function LandingPage({ featuredThumbnails = [], communityThumbnails = [] }: LandingPageProps) {
+  // Split featured thumbnails across hero and style sections
   const heroThumbnails = featuredThumbnails.slice(0, 4);
   const styleThumbnails = featuredThumbnails;
-  const communityThumbnails = featuredThumbnails.slice(0, 6);
 
   return (
     <main className="min-h-screen bg-stone-50 dark:bg-stone-900 overflow-x-hidden">
