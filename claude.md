@@ -27,6 +27,27 @@
 - Marketing landing page with scroll animations
 - PostHog analytics (14 custom events)
 - GDPR-compliant cookie consent
+- Famous routes seeding (41 pre-seeded routes with thumbnails)
+- API usage monitoring dashboard
+- Programmatic SEO pages (/race, /trail, /cycling)
+
+---
+
+## Trademark Policy
+
+**IMPORTANT**: When working with famous routes and events:
+
+1. **Use geographic/descriptive names** for products, not trademarked event names
+   - ✅ "Boston 42K Running Route" (geographic)
+   - ❌ "Boston Marathon Poster" (trademark)
+   - ✅ "Mont Ventoux Cycling Route" (geographic)
+   - ❌ "Tour de France Stage 16" (trademark)
+
+2. **Body text for SEO context** - Can mention events in descriptions for SEO
+3. **Disclaimers required** - All route landing pages include `RouteDisclaimer` component
+4. **Route data is factual** - GPS coordinates themselves are not copyrightable
+
+See `lib/seo/routes.ts` for the trademark-safe naming convention in the route catalog.
 
 ---
 
@@ -62,16 +83,22 @@ frontend/
 │   ├── strava/           # StravaActivityPicker
 │   └── ui/               # Shared components
 ├── lib/
-│   ├── actions/          # Server actions (maps, votes, comments)
+│   ├── actions/          # Server actions (maps, votes, comments, orders)
+│   ├── api-usage/        # API usage tracking system
+│   ├── errors/           # Custom error classes
+│   ├── middleware/       # Rate limiting, CSRF protection
 │   ├── route/            # GPX parsing
 │   ├── strava/           # Strava API helpers
-│   ├── stripe/           # Stripe checkout helpers
+│   ├── stripe/           # Stripe client, products, checkout
 │   ├── styles/           # 11 map style definitions
 │   └── validation/       # Zod schemas
+├── scripts/
+│   └── seed-famous-routes/  # Famous routes seeding (41 routes)
 └── types/
     ├── poster.ts         # Core type definitions
     ├── strava.ts         # Strava API types
     ├── sculpture.ts      # Sculpture config types
+    ├── stripe.ts         # Order, checkout, download types
     └── database.ts       # Supabase types (includes orders)
 ```
 
@@ -91,6 +118,18 @@ frontend/
 | `/terms` | Terms of Service |
 | `/privacy` | Privacy Policy |
 | `/cookies` | Cookie Policy |
+| `/admin/api-usage` | Admin API usage dashboard (password protected) |
+| `/export/success` | Post-payment success page |
+
+### SEO Route Pages (Programmatic)
+
+| Route Pattern | Purpose |
+|---------------|---------|
+| `/race/[slug]` | Marathon/running route landing pages (e.g., `/race/boston-marathon`) |
+| `/trail/[slug]` | Hiking trail landing pages (e.g., `/trail/camino-de-santiago`) |
+| `/cycling/[slug]` | Cycling route landing pages (e.g., `/cycling/mont-ventoux-cycling-route`) |
+
+See `lib/seo/routes.ts` for all available slugs and `app/sitemap.ts` for sitemap generation.
 
 ### API Routes
 
@@ -109,9 +148,23 @@ frontend/
 
 ### Stripe/Orders API Routes
 
+- `/api/stripe/create-checkout` - Create Stripe checkout session
+- `/api/stripe/webhook` - Handle Stripe webhooks (payment completed, refunds)
 - `/api/orders` - Create Stripe checkout session for export
 - `/api/orders/complete` - Complete order after successful payment
 - `/api/orders/[id]` - Get order status and download link
+
+### Export API Routes
+
+- `/api/export/download` - Secure download with token validation and limits
+
+### Admin API Routes
+
+- `/api/admin/usage` - API usage statistics dashboard (password protected)
+
+### Specialty API Routes
+
+- `/api/spaceports` - Rocket launch pad GeoJSON (Launch Library 2 API)
 
 ---
 

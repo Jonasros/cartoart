@@ -8,7 +8,12 @@
       "Bash(echo:*)",
       "Bash(done)",
       "Bash(npm run build:*)",
-      "mcp__MCP_DOCKER__firecrawl_search"
+      "mcp__MCP_DOCKER__firecrawl_search",
+      "mcp__MCP_DOCKER__firecrawl_scrape"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
 }
