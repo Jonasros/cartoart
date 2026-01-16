@@ -60,8 +60,10 @@ See `lib/seo/routes.ts` for the trademark-safe naming convention in the route ca
 - **3D**: React Three Fiber + Three.js (sculptures)
 - **Database**: Supabase (PostgreSQL + Auth + Storage)
 - **Payments**: Stripe Checkout
+- **Email**: Brevo (transactional + marketing)
 - **Analytics**: PostHog
 - **Tiles**: OpenFreeMap / MapTiler
+- **Hosting**: Netlify
 
 ---
 

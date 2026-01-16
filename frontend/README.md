@@ -18,6 +18,11 @@ NEXT_PUBLIC_MAPTILER_KEY=your_maptiler_api_key
 
 # Admin Dashboard (for API usage tracking at /admin/api-usage)
 ADMIN_PASSWORD=your_secure_admin_password
+
+# Brevo Email (transactional + marketing emails)
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=hello@waymarker.eu
+BREVO_SENDER_NAME=Jonas from Waymarker
 ```
 
 ## Getting Started
