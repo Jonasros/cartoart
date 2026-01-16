@@ -4,10 +4,13 @@ import {
   createOrder,
   completePendingOrder,
   updateOrderStatus,
+  type Order,
 } from '@/lib/actions/orders';
 import { getStripeProducts, type ExportProduct } from '@/lib/stripe/products';
 import { logger } from '@/lib/logger';
+import { trackPurchaseCompleted, updateBrevoContact } from '@/lib/brevo';
 import Stripe from 'stripe';
+import { createServiceClient } from '@/lib/supabase/service';
 
 // Disable body parsing - we need raw body for signature verification
 export const runtime = 'nodejs';
@@ -118,6 +121,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
     if (order) {
       logger.info('Pending order completed successfully:', order.id);
+      // Track purchase in Brevo for email automation (non-blocking)
+      sendBrevoEvent(order, session, email, product, amount);
     } else {
       logger.error(
         'Failed to complete pending order:',
@@ -154,8 +159,113 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   if (order) {
     logger.info('Order created successfully:', order.id);
+    // Track purchase in Brevo for email automation (non-blocking)
+    sendBrevoEvent(order, session, email, product, amount);
   } else {
     logger.error('Failed to create order for session:', session.id);
+  }
+}
+
+/**
+ * Track purchase event in Brevo for email automation
+ * Non-blocking - errors are logged but don't affect webhook response
+ */
+function sendBrevoEvent(
+  order: Order,
+  session: Stripe.Checkout.Session,
+  email: string,
+  product: string,
+  amount: number
+) {
+  logger.info('sendBrevoEvent called:', { email, product, amount, orderId: order.id });
+
+  // Get customer name from Stripe session
+  const customerName = session.customer_details?.name || '';
+  const firstName = customerName.split(' ')[0] || 'there';
+
+  // Determine product type and name
+  const productType: 'poster' | 'sculpture' = product.startsWith('sculpture')
+    ? 'sculpture'
+    : 'poster';
+
+  const productNames: Record<string, string> = {
+    'poster-small': 'Small Poster (8×12")',
+    'poster-medium': 'Medium Poster (12×18")',
+    'poster-large': 'Large Poster (16×24")',
+    'sculpture-stl': '3D Sculpture STL',
+  };
+  const productName = productNames[product] || product;
+
+  // Build download URL
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://waymarker.eu';
+  const downloadLink = `${baseUrl}/api/export/download?token=${order.download_token}`;
+
+  logger.info('Tracking Brevo purchase event:', { email, productName, downloadLink });
+
+  // Track event (fire and forget) - triggers automation workflows
+  trackPurchaseCompleted(email, {
+    product,
+    amount,
+    productName,
+    productType,
+    downloadLink,
+    firstName,
+  })
+    .then((result) => {
+      logger.info('Brevo purchase event result:', result);
+    })
+    .catch((err) => {
+      logger.error('Failed to track Brevo purchase event:', err);
+    });
+
+  // Update purchase stats in Brevo (non-blocking) - updates contact attributes
+  updatePurchaseStats(email, amount);
+}
+
+/**
+ * Update purchase statistics in Brevo contact
+ * Queries database for accurate totals
+ */
+async function updatePurchaseStats(email: string, newAmount: number) {
+  logger.info('updatePurchaseStats called:', { email, newAmount });
+
+  try {
+    const supabase = createServiceClient();
+
+    // Get purchase totals for this email
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: orders, error: dbError } = await (supabase as any)
+      .from('orders')
+      .select('amount')
+      .eq('email', email)
+      .eq('status', 'completed');
+
+    if (dbError) {
+      logger.error('Database error fetching orders:', dbError);
+    }
+
+    const orderList = (orders || []) as { amount: number }[];
+    const purchaseCount = orderList.length || 1;
+    const totalSpent = orderList.reduce((sum, o) => sum + (o.amount || 0), 0) || newAmount;
+
+    logger.info('Updating Brevo contact with purchase stats:', {
+      email,
+      purchaseCount,
+      totalSpent,
+      ordersFound: orderList.length
+    });
+
+    // Update Brevo contact with purchase stats (includes HAS_PURCHASED)
+    const result = await updateBrevoContact(email, {
+      HAS_PURCHASED: true,
+      PURCHASE_COUNT: purchaseCount,
+      TOTAL_SPENT: totalSpent,
+      LAST_PURCHASE_DATE: new Date().toISOString(),
+    });
+
+    logger.info('Brevo purchase stats update result:', { email, success: result });
+  } catch (err) {
+    logger.error('Failed to update Brevo purchase stats:', err);
   }
 }
 

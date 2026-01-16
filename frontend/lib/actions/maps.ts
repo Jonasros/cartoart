@@ -13,6 +13,33 @@ import { checkRateLimit } from '@/lib/middleware/rateLimit';
 import { RATE_LIMITS } from '@/lib/constants/limits';
 import { z } from 'zod';
 import { sanitizeText } from '@/lib/utils/sanitize';
+import { updateBrevoContact } from '@/lib/brevo';
+
+/**
+ * Update Brevo contact with new map count (non-blocking)
+ */
+async function trackMapCreated(userId: string, userEmail: string | undefined) {
+  if (!userEmail) return;
+
+  try {
+    // Get the user's current map count from the database
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from('maps')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    // Update Brevo with the new count
+    updateBrevoContact(userEmail, {
+      MAPS_CREATED: count || 1,
+    }).catch((err) => {
+      logger.error('Failed to update Brevo MAPS_CREATED:', err);
+    });
+  } catch (err) {
+    logger.error('Failed to track map creation in Brevo:', err);
+  }
+}
 
 export interface SavedMap {
   id: string;
@@ -121,6 +148,9 @@ export async function saveMap(
     throw new Error(`Failed to save map: ${error.message}`);
   }
 
+  // Track map creation in Brevo (non-blocking)
+  trackMapCreated(user.id, user.email);
+
   revalidatePath('/profile');
   return {
     ...data,
@@ -212,6 +242,9 @@ export async function saveMapWithThumbnail(
     logger.error('Failed to save map with thumbnail:', { error, userId: user.id });
     throw createError.databaseError(`Failed to save map: ${error.message}`);
   }
+
+  // Track map creation in Brevo (non-blocking)
+  trackMapCreated(user.id, user.email);
 
   revalidatePath('/profile');
   return {

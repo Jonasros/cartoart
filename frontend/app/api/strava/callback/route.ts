@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import type { StravaTokenResponse } from '@/types/strava';
 import type { Database, Json } from '@/types/database';
+import { updateBrevoContact } from '@/lib/brevo';
 
 type ConnectedAccountInsert = Database['public']['Tables']['connected_accounts']['Insert'];
 
@@ -104,6 +105,15 @@ export async function GET(request: Request) {
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/profile?strava=error&message=save_failed`
       );
+    }
+
+    // Update Brevo contact with STRAVA_CONNECTED (non-blocking)
+    if (user.email) {
+      updateBrevoContact(user.email, {
+        STRAVA_CONNECTED: true,
+      }).catch((err) => {
+        console.error('Failed to update Brevo STRAVA_CONNECTED:', err);
+      });
     }
 
     return NextResponse.redirect(
