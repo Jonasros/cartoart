@@ -33,8 +33,10 @@ Create beautiful, personalized map posters and 3D sculptures from your adventure
 - **3D**: React Three Fiber + Three.js
 - **Database**: Supabase (PostgreSQL + Auth + Storage)
 - **Payments**: Stripe Checkout
+- **Email**: Brevo (transactional + marketing automation)
 - **Analytics**: PostHog
 - **Tiles**: OpenFreeMap / MapTiler
+- **Hosting**: Netlify
 
 ## Getting Started
 

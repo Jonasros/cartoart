@@ -6,6 +6,7 @@
 > - See [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md) for Phase 4 specification
 > - See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for SEO growth strategy
 > - See [docs/PRD-FAMOUS-ROUTES-SEEDING.md](docs/PRD-FAMOUS-ROUTES-SEEDING.md) for famous routes database seeding
+> - See [docs/PRD-BREVO-EMAIL-AUTOMATION.md](docs/PRD-BREVO-EMAIL-AUTOMATION.md) for email automation strategy
 
 ## Quick Reference
 
@@ -87,6 +88,7 @@ frontend/
 ├── lib/
 │   ├── actions/          # Server actions (maps, votes, comments, orders)
 │   ├── api-usage/        # API usage tracking system
+│   ├── brevo/            # Brevo email (contacts, events, transactional)
 │   ├── errors/           # Custom error classes
 │   ├── middleware/       # Rate limiting, CSRF protection
 │   ├── route/            # GPX parsing
