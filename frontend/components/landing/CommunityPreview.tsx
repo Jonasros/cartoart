@@ -61,66 +61,63 @@ export function CommunityPreview({ thumbnails = [] }: CommunityPreviewProps) {
           viewport={{ once: true, margin: "-100px" }}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-12"
         >
-          {thumbnails.length >= 6 ? (
-            // Use real route thumbnails from database
-            thumbnails.slice(0, 6).map((thumbnail) => (
-              <motion.div
-                key={thumbnail.url}
-                variants={staggerItem}
-                className="group relative"
-              >
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
-                  <Image
-                    src={thumbnail.url}
-                    alt={thumbnail.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                  />
+          {/* Show community thumbnails first, fill remaining with static examples */}
+          {thumbnails.slice(0, 6).map((thumbnail) => (
+            <motion.div
+              key={thumbnail.url}
+              variants={staggerItem}
+              className="group relative"
+            >
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
+                <Image
+                  src={thumbnail.url}
+                  alt={thumbnail.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
 
-                  {/* Overlay with info */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <p className="text-white font-semibold text-sm">
-                        {thumbnail.title}
-                      </p>
-                      <p className="text-white/70 text-xs">
-                        Community Creation
-                      </p>
-                    </div>
+                {/* Overlay with info */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="text-white font-semibold text-sm">
+                      {thumbnail.title}
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      Community Creation
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            ))
-          ) : (
-            // Fallback to static examples
-            PREVIEW_EXAMPLES.map((example) => (
-              <motion.div
-                key={example.id}
-                variants={staggerItem}
-                className="group relative"
-              >
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
-                  <PosterThumbnail
-                    config={example.config}
-                    className="w-full h-full"
-                  />
+              </div>
+            </motion.div>
+          ))}
+          {/* Fill remaining slots with static examples */}
+          {thumbnails.length < 6 && PREVIEW_EXAMPLES.slice(0, 6 - thumbnails.length).map((example) => (
+            <motion.div
+              key={example.id}
+              variants={staggerItem}
+              className="group relative"
+            >
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-500 group-hover:-translate-y-1 border border-stone-200 dark:border-stone-700">
+                <PosterThumbnail
+                  config={example.config}
+                  className="w-full h-full"
+                />
 
-                  {/* Overlay with info */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <p className="text-white font-semibold text-sm">
-                        {example.name}
-                      </p>
-                      <p className="text-white/70 text-xs">
-                        {example.config.style.name}
-                      </p>
-                    </div>
+                {/* Overlay with info */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="text-white font-semibold text-sm">
+                      {example.name}
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      {example.config.style.name}
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            ))
-          )}
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* CTA */}

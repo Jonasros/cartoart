@@ -49,8 +49,8 @@ export function LandingPage({ featuredThumbnails = [], communityThumbnails = [] 
       {/* Product Formats - Prints vs Sculptures */}
       <ProductFormats />
 
-      {/* Community Preview - Showcase examples */}
-      <CommunityPreview thumbnails={communityThumbnails} />
+      {/* Community Preview - Showcase examples (fall back to featured if no community content) */}
+      <CommunityPreview thumbnails={communityThumbnails.length > 0 ? communityThumbnails : featuredThumbnails.slice(0, 6)} />
 
       {/* Final CTA */}
       <FinalCTA />
