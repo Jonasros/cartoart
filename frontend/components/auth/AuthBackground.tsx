@@ -1,28 +1,40 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { POSTER_EXAMPLES } from '@/lib/config/examples';
-import { PosterThumbnail } from '../map/PosterThumbnail';
+import { useEffect, useState, useMemo } from 'react';
+import Image from 'next/image';
 
-interface FloatingCardProps {
-  example: (typeof POSTER_EXAMPLES)[0];
-  index: number;
-  totalCards: number;
+export interface RouteThumbnail {
+  url: string;
+  title: string;
 }
 
-function FloatingCard({ example, index, totalCards }: FloatingCardProps) {
+interface FloatingCardProps {
+  thumbnail: RouteThumbnail;
+  index: number;
+  animationSeed: number;
+}
+
+function FloatingCard({ thumbnail, index, animationSeed }: FloatingCardProps) {
   // Calculate initial position based on index
   const column = index % 3;
   const row = Math.floor(index / 3);
 
-  // Random animation parameters
-  const duration = 20 + Math.random() * 15; // 20-35s
-  const delay = index * 0.5;
+  // Use seeded random values for consistent animations
+  const seed = animationSeed + index;
+  const seededRandom = (n: number) => ((seed * (n + 1) * 9301 + 49297) % 233280) / 233280;
+
+  const duration = 20 + seededRandom(1) * 15; // 20-35s
+  const delay = index * 0.2; // Faster staggered appearance
 
   // Starting positions spread across the screen
-  const startX = (column * 33) + (Math.random() * 10);
-  const startY = (row * 33) + (Math.random() * 10);
+  const startX = (column * 33) + (seededRandom(2) * 10);
+  const startY = (row * 33) + (seededRandom(3) * 10);
+
+  const initialRotate = -5 + seededRandom(4) * 10;
+  const xDirection = seededRandom(5) > 0.5 ? 1 : -1;
+  const x2Direction = seededRandom(6) > 0.5 ? 1 : -1;
+  const rotateDirection = seededRandom(7) > 0.5 ? 1 : -1;
 
   return (
     <motion.div
@@ -32,12 +44,12 @@ function FloatingCard({ example, index, totalCards }: FloatingCardProps) {
         top: `${startY}%`,
         width: 'clamp(140px, 18vw, 220px)',
       }}
-      initial={{ opacity: 0, scale: 0.8, rotate: -5 + Math.random() * 10 }}
+      initial={{ opacity: 0, scale: 0.8, rotate: initialRotate }}
       animate={{
         opacity: [0, 0.8, 0.8, 0],
         y: [0, -30, -60, -100],
-        x: [0, 10 * (Math.random() > 0.5 ? 1 : -1), 20 * (Math.random() > 0.5 ? 1 : -1), 0],
-        rotate: [-5 + Math.random() * 10, 5 * (Math.random() > 0.5 ? 1 : -1), -3 + Math.random() * 6],
+        x: [0, 10 * xDirection, 20 * x2Direction, 0],
+        rotate: [initialRotate, 5 * rotateDirection, -3 + seededRandom(8) * 6],
         scale: [0.85, 1, 1, 0.9],
       }}
       transition={{
@@ -48,50 +60,40 @@ function FloatingCard({ example, index, totalCards }: FloatingCardProps) {
         ease: 'easeInOut',
       }}
     >
-      <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 transform-gpu">
-        {/* Actual PosterThumbnail with example config */}
-        <div className="relative h-3/4 overflow-hidden">
-          <PosterThumbnail
-            config={example.config}
-            className="w-full h-full"
-          />
-          {/* Style badge */}
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/30 backdrop-blur-sm">
-            <span className="text-[8px] font-medium text-white/90">{example.config.style.name}</span>
-          </div>
-        </div>
-        {/* Title area */}
-        <div
-          className="h-1/4 p-2 flex flex-col justify-center"
-          style={{ backgroundColor: example.config.palette.background }}
-        >
-          <p
-            className="text-[10px] font-bold truncate"
-            style={{ color: example.config.palette.text }}
-          >
-            {example.name}
-          </p>
-          <p
-            className="text-[8px] truncate opacity-70"
-            style={{ color: example.config.palette.text }}
-          >
-            {example.config.location.subtitle || example.config.location.city}
-          </p>
-        </div>
+      <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 transform-gpu bg-card">
+        <Image
+          src={thumbnail.url}
+          alt={thumbnail.title}
+          fill
+          className="object-cover"
+          sizes="220px"
+          unoptimized
+        />
       </div>
     </motion.div>
   );
 }
 
-export function AuthBackground() {
+interface AuthBackgroundProps {
+  thumbnails?: RouteThumbnail[];
+}
+
+export function AuthBackground({ thumbnails = [] }: AuthBackgroundProps) {
   const [mounted, setMounted] = useState(false);
+
+  // Generate a stable animation seed once on mount
+  const animationSeed = useMemo(() => Math.floor(Math.random() * 10000), []);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
+  if (!mounted || thumbnails.length === 0) {
+    return (
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-trail-light/80 via-background/90 to-background dark:from-background/95 dark:via-background/98 dark:to-card/90" />
+      </div>
+    );
   }
 
   return (
@@ -101,12 +103,12 @@ export function AuthBackground() {
 
       {/* Floating cards */}
       <div className="absolute inset-0 opacity-40 dark:opacity-25">
-        {POSTER_EXAMPLES.map((example, index) => (
+        {thumbnails.map((thumbnail, index) => (
           <FloatingCard
-            key={example.id}
-            example={example}
+            key={`${thumbnail.url}-${index}`}
+            thumbnail={thumbnail}
             index={index}
-            totalCards={POSTER_EXAMPLES.length}
+            animationSeed={animationSeed}
           />
         ))}
       </div>

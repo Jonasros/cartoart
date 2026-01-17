@@ -1,6 +1,6 @@
 import { EmailAuthForm } from '@/components/auth/EmailAuthForm';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
-import { AuthBackground } from '@/components/auth/AuthBackground';
+import { AuthBackground, RouteThumbnail } from '@/components/auth/AuthBackground';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
@@ -11,15 +11,38 @@ export const metadata = {
   description: 'Create an account to save and share your adventure keepsakes',
 };
 
+async function getFeaturedThumbnails(): Promise<RouteThumbnail[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('maps')
+      .select('thumbnail_url, title')
+      .eq('is_featured', true)
+      .not('thumbnail_url', 'is', null)
+      .limit(20);
+
+    if (!data) return [];
+
+    // Shuffle and take 9 thumbnails
+    return (data as { thumbnail_url: string; title: string }[])
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 9)
+      .map(m => ({ url: m.thumbnail_url, title: m.title }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ redirect?: string }>;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: { user } }, thumbnails] = await Promise.all([
+    supabase.auth.getUser(),
+    getFeaturedThumbnails(),
+  ]);
 
   const params = await searchParams;
 
@@ -29,7 +52,7 @@ export default async function SignupPage({
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-trail-light to-background dark:from-background dark:to-card relative overflow-hidden">
-      <AuthBackground />
+      <AuthBackground thumbnails={thumbnails} />
       <div className="max-w-md w-full mx-4 relative z-10">
         <div className="bg-card/95 dark:bg-card/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-border">
           {/* Logo */}
