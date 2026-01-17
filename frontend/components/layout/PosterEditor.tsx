@@ -446,6 +446,47 @@ export function PosterEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, pathname, router, setConfig, updateSculptureConfig]);
 
+  // Restore route data from sessionStorage after auth redirect
+  // This handles the case where user clicks Save without being logged in,
+  // then logs in and is redirected back - the route data is preserved in sessionStorage
+  // because routes are too large to encode in the URL
+  const DRAFT_ROUTE_KEY = 'waymarker_draft_route';
+  const draftRouteProcessedRef = useRef(false);
+
+  useEffect(() => {
+    // Only process once per component mount
+    if (draftRouteProcessedRef.current) return;
+
+    // Don't restore if we're loading from URL or already have route data
+    if (isLoadingMap || config.route?.data) return;
+
+    try {
+      const storedData = sessionStorage.getItem(DRAFT_ROUTE_KEY);
+      if (!storedData) return;
+
+      const parsed = JSON.parse(storedData);
+      const timestamp = parsed.timestamp;
+
+      // Verify the snapshot is recent (within 5 minutes)
+      if (timestamp && Date.now() - timestamp < 5 * 60 * 1000) {
+        console.log('[DRAFT RESTORE] Restoring route data from sessionStorage');
+        if (parsed.route) {
+          updateRoute(parsed.route);
+        }
+      } else {
+        console.log('[DRAFT RESTORE] Stored route data is too old, discarding');
+      }
+
+      // Clear the snapshot after processing (whether used or not)
+      sessionStorage.removeItem(DRAFT_ROUTE_KEY);
+      draftRouteProcessedRef.current = true;
+    } catch (e) {
+      console.warn('[DRAFT RESTORE] Failed to restore route data:', e);
+      sessionStorage.removeItem(DRAFT_ROUTE_KEY);
+      draftRouteProcessedRef.current = true;
+    }
+  }, [isLoadingMap, config.route?.data, updateRoute]);
+
   // Trigger auto-export when pending and map is ready (from paid download flow)
   // For posters: directly trigger PNG export
   // For sculptures: set flag to auto-open modal and trigger STL export
@@ -762,6 +803,7 @@ export function PosterEditor() {
             hasUnsavedChanges={currentMapStatus?.hasUnsavedChanges}
             isAuthenticated={isAuthenticated}
             disabled={isExporting}
+            getCurrentConfig={() => config}
           />
           <button
             onClick={handleReset}
@@ -895,6 +937,7 @@ export function PosterEditor() {
             hasUnsavedChanges={currentMapStatus?.hasUnsavedChanges}
             isAuthenticated={isAuthenticated}
             disabled={isExporting}
+            getCurrentConfig={() => config}
           />
           <ExportButton
             onExport={handleExport}

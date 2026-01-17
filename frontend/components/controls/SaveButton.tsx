@@ -1,11 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Save, Loader2, Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/tooltip';
 import posthog from 'posthog-js';
+import type { PosterConfig } from '@/types/poster';
+import { encodeConfig } from '@/lib/config/url-state';
+
+// Session storage key for preserving route data during auth
+const DRAFT_ROUTE_KEY = 'waymarker_draft_route';
 
 interface SaveButtonProps {
   onSave: (name: string) => Promise<void>;
@@ -15,6 +20,7 @@ interface SaveButtonProps {
   hasUnsavedChanges?: boolean;
   isAuthenticated: boolean;
   disabled?: boolean;
+  getCurrentConfig?: () => PosterConfig;
 }
 
 export function SaveButton({
@@ -24,9 +30,11 @@ export function SaveButton({
   currentMapName,
   hasUnsavedChanges,
   isAuthenticated,
-  disabled
+  disabled,
+  getCurrentConfig
 }: SaveButtonProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -36,7 +44,38 @@ export function SaveButton({
 
   const handleSaveClick = () => {
     if (!isAuthenticated) {
-      router.push('/login');
+      // Preserve the current design state when redirecting to login
+      let redirectUrl = '/create';
+
+      if (getCurrentConfig) {
+        const config = getCurrentConfig();
+
+        // Encode the config to URL state (excludes route data due to size)
+        const encoded = encodeConfig(config);
+        if (encoded) {
+          redirectUrl = `/create?s=${encoded}`;
+        }
+
+        // Store route data separately in sessionStorage (routes can be very large)
+        if (config.route?.data) {
+          try {
+            sessionStorage.setItem(DRAFT_ROUTE_KEY, JSON.stringify({
+              route: config.route,
+              timestamp: Date.now()
+            }));
+          } catch (e) {
+            console.warn('[SaveButton] Failed to store route data:', e);
+          }
+        }
+      } else {
+        // Fallback: use current URL state if available
+        const currentState = searchParams.get('s');
+        if (currentState) {
+          redirectUrl = `/create?s=${currentState}`;
+        }
+      }
+
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
       return;
     }
 
