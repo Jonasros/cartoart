@@ -58,6 +58,13 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
           auth_method: 'email',
         });
 
+        // Add user to Brevo immediately on signup (before email verification)
+        // This ensures they get welcome emails even if callback fails
+        // The callback will also call this (idempotent - safe to call twice)
+        ensureBrevoContact(email, 'email').catch((err) => {
+          console.error('Failed to create Brevo contact on signup:', err);
+        });
+
         setMessage('Check your email for the confirmation link!');
       } else {
         const { error, data } = await supabase.auth.signInWithPassword({
