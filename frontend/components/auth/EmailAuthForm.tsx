@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/control-components';
 import posthog from 'posthog-js';
+import { ensureBrevoContact } from '@/lib/brevo/client-actions';
 
 interface EmailAuthFormProps {
   mode: 'login' | 'signup';
@@ -73,6 +74,13 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
           });
           posthog.capture('user_logged_in', {
             auth_method: 'email',
+          });
+
+          // Ensure user has a Brevo contact (catches users who signed up
+          // before Brevo was integrated, or had callback failures)
+          // This is non-blocking - don't wait for it
+          ensureBrevoContact(data.user.email!, 'email').catch((err) => {
+            console.error('Failed to ensure Brevo contact on login:', err);
           });
         }
 
