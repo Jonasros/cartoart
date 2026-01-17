@@ -362,10 +362,10 @@ Hey {{params.firstName}}!
 Your {{params.productName}} is ready to download. Thank you so much for
 supporting Waymarker - it means a lot.
 
-→ [Download Your File]({{params.downloadLink}})
+→ [Go to My Downloads](https://waymarker.eu/account)
 
-This link expires in 7 days and works for up to 3 downloads, so make sure
-to save your file somewhere safe.
+Your file is available in "My Downloads" on your account page.
+You can download it up to 5 times.
 
 **What's next?**
 
@@ -925,3 +925,425 @@ export async function updateBrevoContact(
   }
 }
 ```
+
+---
+
+## Email Template Design Guidelines
+
+This section documents how to create on-brand HTML email templates for Brevo.
+
+### Waymarker Brand Colors
+
+| Color | Hex | Usage |
+|-------|-----|-------|
+| **Forest Pine Green** | `#2D5A3D` | Headers, section labels, accent borders, icon backgrounds |
+| **Summit Orange** | `#D4763A` | CTA buttons, links |
+| **Summit Orange Hover** | `#B85A20` | Button hover state |
+| **Stone 900** | `#1c1917` | Headlines, strong text |
+| **Stone 700** | `#44403c` | Body text |
+| **Stone 500** | `#78716c` | Secondary/muted text |
+| **Stone 400** | `#A8A29E` | Footer text |
+| **Stone 100** | `#F5F5F4` | Feature card backgrounds, footer background |
+| **Warm Off-White** | `#FAF9F7` | Email body background |
+| **White** | `#FFFFFF` | Main content container |
+
+### Typography
+
+- **Font Family**: `Arial, Helvetica, sans-serif` (email-safe fallback for Sora/Source Sans)
+- **Body Text**: 16px, line-height 1.7, color `#44403c`
+- **Headlines**: Bold, color `#1c1917` or `#FFFFFF` on dark backgrounds
+- **Section Labels**: 13px, uppercase, letter-spacing 0.5px, color `#2D5A3D`
+- **Muted Text**: 13-14px, color `#78716c`
+
+### Email Structure
+
+```
+┌─────────────────────────────────────────┐
+│           Body Background               │
+│           (#FAF9F7)                     │
+│  ┌───────────────────────────────────┐  │
+│  │      Main Container (white)       │  │
+│  │      border-radius: 16px          │  │
+│  │      max-width: 560px             │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │   Header (#2D5A3D)          │  │  │
+│  │  │   - Logo                    │  │  │
+│  │  │   - Badge                   │  │  │
+│  │  │   - Headline (white)        │  │  │
+│  │  └─────────────────────────────┘  │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │   Content (white bg)        │  │  │
+│  │  │   - Intro paragraphs        │  │  │
+│  │  │   - Feature cards           │  │  │
+│  │  │   - CTA button              │  │  │
+│  │  │   - Personal note           │  │  │
+│  │  │   - Sign-off                │  │  │
+│  │  └─────────────────────────────┘  │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │   Footer (#F5F5F4)          │  │  │
+│  │  │   - Unsubscribe link        │  │  │
+│  │  └─────────────────────────────┘  │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+### Brevo HTML Requirements & Limitations
+
+**Important**: Brevo's Developer Mode uses YAML, not HTML. For custom HTML, use the **"Code your own"** editor.
+
+#### What Works
+
+- Inline CSS (required for most email clients)
+- Table-based layouts
+- Basic HTML entities for emojis (`&#128205;` for 📍)
+- `border-radius` (degrades gracefully in Outlook)
+- Solid `background-color`
+- Basic text formatting (`<strong>`, `<em>`)
+
+#### What Doesn't Work (Avoid These)
+
+| ❌ Avoid | ✅ Use Instead |
+|----------|----------------|
+| `<style>` blocks | Inline styles |
+| CSS gradients (`linear-gradient`) | Solid `background-color` |
+| CSS Grid / Flexbox | Table layouts |
+| External fonts (`@import`) | System fonts (Arial, Helvetica) |
+| JavaScript | Static HTML |
+| Media queries | Single-column responsive design |
+| Complex selectors (`:hover`) | No hover states (or add in `<style>` for clients that support it) |
+| `rgba()` with low opacity | Solid colors or simple `rgba()` |
+
+#### Outlook-Specific Notes
+
+Outlook desktop (2007-2019, Office 365) uses Word's rendering engine:
+- No support for `border-radius` (shows square corners)
+- Limited `line-height` support
+- No `background-image` support
+- Use VML fallbacks for rounded buttons if needed
+
+### How to Import HTML into Brevo
+
+1. **Go to**: Campaigns → Templates → Create template
+2. **Select**: "Start from scratch"
+3. **Choose**: "Code your own" (NOT Drag & Drop)
+4. **Select**: "Paste your code"
+5. **Paste**: Your HTML template
+6. **Click**: Save
+7. **Name**: Your template (e.g., "Welcome Email v2")
+
+**Alternative - HTML Block in Drag & Drop**:
+- Create email using Drag & Drop editor
+- Drag "HTML" block into design
+- Paste custom HTML into that block
+- Useful for mixing custom code with drag-and-drop elements
+
+### Template Variables
+
+Use these placeholders in your HTML:
+
+| Variable | Source | Example |
+|----------|--------|---------|
+| `{{ contact.FIRSTNAME }}` | Contact attribute | "Jonas" |
+| `{{ contact.EMAIL }}` | Contact email | "jonas@example.com" |
+| `{{ event.downloadLink }}` | Event property | "https://waymarker.eu/download/abc" |
+| `{{ event.productName }}` | Event property | "Medium Poster (18×24\")" |
+| `{{ event.productType }}` | Event property | "poster" or "sculpture" |
+| `{{ unsubscribe }}` | Auto-generated | Unsubscribe URL |
+
+### Welcome Email Template (Copy-Paste Ready)
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Welcome to Waymarker</title>
+  <!--[if mso]>
+  <style type="text/css">
+    table {border-collapse: collapse;}
+    td {padding: 0;}
+  </style>
+  <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF9F7; font-family: Arial, Helvetica, sans-serif;">
+
+  <!-- Preview text -->
+  <div style="display: none; max-height: 0; overflow: hidden;">
+    Your best adventures deserve more than a Strava screenshot
+  </div>
+
+  <!-- Email wrapper -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #FAF9F7;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+
+        <!-- Main container -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="560" style="max-width: 560px; background-color: #FFFFFF; border-radius: 16px;">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color: #2D5A3D; padding: 40px 48px 32px 48px; border-radius: 16px 16px 0 0;">
+
+              <!-- Logo -->
+              <img src="https://img.mailinblue.com/10499192/images/content_library/original/696a74be55ba1aec1a45ad4b.png" width="48" height="48" alt="Waymarker" style="display: block; margin: 0 auto 20px auto;">
+
+              <!-- Welcome badge -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin-bottom: 16px;">
+                <tr>
+                  <td style="background-color: rgba(255,255,255,0.15); border-radius: 50px; padding: 8px 16px;">
+                    <span style="color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Welcome to the trail</span>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Headline -->
+              <h1 style="color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; line-height: 1.25; margin: 0;">
+                Hey {{ contact.FIRSTNAME }}, ready to<br>turn adventures into art?
+              </h1>
+
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding: 40px 48px; font-family: Arial, Helvetica, sans-serif;">
+
+              <!-- Intro -->
+              <p style="color: #44403c; font-size: 16px; line-height: 1.7; margin: 0 0 20px 0;">
+                Jonas here, founder of Waymarker.
+              </p>
+
+              <p style="color: #44403c; font-size: 16px; line-height: 1.7; margin: 0 0 20px 0;">
+                I'm stoked you signed up! I built this because I had the same frustration you probably have: <strong style="color: #1c1917;">my best adventures were buried in forgotten GPX files.</strong>
+              </p>
+
+              <p style="color: #44403c; font-size: 16px; line-height: 1.7; margin: 0 0 20px 0;">
+                That marathon PR? A data point on Strava. That epic mountain ride? Somewhere in a folder I'll never open again.
+              </p>
+
+              <p style="color: #44403c; font-size: 16px; line-height: 1.7; margin: 0 0 32px 0;">
+                I wanted those routes on my wall. Something I'd actually <em>look at</em> every day. So I built Waymarker to make it stupidly easy.
+              </p>
+
+              <!-- Section header -->
+              <p style="color: #2D5A3D; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; margin: 0 0 16px 0;">
+                Here's what you can do
+              </p>
+
+              <!-- Feature 1 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 12px;">
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #F5F5F4; border-radius: 12px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="44" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #2D5A3D; border-radius: 8px; text-align: center; line-height: 32px; color: #FFFFFF; font-size: 14px;">&#128205;</div>
+                        </td>
+                        <td valign="top">
+                          <p style="color: #1c1917; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">Upload any GPX or connect Strava</p>
+                          <p style="color: #78716c; font-family: Arial, Helvetica, sans-serif; font-size: 13px; margin: 0;">Import activities in one click</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Feature 2 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 12px;">
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #F5F5F4; border-radius: 12px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="44" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #2D5A3D; border-radius: 8px; text-align: center; line-height: 32px; color: #FFFFFF; font-size: 14px;">&#127912;</div>
+                        </td>
+                        <td valign="top">
+                          <p style="color: #1c1917; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">Pick from 11 styles and 15+ palettes</p>
+                          <p style="color: #78716c; font-family: Arial, Helvetica, sans-serif; font-size: 13px; margin: 0;">Vintage topo, midnight noir, and more</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Feature 3 -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #F5F5F4; border-radius: 12px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="44" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #2D5A3D; border-radius: 8px; text-align: center; line-height: 32px; color: #FFFFFF; font-size: 14px;">&#128444;</div>
+                        </td>
+                        <td valign="top">
+                          <p style="color: #1c1917; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">Export as poster or 3D sculpture</p>
+                          <p style="color: #78716c; font-family: Arial, Helvetica, sans-serif; font-size: 13px; margin: 0;">High-res print files or STL for 3D printing</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="border-radius: 12px; background-color: #D4763A;">
+                          <a href="https://waymarker.eu/create" style="display: inline-block; padding: 16px 36px; color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 12px;">
+                            Create Your First Map &rarr;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Personal note -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="border-left: 3px solid #2D5A3D; padding-left: 16px;">
+                    <p style="color: #57534e; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.6; margin: 0;">
+                      <strong style="color: #44403c;">Quick tip:</strong> Your work saves automatically, so feel free to experiment. And if you have questions or just want to say hi, hit reply. I read every email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Sign off -->
+              <p style="color: #44403c; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.7; margin: 0;">
+                Happy trails,<br>
+                <strong style="color: #1c1917;">Jonas</strong>
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F5F5F4; padding: 24px 48px; text-align: center; border-radius: 0 0 16px 16px;">
+              <p style="color: #A8A29E; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                You signed up at waymarker.eu
+              </p>
+              <p style="color: #A8A29E; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; margin: 0;">
+                <a href="{{ unsubscribe }}" style="color: #78716c; text-decoration: underline;">Unsubscribe</a>
+                &nbsp;|&nbsp;
+                <a href="https://waymarker.eu/privacy" style="color: #78716c; text-decoration: underline;">Privacy</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+```
+
+### Creating New Email Templates
+
+When creating new emails, follow this checklist:
+
+1. **Copy the structure** from the Welcome Email template above
+2. **Update the header**:
+   - Change the badge text (e.g., "Your download is ready")
+   - Update the headline
+3. **Update the content**:
+   - Write body copy in the personal "Jonas" voice
+   - Use feature cards for lists (or remove if not needed)
+   - Update CTA button text and link
+4. **Test thoroughly**:
+   - Send test email from Brevo
+   - Check on Gmail, Outlook, Apple Mail
+   - Check on mobile (iOS Mail, Gmail app)
+
+### Component Patterns
+
+#### Feature Card
+
+```html
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 12px;">
+  <tr>
+    <td style="padding: 16px 20px; background-color: #F5F5F4; border-radius: 12px;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+          <td width="44" valign="top">
+            <div style="width: 32px; height: 32px; background-color: #2D5A3D; border-radius: 8px; text-align: center; line-height: 32px; color: #FFFFFF; font-size: 14px;">&#128205;</div>
+          </td>
+          <td valign="top">
+            <p style="color: #1c1917; font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">Feature Title</p>
+            <p style="color: #78716c; font-family: Arial, Helvetica, sans-serif; font-size: 13px; margin: 0;">Feature description</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+```
+
+#### CTA Button
+
+```html
+<table role="presentation" cellspacing="0" cellpadding="0" border="0">
+  <tr>
+    <td style="border-radius: 12px; background-color: #D4763A;">
+      <a href="https://waymarker.eu/create" style="display: inline-block; padding: 16px 36px; color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 12px;">
+        Button Text &rarr;
+      </a>
+    </td>
+  </tr>
+</table>
+```
+
+#### Accent Border Note
+
+```html
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td style="border-left: 3px solid #2D5A3D; padding-left: 16px;">
+      <p style="color: #57534e; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.6; margin: 0;">
+        <strong style="color: #44403c;">Note:</strong> Your note content here.
+      </p>
+    </td>
+  </tr>
+</table>
+```
+
+#### Section Label
+
+```html
+<p style="color: #2D5A3D; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; margin: 0 0 16px 0;">
+  Section Title
+</p>
+```
+
+### Emoji HTML Entities
+
+| Emoji | Entity | Description |
+|-------|--------|-------------|
+| 📍 | `&#128205;` | Location pin |
+| 🎨 | `&#127912;` | Palette |
+| 🖼️ | `&#128444;` | Frame |
+| ⛰️ | `&#9968;` | Mountain |
+| 🏃 | `&#127939;` | Runner |
+| 🚴 | `&#128692;` | Cyclist |
+| ✅ | `&#9989;` | Checkmark |
+| 📧 | `&#128231;` | Email |
+| 🔗 | `&#128279;` | Link |
+
+### Resources
+
+- [Brevo HTML Editor Guide](https://help.brevo.com/hc/en-us/articles/4672127581074-Upload-an-HTML-file-to-design-your-emails-HTML-custom-code-editor)
+- [Brevo HTML Limitations](https://help.brevo.com/hc/en-us/articles/6632412983186-Limitations-when-using-HTML-for-your-email-campaigns)
+- [HTML/CSS Email Support Guide](https://www.caniemail.com/)
+- [Litmus CSS Inlining Guide](https://www.litmus.com/blog/a-guide-to-css-inlining-in-email/)

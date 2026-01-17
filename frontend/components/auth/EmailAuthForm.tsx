@@ -91,8 +91,8 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
           });
         }
 
-        router.push(redirectTo || '/profile');
         router.refresh();
+        router.push(redirectTo || '/profile');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
