@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-14
+**Last Updated**: 2026-01-19
 
 ---
 
@@ -36,52 +36,62 @@ Waymarker transforms GPS activity data into gallery-worthy wall art. Starting wi
 
 ---
 
-## Immediate: Programmatic SEO (Growth Initiative)
+## Next: Programmatic SEO Expansion (Growth Initiative)
 
 > **Comprehensive specification**: [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md)
 
 Scale organic traffic through thousands of targeted landing pages capturing long-tail search queries.
 
-### Why This Is Priority
+### Phase 1 Complete ✅
 
-| Factor | Opportunity |
-|--------|-------------|
-| Total pages | ~11,000+ at scale |
-| Traffic potential | 50-100K visits/month |
-| Conversion focus | High-intent keywords |
-| Competitive moat | Strava + GPX + 3D = unique |
+**Implemented route landing pages:**
 
-### Page Categories
+- `/race/[slug]` - Marathon and running routes
+- `/trail/[slug]` - Hiking trail routes
+- `/cycling/[slug]` - Cycling routes
+- Sitemap integration, JSON-LD structured data, trademark-safe naming
 
-| Category | Pages | Target Keywords |
-|----------|-------|-----------------|
-| City Maps | ~10,000 | "[City] map poster" |
-| Marathons & Races | ~500 | "[Race] route poster 2026" |
-| Trails & Hikes | ~200 | "[Trail] map print" |
-| Cycling Routes | ~300 | "[Route] cycling poster" |
-| Triathlons | ~100 | "Ironman [Location] map" |
-| Gift Guides | ~50 | "gift for marathon runner" |
+### Remaining Phases
 
-### Implementation Phases
+| Category | Pages | Target Keywords | Status |
+|----------|-------|-----------------|--------|
+| City Maps | ~10,000 | "[City] map poster" | Planned |
+| Marathons & Races | ~500 | "[Race] route poster 2026" | ✅ Phase 1 |
+| Trails & Hikes | ~200 | "[Trail] map print" | ✅ Phase 1 |
+| Cycling Routes | ~300 | "[Route] cycling poster" | ✅ Phase 1 |
+| Triathlons | ~100 | "Ironman [Location] map" | Planned |
+| Gift Guides | ~50 | "gift for marathon runner" | Planned |
 
-1. **Phase 1 (Weeks 1-2)**: Foundation — 170 high-value pages (top cities, races, trails)
-2. **Phase 2 (Weeks 3-6)**: Scale — Expand to ~1,500 pages
-3. **Phase 3 (Weeks 7-10)**: Optimization — SEO refinement, A/B testing
-4. **Phase 4 (Weeks 11+)**: Full scale — ~11,000+ pages
+### Next Steps
 
-### Technical Approach
+1. **Phase 2**: City map pages (~10,000 pages for major cities)
+2. **Phase 3**: SEO optimization, A/B testing CTAs
+3. **Phase 4**: Gift guides and seasonal content
 
-- Next.js `generateStaticParams` for pre-rendering
-- Dynamic sitemap with priority scoring
-- JSON-LD structured data (FAQ schema)
-- Pre-loaded GPX routes for major events
-- Community content integration for unique value
-
-See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD including URL structures, data requirements, page templates, and keyword targeting.
+See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD.
 
 ---
 
 ## Recently Completed
+
+### Brevo Email Automation ✅
+
+> **Specification**: [docs/PRD-BREVO-EMAIL-AUTOMATION.md](docs/PRD-BREVO-EMAIL-AUTOMATION.md)
+
+User lifecycle email automation for retention and conversion.
+
+- ✅ Contact management (create/update on signup)
+- ✅ Event tracking (signup, Strava connect, purchase)
+- ✅ Marketing consent checkbox
+- ✅ Email template documentation
+
+### Programmatic SEO Pages (Phase 1) ✅
+
+- ✅ Race landing pages (`/race/[slug]`)
+- ✅ Trail landing pages (`/trail/[slug]`)
+- ✅ Cycling landing pages (`/cycling/[slug]`)
+- ✅ Sitemap integration
+- ✅ RouteDisclaimer for trademark safety
 
 ### 3D Journey Sculptures ✅
 
@@ -175,7 +185,7 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 
 - [ ] Onboarding tutorial
 - [ ] Accessibility improvements
-- [ ] Mobile editor optimization
+- [x] Mobile editor optimization ✅
 
 ---
 

@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-15
+**Last Updated**: 2026-01-19
 
 ---
 
@@ -21,6 +21,8 @@
 | 9 | 3D Journey Sculpture | ✅ Complete |
 | 10 | Payments & Analytics | ✅ Complete |
 | 11 | Famous Routes Seeding | ✅ Complete |
+| 12 | Brevo Email Automation | ✅ Complete |
+| 13 | Programmatic SEO Pages | ✅ Complete |
 
 ---
 
@@ -32,6 +34,8 @@
 - ✅ OAuth sign-in (Google)
 - ✅ Protected routes with middleware
 - ✅ User sessions via Supabase Auth
+- ✅ Marketing consent checkbox on signup
+- ✅ Featured map thumbnails on auth pages
 
 ### Connected Services
 
@@ -102,6 +106,7 @@
 
 - ✅ Dark mode support throughout
 - ✅ Responsive layout (desktop & mobile)
+- ✅ Mobile-optimized touch targets and controls
 - ✅ Loading states and error handling
 - ✅ Toast notifications
 - ✅ Confirmation dialogs
@@ -281,6 +286,51 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 - ✅ FAQ page (`/faq`)
 - ✅ Consent state persistence
 
+### Brevo Email Automation
+
+User lifecycle email automation using Brevo (formerly Sendinblue).
+
+**Contact Management**:
+
+- ✅ Automatic contact creation on signup (email/Google OAuth)
+- ✅ Contact attributes sync (signup date, strava status, purchase status)
+- ✅ Marketing consent checkbox on signup form
+- ✅ Immediate contact sync for email auth (client-side action)
+
+**Event Tracking**:
+
+- ✅ `user_signed_up` - New user registration
+- ✅ `strava_connected` - Strava OAuth linked
+- ✅ `map_saved` - First map saved
+- ✅ `purchase_completed` - Stripe payment success
+
+**Infrastructure**:
+
+- ✅ `lib/brevo/` module with client, contacts, events, types
+- ✅ Brevo SDK integration (`@getbrevo/brevo`)
+- ✅ Server-side event tracking from API routes
+- ✅ Email template documentation in PRD
+
+### Programmatic SEO Pages
+
+Landing pages for famous routes to capture organic search traffic.
+
+**Implemented Route Categories**:
+
+- ✅ `/race/[slug]` - Marathon and running routes (e.g., `/race/boston-marathon`)
+- ✅ `/trail/[slug]` - Hiking trail routes (e.g., `/trail/camino-de-santiago`)
+- ✅ `/cycling/[slug]` - Cycling routes (e.g., `/cycling/mont-ventoux-cycling-route`)
+
+**SEO Features**:
+
+- ✅ Dynamic metadata generation (title, description, keywords)
+- ✅ JSON-LD structured data (FAQ schema)
+- ✅ Sitemap integration (`app/sitemap.ts`)
+- ✅ RouteDisclaimer component for trademark safety
+- ✅ Trademark-safe naming convention in route catalog
+
+**Route Catalog**: `lib/seo/routes.ts` with 41 pre-seeded routes
+
 ---
 
 ## Codebase Health
@@ -296,6 +346,27 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-19
+
+- ✅ Improved mobile touch targets and responsiveness
+- ✅ Mobile-optimized create page UI
+
+### 2026-01-17
+
+- ✅ Added marketing consent checkbox to signup flow
+- ✅ Featured map thumbnails on login/signup pages
+- ✅ Cycling SEO pages (`/cycling/[slug]`)
+- ✅ Trail SEO pages (`/trail/[slug]`)
+- ✅ Sitemap integration for SEO pages
+
+### 2026-01-16
+
+- ✅ Brevo email automation integration
+- ✅ Contact management (create/update on signup)
+- ✅ Event tracking for user lifecycle
+- ✅ Immediate Brevo contact sync on email signup
+- ✅ Brevo email template documentation
 
 ### 2026-01-15
 
@@ -359,6 +430,7 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 - `docs/SCULPTURE-ENHANCEMENTS.md` - Sculpture enhancement ideas
 - `docs/PROGRAMMATIC-SEO.md` - SEO growth strategy PRD
 - `docs/PRD-FAMOUS-ROUTES-SEEDING.md` - Famous routes database seeding
+- `docs/PRD-BREVO-EMAIL-AUTOMATION.md` - Brevo email automation strategy
 - `docs/EXPORT-PAYMENT-SAFETY.md` - Export & payment flow safety system
 
 ---

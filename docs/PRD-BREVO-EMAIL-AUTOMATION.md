@@ -4,9 +4,47 @@
 > Personal, down-to-earth communication from "Jonas from Waymarker"
 
 **Created**: 2026-01-16
-**Status**: In Progress
+**Updated**: 2026-01-19
+**Status**: Core Integration Complete ✅
 **Priority**: P1 - Critical for user retention and conversion
 **SDK**: `@getbrevo/brevo` (Node.js)
+
+---
+
+## Implementation Status
+
+### Completed ✅ (January 2026)
+
+**Contact Management:**
+
+- ✅ Automatic contact creation on email signup
+- ✅ Automatic contact creation on Google OAuth signup
+- ✅ Contact attributes sync (SIGNUP_DATE, HAS_PURCHASED, STRAVA_CONNECTED)
+- ✅ Marketing consent checkbox on signup form
+- ✅ Immediate contact sync via client-side action
+
+**Event Tracking:**
+
+- ✅ `user_signed_up` - Triggered on new registration
+- ✅ `strava_connected` - Triggered on Strava OAuth callback
+- ✅ `map_saved` - Triggered on first map save
+- ✅ `purchase_completed` - Triggered on Stripe webhook
+
+**Infrastructure:**
+
+- ✅ `lib/brevo/client.ts` - Brevo API client singleton
+- ✅ `lib/brevo/contacts.ts` - Contact management functions
+- ✅ `lib/brevo/events.ts` - Event tracking functions
+- ✅ `lib/brevo/types.ts` - TypeScript interfaces
+- ✅ `lib/brevo/client-actions.ts` - Client-side server actions
+
+### Remaining Work
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Welcome email sequence | Pending | Requires Brevo automation setup |
+| Purchase confirmation emails | Pending | Use transactional templates |
+| Re-engagement emails | Pending | Brevo automation rules |
 
 ---
 
