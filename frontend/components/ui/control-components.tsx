@@ -28,10 +28,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             'bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive dark:hover:bg-destructive/90': variant === 'destructive',
           },
           {
-            'h-9 px-4 py-2': size === 'default',
-            'h-8 px-3 text-xs': size === 'sm',
+            'h-10 px-4 py-2': size === 'default',
+            'h-9 px-3 text-xs': size === 'sm',
             'h-11 px-8': size === 'lg',
-            'h-9 w-9': size === 'icon',
+            'h-10 w-10': size === 'icon',
           },
           className
         )}

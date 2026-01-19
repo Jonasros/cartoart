@@ -93,7 +93,7 @@ export function StyleShowcase({ thumbnails = [] }: StyleShowcaseProps) {
                 className="flex-shrink-0 snap-center group cursor-pointer"
                 onMouseEnter={() => setActiveIndex(index)}
               >
-                <div className="w-64 sm:w-72 md:w-80">
+                <div className="w-52 sm:w-64 md:w-72 lg:w-80">
                   {/* Poster Card */}
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border-2 border-white dark:border-stone-700">
                     <Image
@@ -140,7 +140,7 @@ export function StyleShowcase({ thumbnails = [] }: StyleShowcaseProps) {
                 className="flex-shrink-0 snap-center group cursor-pointer"
                 onMouseEnter={() => setActiveIndex(index)}
               >
-                <div className="w-64 sm:w-72 md:w-80">
+                <div className="w-52 sm:w-64 md:w-72 lg:w-80">
                   {/* Poster Card */}
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 border-2 border-white dark:border-stone-700">
                     <PosterThumbnail

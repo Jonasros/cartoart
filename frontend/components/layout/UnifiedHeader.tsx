@@ -68,7 +68,7 @@ function UserMenu({ user, loading, onSignOut }: UserMenuProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center justify-center w-9 h-9 rounded-full',
+          'flex items-center justify-center w-10 h-10 rounded-full',
           'bg-primary text-primary-foreground font-medium text-sm',
           'hover:bg-primary/90 transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-primary/50'
@@ -146,7 +146,7 @@ function Breadcrumb({ variant, mapTitle }: BreadcrumbProps) {
           Community
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-foreground font-medium truncate max-w-[200px]">
+        <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
           {mapTitle}
         </span>
       </nav>
