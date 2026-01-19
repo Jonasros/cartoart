@@ -24,6 +24,8 @@ import type {
   SculptureTextConfig,
   SculptureTerrainMode,
   SculptureStylePreset,
+  TerrainColorPreset,
+  TerrainColorizationConfig,
 } from '@/types/sculpture';
 import {
   SCULPTURE_SIZES,
@@ -32,6 +34,8 @@ import {
   SCULPTURE_MATERIALS,
   SCULPTURE_TERRAIN_MODES,
   SCULPTURE_STYLE_PRESETS,
+  TERRAIN_COLOR_PRESETS,
+  DEFAULT_COLORIZATION_CONFIG,
 } from '@/types/sculpture';
 
 interface SculptureControlsProps {
@@ -53,7 +57,7 @@ export function SculptureControls({
   printValidation,
   isPrintValidating,
 }: SculptureControlsProps) {
-  const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | 'base' | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState<'terrain' | 'route' | 'base' | 'colorize-low' | 'colorize-mid' | 'colorize-high' | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Get elevation grid for export (now with terrain mode support)
@@ -68,6 +72,20 @@ export function SculptureControls({
 
   const updateText = (updates: Partial<SculptureTextConfig>) => {
     onConfigChange({ text: { ...config.text, ...updates } });
+  };
+
+  // Helper to update colorization config
+  const colorization = config.colorization ?? DEFAULT_COLORIZATION_CONFIG;
+  const updateColorization = (updates: Partial<TerrainColorizationConfig>) => {
+    onConfigChange({
+      colorization: { ...colorization, ...updates },
+    });
+  };
+
+  const updateCustomColor = (key: 'low' | 'mid' | 'high', color: string) => {
+    updateColorization({
+      customColors: { ...colorization.customColors, [key]: color },
+    });
   };
 
   return (
@@ -771,6 +789,247 @@ export function SculptureControls({
             </div>
           )}
         </div>
+      </ControlSection>
+
+      {/* Terrain Colorization - Preview Only */}
+      <ControlSection title="Terrain Colorization">
+        {/* Info Banner */}
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600 dark:text-amber-400 text-lg">🎨</span>
+            <div>
+              <p className="text-xs text-amber-800 dark:text-amber-200 font-medium">
+                Preview Only Feature
+              </p>
+              <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                Colorization is for visualization inspiration. Paint your 3D print like a Warhammer figure!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Enable Toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Enable Colorization
+            </div>
+            <div className="text-[10px] text-gray-500 dark:text-gray-400">
+              Elevation-based terrain coloring
+            </div>
+          </div>
+          <button
+            onClick={() => updateColorization({ enabled: !colorization.enabled })}
+            className={cn(
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+              colorization.enabled
+                ? 'bg-primary'
+                : 'bg-gray-200 dark:bg-gray-700'
+            )}
+            aria-label="Toggle terrain colorization"
+          >
+            <span
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                colorization.enabled ? 'translate-x-6' : 'translate-x-1'
+              )}
+            />
+          </button>
+        </div>
+
+        {colorization.enabled && (
+          <>
+            {/* Preset Selector */}
+            <div className="space-y-2">
+              <ControlLabel className="text-[10px] uppercase text-gray-500">
+                Color Scheme
+              </ControlLabel>
+              <div className="grid grid-cols-2 gap-2">
+                {/* Preset options */}
+                {(['natural', 'earth', 'topo', 'mono', 'custom'] as const).map((preset) => {
+                  const isActive = colorization.preset === preset;
+                  const presetInfo = preset === 'custom'
+                    ? { name: 'Custom', description: 'Pick your own colors' }
+                    : TERRAIN_COLOR_PRESETS[preset];
+
+                  // Generate gradient preview for preset
+                  const gradientStops = preset === 'custom'
+                    ? [colorization.customColors.low, colorization.customColors.mid, colorization.customColors.high]
+                    : TERRAIN_COLOR_PRESETS[preset].stops.map(s => s.color);
+                  const gradientStyle = {
+                    background: `linear-gradient(to right, ${gradientStops.join(', ')})`,
+                  };
+
+                  return (
+                    <button
+                      key={preset}
+                      onClick={() => updateColorization({ preset })}
+                      className={cn(
+                        'p-2.5 text-left rounded-lg border transition-all',
+                        isActive
+                          ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-500'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                    >
+                      {/* Color gradient preview */}
+                      <div
+                        className="h-3 rounded-sm mb-1.5"
+                        style={gradientStyle}
+                      />
+                      <div className={cn(
+                        'text-xs font-semibold',
+                        isActive ? 'text-amber-700 dark:text-amber-300' : 'text-gray-700 dark:text-gray-300'
+                      )}>
+                        {presetInfo.name}
+                      </div>
+                      <div className="text-[9px] text-gray-500 mt-0.5 truncate">
+                        {presetInfo.description}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Color Pickers (when preset === 'custom') */}
+            {colorization.preset === 'custom' && (
+              <div className="space-y-3 mt-4">
+                {/* Low Elevation Color */}
+                <div className="space-y-1 relative">
+                  <ControlLabel className="text-[10px] uppercase text-gray-500">
+                    Low Elevation
+                  </ControlLabel>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowColorPicker(showColorPicker === 'colorize-low' ? null : 'colorize-low')}
+                      className={cn(
+                        'w-9 h-9 rounded-md border shadow-sm transition-all',
+                        showColorPicker === 'colorize-low'
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                      style={{ backgroundColor: colorization.customColors.low }}
+                      aria-label="Toggle low elevation color picker"
+                    />
+                    <ControlInput
+                      type="text"
+                      value={colorization.customColors.low}
+                      onChange={(e) => updateCustomColor('low', e.target.value)}
+                      className="font-mono"
+                      placeholder="#4a7c59"
+                    />
+                  </div>
+                  {showColorPicker === 'colorize-low' && (
+                    <div className="absolute left-0 top-full mt-2 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                      <div className="fixed inset-0 z-[-1]" onClick={() => setShowColorPicker(null)} />
+                      <HexColorPicker
+                        color={colorization.customColors.low}
+                        onChange={(color) => updateCustomColor('low', color)}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Mid Elevation Color */}
+                <div className="space-y-1 relative">
+                  <ControlLabel className="text-[10px] uppercase text-gray-500">
+                    Mid Elevation
+                  </ControlLabel>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowColorPicker(showColorPicker === 'colorize-mid' ? null : 'colorize-mid')}
+                      className={cn(
+                        'w-9 h-9 rounded-md border shadow-sm transition-all',
+                        showColorPicker === 'colorize-mid'
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                      style={{ backgroundColor: colorization.customColors.mid }}
+                      aria-label="Toggle mid elevation color picker"
+                    />
+                    <ControlInput
+                      type="text"
+                      value={colorization.customColors.mid}
+                      onChange={(e) => updateCustomColor('mid', e.target.value)}
+                      className="font-mono"
+                      placeholder="#b8860b"
+                    />
+                  </div>
+                  {showColorPicker === 'colorize-mid' && (
+                    <div className="absolute left-0 top-full mt-2 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                      <div className="fixed inset-0 z-[-1]" onClick={() => setShowColorPicker(null)} />
+                      <HexColorPicker
+                        color={colorization.customColors.mid}
+                        onChange={(color) => updateCustomColor('mid', color)}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* High Elevation Color */}
+                <div className="space-y-1 relative">
+                  <ControlLabel className="text-[10px] uppercase text-gray-500">
+                    High Elevation
+                  </ControlLabel>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowColorPicker(showColorPicker === 'colorize-high' ? null : 'colorize-high')}
+                      className={cn(
+                        'w-9 h-9 rounded-md border shadow-sm transition-all',
+                        showColorPicker === 'colorize-high'
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                      style={{ backgroundColor: colorization.customColors.high }}
+                      aria-label="Toggle high elevation color picker"
+                    />
+                    <ControlInput
+                      type="text"
+                      value={colorization.customColors.high}
+                      onChange={(e) => updateCustomColor('high', e.target.value)}
+                      className="font-mono"
+                      placeholder="#f5f5f5"
+                    />
+                  </div>
+                  {showColorPicker === 'colorize-high' && (
+                    <div className="absolute left-0 top-full mt-2 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                      <div className="fixed inset-0 z-[-1]" onClick={() => setShowColorPicker(null)} />
+                      <HexColorPicker
+                        color={colorization.customColors.high}
+                        onChange={(color) => updateCustomColor('high', color)}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Smoothness Slider */}
+            <div className="space-y-1 mt-4">
+              <ControlLabel className="text-[10px] uppercase text-gray-500">
+                Gradient Style
+              </ControlLabel>
+              <ControlSlider
+                min="0"
+                max="1"
+                step="0.1"
+                value={colorization.smoothness}
+                onChange={(e) => updateColorization({ smoothness: parseFloat(e.target.value) })}
+                displayValue={colorization.smoothness < 0.5 ? 'Stepped' : 'Smooth'}
+                onValueChange={(value) => updateColorization({ smoothness: value })}
+                formatValue={(v) => v < 0.5 ? 'Stepped' : 'Smooth'}
+                parseValue={(s) => s === 'Stepped' ? 0.2 : 0.8}
+              />
+              <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+                <span>Banded</span>
+                <span>Smooth</span>
+              </div>
+            </div>
+          </>
+        )}
       </ControlSection>
 
     </div>

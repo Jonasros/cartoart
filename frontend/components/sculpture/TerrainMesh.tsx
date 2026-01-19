@@ -4,7 +4,9 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import type { RouteData } from '@/types/poster';
 import type { SculptureConfig } from '@/types/sculpture';
+import { DEFAULT_COLORIZATION_CONFIG } from '@/types/sculpture';
 import { getMaterialProperties } from './materials';
+import { createVertexColors, calculateHeightRange } from '@/lib/sculpture/colorUtils';
 
 interface TerrainMeshProps {
   routeData: RouteData;
@@ -331,6 +333,20 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     positions.needsUpdate = true;
     geo.computeVertexNormals();
 
+    // Apply vertex colors if colorization is enabled (preview-only feature)
+    const colorization = config.colorization ?? DEFAULT_COLORIZATION_CONFIG;
+    if (colorization.enabled && colorization.preset !== 'none') {
+      const heightRange = calculateHeightRange(positions as THREE.BufferAttribute, vertexClipped);
+      const colors = createVertexColors(
+        positions as THREE.BufferAttribute,
+        heightRange,
+        colorization,
+        vertexClipped,
+        config.terrainColor
+      );
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    }
+
     return geo;
   }, [routeData, config, elevationGrid]);
 
@@ -338,10 +354,16 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
   // Textures temporarily disabled for debugging - will enable after refinement
   const materialProps = getMaterialProperties(config.material);
 
+  // Check if colorization is enabled
+  const colorization = config.colorization ?? DEFAULT_COLORIZATION_CONFIG;
+  const useVertexColors = colorization.enabled && colorization.preset !== 'none';
+
   return (
     <mesh geometry={geometry} receiveShadow castShadow>
       <meshPhysicalMaterial
-        color={config.terrainColor}
+        // When vertex colors are active, use white base to show true colors
+        color={useVertexColors ? '#ffffff' : config.terrainColor}
+        vertexColors={useVertexColors}
         roughness={materialProps.roughness}
         metalness={materialProps.metalness}
         clearcoat={materialProps.clearcoat ?? 0}
@@ -352,7 +374,8 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
         normalMap={materialProps.normalMap}
         normalScale={materialProps.normalScale}
         roughnessMap={materialProps.roughnessMap}
-        map={materialProps.map}
+        // Don't use color map when vertex colors are active
+        map={useVertexColors ? undefined : materialProps.map}
         // Resin SSS properties
         transmission={materialProps.transmission ?? 0}
         thickness={materialProps.thickness ?? 0}

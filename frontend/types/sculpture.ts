@@ -33,6 +33,111 @@ export type SculptureTerrainMode = 'route' | 'terrain';
 export type SculptureMaterial = 'pla' | 'wood' | 'resin';
 
 /**
+ * Terrain colorization preset identifiers (preview-only feature)
+ * - 'none': Single solid color (current behavior)
+ * - 'natural': Blue (water) → Green (forest) → Brown (hills) → White (snow)
+ * - 'earth': Warm brown gradient for desert/arid terrain
+ * - 'topo': Classic topographic map colors
+ * - 'mono': Single color gradient (dark to light)
+ * - 'custom': User-defined 3-color gradient
+ */
+export type TerrainColorPreset = 'none' | 'natural' | 'earth' | 'topo' | 'mono' | 'custom';
+
+/**
+ * A color stop in a gradient (position 0-1, hex color)
+ */
+export interface ColorStop {
+  position: number;
+  color: string;
+}
+
+/**
+ * Configuration for terrain colorization (preview-only feature)
+ * Note: Colorization is for visualization inspiration only.
+ * STL exports remain single-color for 3D printing.
+ */
+export interface TerrainColorizationConfig {
+  /** Enable/disable colorization */
+  enabled: boolean;
+  /** Selected color preset */
+  preset: TerrainColorPreset;
+  /** Custom colors when preset is 'custom' */
+  customColors: {
+    low: string;   // Lowest elevation color
+    mid: string;   // Middle elevation color
+    high: string;  // Highest elevation color
+  };
+  /** Gradient smoothness (0 = stepped bands, 1 = smooth interpolation) */
+  smoothness: number;
+}
+
+/**
+ * Default colorization configuration
+ */
+export const DEFAULT_COLORIZATION_CONFIG: TerrainColorizationConfig = {
+  enabled: false,
+  preset: 'natural',
+  customColors: {
+    low: '#4a7c59',   // Forest green
+    mid: '#b8860b',   // Goldenrod/brown
+    high: '#f5f5f5',  // Off-white/snow
+  },
+  smoothness: 0.8,
+};
+
+/**
+ * Predefined color stops for each colorization preset
+ */
+export const TERRAIN_COLOR_PRESETS: Record<
+  Exclude<TerrainColorPreset, 'none' | 'custom'>,
+  { name: string; description: string; stops: ColorStop[] }
+> = {
+  natural: {
+    name: 'Natural',
+    description: 'Water → Forest → Hills → Snow',
+    stops: [
+      { position: 0.0, color: '#1a5f7a' },   // Deep water blue
+      { position: 0.15, color: '#4a7c59' },  // Forest green
+      { position: 0.4, color: '#8fbc8f' },   // Light green meadows
+      { position: 0.6, color: '#daa520' },   // Goldenrod hills
+      { position: 0.8, color: '#8b7355' },   // Brown mountains
+      { position: 1.0, color: '#f5f5f5' },   // Snow peaks
+    ],
+  },
+  earth: {
+    name: 'Earth Tones',
+    description: 'Warm brown gradient for arid terrain',
+    stops: [
+      { position: 0.0, color: '#3d2914' },   // Dark brown
+      { position: 0.3, color: '#8b5a2b' },   // Saddle brown
+      { position: 0.6, color: '#d2691e' },   // Chocolate
+      { position: 1.0, color: '#f4e4d4' },   // Light sand
+    ],
+  },
+  topo: {
+    name: 'Topographic',
+    description: 'Classic topo map green-yellow-red',
+    stops: [
+      { position: 0.0, color: '#006400' },   // Dark green
+      { position: 0.25, color: '#9acd32' },  // Yellow-green
+      { position: 0.5, color: '#ffd700' },   // Gold
+      { position: 0.75, color: '#cd853f' },  // Peru/tan
+      { position: 0.9, color: '#a0522d' },   // Sienna
+      { position: 1.0, color: '#ffffff' },   // White
+    ],
+  },
+  mono: {
+    name: 'Monochrome',
+    description: 'Single color gradient dark to light',
+    stops: [
+      { position: 0.0, color: '#2d2d2d' },   // Dark gray
+      { position: 0.5, color: '#6b6b6b' },   // Medium gray
+      { position: 1.0, color: '#e8e8e8' },   // Light gray
+    ],
+  },
+};
+
+/**
  * Text configuration for engraved typography
  */
 export interface SculptureTextConfig {
@@ -92,6 +197,8 @@ export interface SculptureConfig {
   turntableEnabled?: boolean;
   /** Turntable rotation speed (rotations per 10 seconds, default 0.3) */
   turntableSpeed?: number;
+  /** Terrain colorization configuration (preview-only feature) */
+  colorization?: TerrainColorizationConfig;
 }
 
 /**
@@ -128,6 +235,7 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainSmoothing: 1, // One smoothing pass for gentle terrain
   turntableEnabled: false, // Auto-rotation disabled by default
   turntableSpeed: 0.3, // Slow rotation for hero shots
+  colorization: DEFAULT_COLORIZATION_CONFIG,
 };
 
 /**
