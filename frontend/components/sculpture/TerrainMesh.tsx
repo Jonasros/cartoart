@@ -369,6 +369,10 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
       }
     }
 
+    // Minimum terrain height to prevent z-fighting with base platform
+    // The base top surface is at Y=0, so terrain must always be slightly above
+    const minTerrainHeight = 0.003; // ~0.3mm offset prevents z-fighting
+
     // Final pass: apply height limit, route clearance, and groove carving
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
@@ -382,7 +386,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
           positions.setX(i, x * scale);
           positions.setZ(i, z * scale);
         }
-        positions.setY(i, 0);
+        positions.setY(i, minTerrainHeight); // Use minimum height instead of 0
         continue;
       }
 
@@ -425,6 +429,9 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
           y -= grooveDepth * (1 - smoothFactor);
         }
       }
+
+      // Ensure terrain is always above base platform to prevent z-fighting
+      y = Math.max(y, minTerrainHeight);
 
       positions.setY(i, y);
     }
