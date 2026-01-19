@@ -346,6 +346,28 @@ export function SculptureControls({
           </div>
         </div>
 
+        {/* Route Depth - controls how high (raised) or deep (engraved) the route is */}
+        <div className="space-y-1 mt-4">
+          <ControlLabel className="text-[10px] uppercase text-gray-500">
+            Route Depth
+          </ControlLabel>
+          <ControlSlider
+            min="0.01"
+            max="0.1"
+            step="0.005"
+            value={config.routeDepth ?? 0.04}
+            onChange={(e) => onConfigChange({ routeDepth: parseFloat(e.target.value) })}
+            displayValue={`${Math.round((config.routeDepth ?? 0.04) * 1000) / 10}mm`}
+            onValueChange={(value) => onConfigChange({ routeDepth: value })}
+            formatValue={(v) => `${Math.round(v * 1000) / 10}mm`}
+            parseValue={(s) => parseFloat(s.replace('mm', '')) / 100}
+          />
+          <div className="flex justify-between text-[10px] text-gray-400 uppercase font-medium">
+            <span>Shallow</span>
+            <span>Deep</span>
+          </div>
+        </div>
+
         {/* Terrain Smoothing */}
         <div className="space-y-1 mt-4">
           <ControlLabel className="text-[10px] uppercase text-gray-500">

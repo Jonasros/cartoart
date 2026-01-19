@@ -208,7 +208,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
   const { geometry, skirtGeometry } = useMemo(() => {
     const {
       size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness,
-      terrainHeightLimit = 0.8, routeClearance = 0.05, terrainSmoothing = 1
+      terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04, terrainSmoothing = 1
     } = config;
     const segments = terrainResolution;
 
@@ -244,7 +244,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
     // Pre-compute route points in mesh coordinates for groove carving and route clearance
     const routeMeshPoints: Array<{ x: number; z: number; y: number }> = [];
     const grooveWidth = routeStyle === 'engraved' ? (routeThickness / 100) * 2.5 : 0; // Much wider for visibility
-    const grooveDepth = routeStyle === 'engraved' ? 0.05 : 0; // Deep groove for strong shadow effect
+    const grooveDepth = routeStyle === 'engraved' ? routeDepth : 0; // Use routeDepth from config
 
     // Circular boundary for clipping route points (stays inside rim)
     const routeClipRadius = meshSize / 2 * 0.88;
@@ -395,24 +395,26 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
       // Apply height limit - clamp maximum terrain height
       y = Math.min(y, maxHeight);
 
-      // Apply route clearance - lower terrain near route to ensure visibility
+      // Apply route clearance - ensure route is visible
       if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
         const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
 
         if (distance < clearanceRadius) {
-          // Smooth falloff - terrain is lowered more as it gets closer to route
-          const t = distance / clearanceRadius;
-          const falloff = Math.pow(t, 0.5); // Square root for gentle curve
-
-          // For raised routes: terrain must stay below route elevation
-          // For engraved routes: terrain follows route elevation (groove handles visual)
           if (routeStyle === 'raised') {
-            // Ensure terrain is always below the route tube
-            const maxTerrainNearRoute = routeElev - 0.01; // Stay 0.01 below route
-            const targetHeight = falloff * y + (1 - falloff) * Math.min(y, maxTerrainNearRoute);
-            y = Math.min(y, targetHeight);
+            // Route tube parameters (must match RouteMesh.tsx)
+            const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
+            const tubeRadius = routeThickness / 200; // Tube radius in scene units
+
+            // Calculate the bottom of the tube with small safety margin
+            const tubeBottom = routeElev + tubeVerticalOffset - tubeRadius - 0.005;
+
+            // Hard cap: terrain must not exceed tube bottom
+            // This prevents terrain from poking through the route tube
+            y = Math.min(y, tubeBottom);
           } else {
             // For engraved: blend terrain toward route elevation near the groove
+            const t = distance / clearanceRadius;
+            const falloff = Math.pow(t, 0.5);
             const blendedHeight = falloff * y + (1 - falloff) * routeElev;
             y = blendedHeight;
           }

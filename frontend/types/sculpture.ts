@@ -191,6 +191,8 @@ export interface SculptureConfig {
   terrainHeightLimit: number;
   /** Distance around route where terrain is lowered to ensure visibility (0-0.15) */
   routeClearance: number;
+  /** Route depth/height - raised: how high above terrain, engraved: how deep the groove (0.01-0.1) */
+  routeDepth: number;
   /** Terrain smoothing passes for better 3D printing (0-3) */
   terrainSmoothing: number;
   /** Enable auto-rotation turntable animation for preview */
@@ -232,6 +234,7 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainMode: 'route', // Default to route-based terrain (faster)
   terrainHeightLimit: 0.8, // 80% of elevation scale - keeps terrain printable
   routeClearance: 0.05, // Terrain dips near route for visibility
+  routeDepth: 0.04, // Route height (raised) or groove depth (engraved)
   terrainSmoothing: 1, // One smoothing pass for gentle terrain
   turntableEnabled: false, // Auto-rotation disabled by default
   turntableSpeed: 0.3, // Slow rotation for hero shots
@@ -300,6 +303,7 @@ export interface StylePresetConfig {
   elevationScale: number;
   terrainHeightLimit: number;
   routeClearance: number;
+  routeDepth: number;
   terrainSmoothing: number;
   terrainMode: SculptureTerrainMode;
   terrainResolution: number;
@@ -319,6 +323,7 @@ export const SCULPTURE_STYLE_PRESETS: Record<
       elevationScale: 1.5,
       terrainHeightLimit: 0.8,
       routeClearance: 0.05,
+      routeDepth: 0.04,
       terrainSmoothing: 1,
       terrainMode: 'route',
       terrainResolution: 128,
@@ -331,6 +336,7 @@ export const SCULPTURE_STYLE_PRESETS: Record<
       elevationScale: 2.5,
       terrainHeightLimit: 1.0,
       routeClearance: 0.08,
+      routeDepth: 0.06,
       terrainSmoothing: 0,
       terrainMode: 'terrain',
       terrainResolution: 128,
@@ -343,6 +349,7 @@ export const SCULPTURE_STYLE_PRESETS: Record<
       elevationScale: 1.0,
       terrainHeightLimit: 0.6,
       routeClearance: 0.03,
+      routeDepth: 0.02,
       terrainSmoothing: 2,
       terrainMode: 'route',
       terrainResolution: 96,
@@ -355,6 +362,7 @@ export const SCULPTURE_STYLE_PRESETS: Record<
       elevationScale: 1.8,
       terrainHeightLimit: 0.9,
       routeClearance: 0.06,
+      routeDepth: 0.05,
       terrainSmoothing: 1,
       terrainMode: 'terrain',
       terrainResolution: 192,
@@ -367,6 +375,7 @@ export const SCULPTURE_STYLE_PRESETS: Record<
       elevationScale: 1.2,
       terrainHeightLimit: 0.7,
       routeClearance: 0.05,
+      routeDepth: 0.03,
       terrainSmoothing: 2,
       terrainMode: 'route',
       terrainResolution: 128,

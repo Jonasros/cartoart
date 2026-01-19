@@ -109,7 +109,8 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     const heightScale = elevationScale * (size / 100);
 
     // Offset: raised tube floats above terrain
-    const verticalOffset = 0.02;
+    // Use routeDepth from config (default 0.04 for backwards compatibility)
+    const verticalOffset = config.routeDepth ?? 0.04;
 
     // Mesh size and circular boundary (for clipping)
     const meshSize = size / 10;
