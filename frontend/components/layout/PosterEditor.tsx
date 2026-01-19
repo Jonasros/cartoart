@@ -27,6 +27,7 @@ import { ExploreDrawer } from './ExploreDrawer';
 import { ErrorToastContainer } from '@/components/ui/ErrorToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import Link from 'next/link';
+import { WaymarkerLogo } from '@/components/ui/WaymarkerLogo';
 import type MapLibreGL from 'maplibre-gl';
 import { getMapById, getFeaturedRouteBySlug, publishMap } from '@/lib/actions/maps';
 import { isConfigEqual, cloneConfig } from '@/lib/utils/configComparison';
@@ -783,9 +784,8 @@ export function PosterEditor() {
       <ErrorToastContainer errors={errors} onDismiss={clearError} />
       {/* Mobile Header */}
       <div className="md:hidden h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-40 shadow-sm">
-        <Link href="/create" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-forest-light shadow-lg" />
-          <span className="font-bold text-gray-900 dark:text-white">Waymarker</span>
+        <Link href="/create">
+          <WaymarkerLogo size="md" showText />
         </Link>
         <div className="flex items-center gap-2">
           <button

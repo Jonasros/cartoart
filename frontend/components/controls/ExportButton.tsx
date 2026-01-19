@@ -143,7 +143,8 @@ export function ExportButton({
         onClick={handleButtonClick}
         disabled={isDisabled}
         className={cn(
-          'group relative flex items-center gap-2 px-5 py-2.5 rounded-full font-medium shadow-lg transition-all duration-300',
+          'group relative flex items-center justify-center gap-2 rounded-full font-medium shadow-lg transition-all duration-300',
+          'p-2.5 md:px-5 md:py-2.5',
           'bg-gray-900 text-white dark:bg-white dark:text-gray-900',
           'hover:shadow-xl hover:scale-105 active:scale-95',
           'disabled:opacity-70 disabled:cursor-wait disabled:hover:scale-100 disabled:shadow-lg'
@@ -161,13 +162,13 @@ export function ExportButton({
         </div>
 
         {isExporting && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 md:left-5 top-1/2 -translate-x-1/2 md:translate-x-0 -translate-y-1/2">
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         )}
 
         <span className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 hidden md:inline",
           isExporting && "translate-x-4"
         )}>
           {isExporting

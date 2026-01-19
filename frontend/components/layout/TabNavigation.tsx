@@ -1,6 +1,6 @@
 'use client';
 
-import { Map as MapIcon, Type, Layout, Sparkles, Palette, User, Compass, Box } from 'lucide-react';
+import { Map as MapIcon, Type, Layout, Sparkles, Palette, User, Compass, Box, Image } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { ModeToggle } from '@/components/controls/ModeToggle';
@@ -36,6 +36,7 @@ export function TabNavigation({
 }: TabNavigationProps) {
   // Get tabs based on current mode
   const currentTabs = productMode === 'poster' ? posterTabs : sculptureTabs;
+  const sculptureDisabled = !hasRoute;
 
   const handleTabClick = (id: Tab) => {
     if (activeTab === id && isDrawerOpen) {
@@ -103,6 +104,39 @@ export function TabNavigation({
           onModeChange={handleModeChange}
           hasRoute={hasRoute}
         />
+      </div>
+
+      {/* Mobile Mode Toggle - compact toggle at left of bottom nav */}
+      <div className="flex md:hidden items-center border-r border-border px-2">
+        <div className="flex rounded-lg bg-secondary p-0.5">
+          <button
+            onClick={() => handleModeChange('poster')}
+            className={cn(
+              'p-2 rounded-md transition-all',
+              productMode === 'poster'
+                ? 'bg-card shadow-sm text-adventure-print'
+                : 'text-muted-foreground'
+            )}
+            title="Print Mode"
+          >
+            <Image className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => !sculptureDisabled && handleModeChange('sculpture')}
+            disabled={sculptureDisabled}
+            className={cn(
+              'p-2 rounded-md transition-all',
+              productMode === 'sculpture'
+                ? 'bg-card shadow-sm text-journey-sculpture'
+                : sculptureDisabled
+                  ? 'text-muted-foreground/30 cursor-not-allowed'
+                  : 'text-muted-foreground'
+            )}
+            title={sculptureDisabled ? 'Upload a GPX route first' : '3D Sculpture Mode'}
+          >
+            <Box className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex md:flex-col flex-1 md:flex-none md:w-full md:space-y-1">
