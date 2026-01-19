@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import type { StravaTokenResponse } from '@/types/strava';
 import type { Database, Json } from '@/types/database';
 import { updateBrevoContact } from '@/lib/brevo';
+import { checkRateLimit } from '@/lib/middleware/rateLimit';
 
 type ConnectedAccountInsert = Database['public']['Tables']['connected_accounts']['Insert'];
 
@@ -48,6 +49,20 @@ export async function GET(request: Request) {
   if (!user) {
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login?redirect=/profile`
+    );
+  }
+
+  // Rate limit: 5 OAuth attempts per 5 minutes per user
+  const { allowed, retryAfter } = await checkRateLimit(
+    user.id,
+    'strava_oauth',
+    5,
+    5 * 60 * 1000
+  );
+
+  if (!allowed) {
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/profile?strava=error&message=rate_limited&retry=${retryAfter}`
     );
   }
 
