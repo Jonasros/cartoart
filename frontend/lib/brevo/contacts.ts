@@ -36,6 +36,10 @@ export async function createBrevoContact(
       STRAVA_CONNECTED: false,
       MAPS_CREATED: 0,
       LAST_ACTIVITY: new Date().toISOString(),
+      MARKETING_CONSENT: data.marketingConsent ?? false,
+      MARKETING_CONSENT_DATE: data.marketingConsent
+        ? new Date().toISOString()
+        : undefined,
     };
     contact.listIds = [ALL_USERS_LIST_ID];
     contact.updateEnabled = true; // Update if contact already exists

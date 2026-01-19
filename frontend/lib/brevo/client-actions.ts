@@ -15,7 +15,8 @@ import { createBrevoContact } from './contacts';
  */
 export async function ensureBrevoContact(
   email: string,
-  signupSource: 'email' | 'google' = 'email'
+  signupSource: 'email' | 'google' = 'email',
+  marketingConsent?: boolean
 ): Promise<boolean> {
   try {
     // createBrevoContact has updateEnabled: true, so it's idempotent
@@ -25,6 +26,7 @@ export async function ensureBrevoContact(
       firstName: '',
       lastName: '',
       signupSource,
+      marketingConsent,
     });
     return true;
   } catch (error) {

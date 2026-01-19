@@ -16,6 +16,7 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -56,12 +57,13 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
         // Track signup event
         posthog.capture('user_signed_up', {
           auth_method: 'email',
+          marketing_consent: marketingConsent,
         });
 
         // Add user to Brevo immediately on signup (before email verification)
         // This ensures they get welcome emails even if callback fails
         // The callback will also call this (idempotent - safe to call twice)
-        ensureBrevoContact(email, 'email').catch((err) => {
+        ensureBrevoContact(email, 'email', marketingConsent).catch((err) => {
           console.error('Failed to create Brevo contact on signup:', err);
         });
 
@@ -162,6 +164,23 @@ export function EmailAuthForm({ mode, redirectTo }: EmailAuthFormProps) {
             placeholder="••••••••"
           />
         </div>
+      )}
+
+      {mode === 'signup' && (
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer accent-primary"
+          />
+          <span className="text-sm">
+            <span className="font-medium text-foreground">Keep me on the trail</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">
+              Route inspiration, new styles, and stories from explorers. 2x/month, unsubscribe anytime.
+            </span>
+          </span>
+        </label>
       )}
 
       <Button

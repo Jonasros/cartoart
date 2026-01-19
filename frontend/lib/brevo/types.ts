@@ -17,6 +17,8 @@ export interface BrevoContactAttributes {
   MAPS_CREATED?: number;
   LAST_ACTIVITY?: string;
   ROUTES_UPLOADED?: number;
+  MARKETING_CONSENT?: boolean;
+  MARKETING_CONSENT_DATE?: string;
 }
 
 // Data needed to create a new contact
@@ -25,6 +27,7 @@ export interface CreateContactData {
   firstName?: string;
   lastName?: string;
   signupSource?: 'email' | 'google';
+  marketingConsent?: boolean;
 }
 
 // Data for purchase completed event
