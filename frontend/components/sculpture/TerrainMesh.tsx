@@ -96,17 +96,116 @@ function applySmoothing(heights: number[], width: number, height: number, passes
 }
 
 /**
+ * Create skirt geometry (vertical walls) around rectangular terrain edges.
+ * This closes the gap between the terrain and the base platform.
+ */
+function createSkirtGeometry(
+  mainPositions: THREE.BufferAttribute,
+  segments: number,
+  meshSize: number
+): THREE.BufferGeometry {
+  const gridSize = segments + 1;
+  const skirtVertices: number[] = [];
+  const skirtIndices: number[] = [];
+  const skirtNormals: number[] = [];
+
+  // Helper to get vertex index in the main geometry grid
+  const getMainIdx = (row: number, col: number) => row * gridSize + col;
+
+  // Helper to add a quad (2 triangles) for the skirt
+  // v0, v1 are on the terrain edge, v2, v3 are at Y=0
+  const addQuad = (
+    x0: number, y0: number, z0: number,
+    x1: number, y1: number, z1: number,
+    normalX: number, normalZ: number
+  ) => {
+    const baseIdx = skirtVertices.length / 3;
+
+    // Top-left (terrain edge)
+    skirtVertices.push(x0, y0, z0);
+    // Top-right (terrain edge)
+    skirtVertices.push(x1, y1, z1);
+    // Bottom-right (at Y=0)
+    skirtVertices.push(x1, 0, z1);
+    // Bottom-left (at Y=0)
+    skirtVertices.push(x0, 0, z0);
+
+    // Normals pointing outward
+    for (let i = 0; i < 4; i++) {
+      skirtNormals.push(normalX, 0, normalZ);
+    }
+
+    // Two triangles for the quad (CCW winding when viewed from outside)
+    skirtIndices.push(baseIdx, baseIdx + 2, baseIdx + 3);
+    skirtIndices.push(baseIdx, baseIdx + 1, baseIdx + 2);
+  };
+
+  // Process all four edges
+  // Top edge (Z = -meshSize/2, row = 0)
+  for (let col = 0; col < segments; col++) {
+    const idx0 = getMainIdx(0, col);
+    const idx1 = getMainIdx(0, col + 1);
+    addQuad(
+      mainPositions.getX(idx0), mainPositions.getY(idx0), mainPositions.getZ(idx0),
+      mainPositions.getX(idx1), mainPositions.getY(idx1), mainPositions.getZ(idx1),
+      0, -1 // Normal pointing -Z
+    );
+  }
+
+  // Bottom edge (Z = +meshSize/2, row = segments)
+  for (let col = 0; col < segments; col++) {
+    const idx0 = getMainIdx(segments, col + 1);
+    const idx1 = getMainIdx(segments, col);
+    addQuad(
+      mainPositions.getX(idx0), mainPositions.getY(idx0), mainPositions.getZ(idx0),
+      mainPositions.getX(idx1), mainPositions.getY(idx1), mainPositions.getZ(idx1),
+      0, 1 // Normal pointing +Z
+    );
+  }
+
+  // Left edge (X = -meshSize/2, col = 0)
+  for (let row = 0; row < segments; row++) {
+    const idx0 = getMainIdx(row + 1, 0);
+    const idx1 = getMainIdx(row, 0);
+    addQuad(
+      mainPositions.getX(idx0), mainPositions.getY(idx0), mainPositions.getZ(idx0),
+      mainPositions.getX(idx1), mainPositions.getY(idx1), mainPositions.getZ(idx1),
+      -1, 0 // Normal pointing -X
+    );
+  }
+
+  // Right edge (X = +meshSize/2, col = segments)
+  for (let row = 0; row < segments; row++) {
+    const idx0 = getMainIdx(row, segments);
+    const idx1 = getMainIdx(row + 1, segments);
+    addQuad(
+      mainPositions.getX(idx0), mainPositions.getY(idx0), mainPositions.getZ(idx0),
+      mainPositions.getX(idx1), mainPositions.getY(idx1), mainPositions.getZ(idx1),
+      1, 0 // Normal pointing +X
+    );
+  }
+
+  const skirtGeo = new THREE.BufferGeometry();
+  skirtGeo.setAttribute('position', new THREE.Float32BufferAttribute(skirtVertices, 3));
+  skirtGeo.setAttribute('normal', new THREE.Float32BufferAttribute(skirtNormals, 3));
+  skirtGeo.setIndex(skirtIndices);
+
+  return skirtGeo;
+}
+
+/**
  * 3D Terrain mesh with height displacement based on elevation data.
  *
  * Uses PlaneGeometry with grid subdivision for detailed terrain.
  * For circular shapes, vertices outside the radius are clipped.
+ * For rectangular shapes, adds a skirt (vertical walls) to close gaps.
  * When routeStyle is 'engraved', carves a groove into the terrain along the route.
  *
  * The terrain is normalized to fit within the sculpture size and
  * elevation scale parameters from the config.
  */
 export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshProps) {
-  const geometry = useMemo(() => {
+  const { geometry, skirtGeometry } = useMemo(() => {
     const {
       size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness,
       terrainHeightLimit = 0.8, routeClearance = 0.05, terrainSmoothing = 1
@@ -347,7 +446,13 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
       geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     }
 
-    return geo;
+    // Create skirt geometry for rectangular shapes to close the gaps
+    let skirt: THREE.BufferGeometry | null = null;
+    if (shape === 'rectangular') {
+      skirt = createSkirtGeometry(positions as THREE.BufferAttribute, segments, meshSize);
+    }
+
+    return { geometry: geo, skirtGeometry: skirt };
   }, [routeData, config, elevationGrid]);
 
   // Get material properties based on selected material
@@ -359,31 +464,50 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
   const useVertexColors = colorization.enabled && colorization.preset !== 'none';
 
   return (
-    <mesh geometry={geometry} receiveShadow castShadow>
-      <meshPhysicalMaterial
-        // When vertex colors are active, use white base to show true colors
-        color={useVertexColors ? '#ffffff' : config.terrainColor}
-        vertexColors={useVertexColors}
-        roughness={materialProps.roughness}
-        metalness={materialProps.metalness}
-        clearcoat={materialProps.clearcoat ?? 0}
-        clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
-        envMapIntensity={materialProps.envMapIntensity ?? 0.5}
-        flatShading={config.material === 'wood'}
-        // Enhanced texture properties (PLA layer lines, Wood grain)
-        normalMap={materialProps.normalMap}
-        normalScale={materialProps.normalScale}
-        roughnessMap={materialProps.roughnessMap}
-        // Don't use color map when vertex colors are active
-        map={useVertexColors ? undefined : materialProps.map}
-        // Resin SSS properties
-        transmission={materialProps.transmission ?? 0}
-        thickness={materialProps.thickness ?? 0}
-        ior={materialProps.ior ?? 1.5}
-        sheen={materialProps.sheen ?? 0}
-        sheenRoughness={materialProps.sheenRoughness ?? 0}
-        sheenColor={materialProps.sheenColor}
-      />
-    </mesh>
+    <group>
+      {/* Main terrain surface */}
+      <mesh geometry={geometry} receiveShadow castShadow>
+        <meshPhysicalMaterial
+          // When vertex colors are active, use white base to show true colors
+          color={useVertexColors ? '#ffffff' : config.terrainColor}
+          vertexColors={useVertexColors}
+          roughness={materialProps.roughness}
+          metalness={materialProps.metalness}
+          clearcoat={materialProps.clearcoat ?? 0}
+          clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+          envMapIntensity={materialProps.envMapIntensity ?? 0.5}
+          flatShading={config.material === 'wood'}
+          // Enhanced texture properties (PLA layer lines, Wood grain)
+          normalMap={materialProps.normalMap}
+          normalScale={materialProps.normalScale}
+          roughnessMap={materialProps.roughnessMap}
+          // Don't use color map when vertex colors are active
+          map={useVertexColors ? undefined : materialProps.map}
+          // Resin SSS properties
+          transmission={materialProps.transmission ?? 0}
+          thickness={materialProps.thickness ?? 0}
+          ior={materialProps.ior ?? 1.5}
+          sheen={materialProps.sheen ?? 0}
+          sheenRoughness={materialProps.sheenRoughness ?? 0}
+          sheenColor={materialProps.sheenColor}
+        />
+      </mesh>
+
+      {/* Skirt (vertical walls) for rectangular shapes to close gaps */}
+      {skirtGeometry && (
+        <mesh geometry={skirtGeometry} receiveShadow castShadow>
+          <meshPhysicalMaterial
+            color={config.terrainColor}
+            roughness={materialProps.roughness}
+            metalness={materialProps.metalness}
+            clearcoat={materialProps.clearcoat ?? 0}
+            clearcoatRoughness={materialProps.clearcoatRoughness ?? 0}
+            envMapIntensity={materialProps.envMapIntensity ?? 0.5}
+            flatShading={config.material === 'wood'}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      )}
+    </group>
   );
 }
