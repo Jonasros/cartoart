@@ -298,7 +298,7 @@ export function UnifiedHeader({
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-card">
+        <div className="lg:hidden border-t border-border bg-card max-h-[calc(100vh-4rem)] overflow-y-auto">
           <nav className="px-4 py-3 space-y-1">
             <Link
               href="/create"
