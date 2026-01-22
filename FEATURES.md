@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-19
+**Last Updated**: 2026-01-22
 
 ---
 
@@ -73,6 +73,15 @@ See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD.
 ---
 
 ## Recently Completed
+
+### Feature Voting System ✅
+
+User feedback system for prioritizing upcoming features in export modals.
+
+- ✅ "Coming Soon" cards in poster and sculpture export modals
+- ✅ Vote/unvote toggle with PostHog event tracking
+- ✅ Anonymous voting via localStorage (no account required)
+- ✅ Voteable features: Print fulfillment, framing, canvas, metal prints, 3D printing service
 
 ### Brevo Email Automation ✅
 

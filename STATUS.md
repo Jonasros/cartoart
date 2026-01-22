@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-19
+**Last Updated**: 2026-01-22
 
 ---
 
@@ -286,6 +286,20 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 - ✅ FAQ page (`/faq`)
 - ✅ Consent state persistence
 
+### Feature Voting System
+
+User feedback system for prioritizing upcoming features.
+
+- ✅ "Coming Soon" cards in export modals (poster and sculpture)
+- ✅ Vote buttons with toggle state (vote/unvote)
+- ✅ Vote persistence in localStorage (anonymous users supported)
+- ✅ PostHog event tracking (`feature_vote_added`, `feature_vote_removed`)
+- ✅ Voteable poster features: Print & Ship, Custom Framing, Canvas Prints, Metal Prints
+- ✅ Voteable sculpture features: 3D Printing Service, Premium Materials
+
+**Components**: `ComingSoonCard`, `FeatureVoteButton`
+**Config**: `lib/features/comingSoon.ts`
+
 ### Brevo Email Automation
 
 User lifecycle email automation using Brevo (formerly Sendinblue).
@@ -346,6 +360,13 @@ Landing pages for famous routes to capture organic search traffic.
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-22
+
+- ✅ Feature voting system for "Coming Soon" features
+- ✅ ComingSoonCard component in poster and sculpture export modals
+- ✅ Vote persistence in localStorage for anonymous users
+- ✅ PostHog event tracking for feature votes
 
 ### 2026-01-19
 
