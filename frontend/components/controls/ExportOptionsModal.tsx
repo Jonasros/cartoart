@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Check, Loader2, Printer, Monitor, Smartphone, Laptop, Tv, Image, Download, Frame, Palette, AlertCircle } from 'lucide-react';
+import { X, Check, Loader2, Printer, Monitor, Smartphone, Laptop, Tv, Image, Download, AlertCircle } from 'lucide-react';
+import { ComingSoonCard } from '@/components/voting/ComingSoonCard';
 import { cn } from '@/lib/utils';
 import { EXPORT_RESOLUTIONS, type BaseExportResolution, type ExportResolutionKey } from '@/lib/export/constants';
 import { calculateTargetResolution, getPhysicalDimensions } from '@/lib/export/resolution';
@@ -75,22 +76,6 @@ const RESOLUTION_META: Record<ExportResolutionKey, {
   },
 };
 
-// Print add-on options (placeholders)
-const FRAME_OPTIONS = [
-  { id: 'none', name: 'No Frame', price: null },
-  { id: 'black', name: 'Black Wood', price: '€24.99' },
-  { id: 'white', name: 'White Wood', price: '€24.99' },
-  { id: 'natural', name: 'Natural Oak', price: '€29.99' },
-  { id: 'walnut', name: 'Dark Walnut', price: '€34.99' },
-];
-
-const MATERIAL_OPTIONS = [
-  { id: 'matte', name: 'Matte Paper', price: null, description: 'Classic finish, no glare' },
-  { id: 'glossy', name: 'Glossy Paper', price: '€2.99', description: 'Vibrant colors, slight glare' },
-  { id: 'canvas', name: 'Canvas', price: '€14.99', description: 'Textured, gallery-ready' },
-  { id: 'metal', name: 'Metal Print', price: '€29.99', description: 'Modern, ultra-durable' },
-];
-
 const PRINT_RESOLUTIONS: ExportResolutionKey[] = ['SMALL', 'MEDIUM', 'LARGE'];
 const DIGITAL_RESOLUTIONS: ExportResolutionKey[] = ['THUMBNAIL', 'PHONE_WALLPAPER', 'LAPTOP_WALLPAPER', 'DESKTOP_4K'];
 
@@ -114,9 +99,6 @@ export function ExportOptionsModal({
   productMode = 'poster',
 }: ExportOptionsModalProps) {
   const [selectedKey, setSelectedKey] = useState<ExportResolutionKey>('SMALL');
-  const [selectedFrame, setSelectedFrame] = useState('none');
-  const [selectedMaterial, setSelectedMaterial] = useState('matte');
-  const [showPrintOptions, setShowPrintOptions] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -130,20 +112,8 @@ export function ExportOptionsModal({
     format.orientation
   );
 
-  // Calculate total price
+  // Get price for selected resolution
   const basePrice = RESOLUTION_META[selectedKey].price;
-  const framePrice = FRAME_OPTIONS.find(f => f.id === selectedFrame)?.price;
-  const materialPrice = MATERIAL_OPTIONS.find(m => m.id === selectedMaterial)?.price;
-
-  const calculateTotal = () => {
-    let total = 0;
-    if (basePrice) total += parseFloat(basePrice.replace('€', ''));
-    if (isPrintResolution && showPrintOptions) {
-      if (framePrice) total += parseFloat(framePrice.replace('€', ''));
-      if (materialPrice) total += parseFloat(materialPrice.replace('€', ''));
-    }
-    return total > 0 ? `€${total.toFixed(2)}` : 'Free';
-  };
 
   // Check if selected resolution requires payment
   const isPaidResolution = RESOLUTION_TO_PRODUCT[selectedKey] !== undefined;
@@ -331,107 +301,9 @@ export function ExportOptionsModal({
               })}
             </div>
 
-            {/* Print Add-ons Toggle */}
+            {/* Coming Soon Features */}
             {isPrintResolution && (
-              <button
-                onClick={() => setShowPrintOptions(!showPrintOptions)}
-                className="mt-3 w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200/50 dark:border-amber-800/30 text-sm transition-colors hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-950/30 dark:hover:to-orange-950/30"
-              >
-                <div className="flex items-center gap-2">
-                  <Frame className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span className="font-medium text-amber-800 dark:text-amber-300">
-                    Add Frame & Material Options
-                  </span>
-                </div>
-                <span className="text-xs text-amber-600 dark:text-amber-400">
-                  {showPrintOptions ? 'Hide' : 'Show'} →
-                </span>
-              </button>
-            )}
-
-            {/* Print Options (Frames & Materials) */}
-            {isPrintResolution && showPrintOptions && (
-              <div className="mt-4 space-y-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-                {/* Frame Selection */}
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Frame className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Frame
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {FRAME_OPTIONS.map((frame) => (
-                      <button
-                        key={frame.id}
-                        onClick={() => setSelectedFrame(frame.id)}
-                        className={cn(
-                          "px-3 py-2 rounded-lg border-2 text-left transition-all",
-                          selectedFrame === frame.id
-                            ? "border-primary bg-primary/5 dark:bg-primary/10"
-                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className={cn(
-                            "text-sm font-medium",
-                            selectedFrame === frame.id ? "text-primary dark:text-primary" : "text-gray-900 dark:text-white"
-                          )}>
-                            {frame.name}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {frame.price || 'Free'}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Material Selection */}
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Palette className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Material
-                    </span>
-                  </div>
-                  <div className="grid gap-2">
-                    {MATERIAL_OPTIONS.map((material) => (
-                      <button
-                        key={material.id}
-                        onClick={() => setSelectedMaterial(material.id)}
-                        className={cn(
-                          "px-3 py-2.5 rounded-lg border-2 text-left transition-all",
-                          selectedMaterial === material.id
-                            ? "border-primary bg-primary/5 dark:bg-primary/10"
-                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className={cn(
-                            "text-sm font-medium",
-                            selectedMaterial === material.id ? "text-primary dark:text-primary" : "text-gray-900 dark:text-white"
-                          )}>
-                            {material.name}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {material.price ? `+${material.price}` : 'Included'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{material.description}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Coming Soon Notice */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30">
-                  <span className="text-xs text-amber-700 dark:text-amber-400">
-                    🚧 Print fulfillment coming soon! For now, download and use your preferred print service.
-                  </span>
-                </div>
-              </div>
+              <ComingSoonCard category="poster" className="mt-4" source="poster_export_modal" />
             )}
           </div>
 
@@ -532,9 +404,9 @@ export function ExportOptionsModal({
             </div>
             <span className={cn(
               "text-sm font-semibold",
-              calculateTotal() === 'Free' ? "text-gray-500" : "text-emerald-600 dark:text-emerald-400"
+              basePrice === null ? "text-gray-500" : "text-emerald-600 dark:text-emerald-400"
             )}>
-              {calculateTotal()}
+              {basePrice || 'Free'}
             </span>
           </div>
 

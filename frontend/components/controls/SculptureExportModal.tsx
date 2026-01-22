@@ -14,6 +14,7 @@ import {
 } from '@/lib/sculpture';
 import { ShareModal } from './ShareModal';
 import { generateShareThumbnail } from '@/lib/export/shareThumbnail';
+import { ComingSoonCard } from '@/components/voting/ComingSoonCard';
 import posthog from 'posthog-js';
 
 interface SculptureExportModalProps {
@@ -461,11 +462,8 @@ export function SculptureExportModal({
             )}
           </button>
 
-          {/* Future: Order printed sculpture */}
-          <p className="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">
-            Want us to print it for you?{' '}
-            <span className="text-gray-400">Coming soon!</span>
-          </p>
+          {/* Coming Soon Features */}
+          <ComingSoonCard category="sculpture" className="mt-4" source="sculpture_export_modal" />
         </div>
       </div>
 
