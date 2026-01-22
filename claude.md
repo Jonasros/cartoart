@@ -26,11 +26,12 @@
 - Social features (feed, likes, comments, sharing)
 - User auth (email/password + Google OAuth) via Supabase
 - Marketing landing page with scroll animations
-- PostHog analytics (14 custom events)
+- PostHog analytics (16 custom events)
 - GDPR-compliant cookie consent
 - Famous routes seeding (41 pre-seeded routes with thumbnails)
 - API usage monitoring dashboard
 - Programmatic SEO pages (/race, /trail, /cycling)
+- Feature voting system in export modals
 
 ---
 
@@ -84,12 +85,14 @@ frontend/
 │   ├── map/              # MapPreview, TextOverlay
 │   ├── sculpture/        # 3D sculpture viewer (R3F components)
 │   ├── strava/           # StravaActivityPicker
-│   └── ui/               # Shared components
+│   ├── ui/               # Shared components
+│   └── voting/           # Feature voting (ComingSoonCard, FeatureVoteButton)
 ├── lib/
 │   ├── actions/          # Server actions (maps, votes, comments, orders)
 │   ├── api-usage/        # API usage tracking system
 │   ├── brevo/            # Brevo email (contacts, events, transactional)
 │   ├── errors/           # Custom error classes
+│   ├── features/         # Feature voting config (comingSoon.ts)
 │   ├── middleware/       # Rate limiting, CSRF protection
 │   ├── route/            # GPX parsing
 │   ├── strava/           # Strava API helpers
