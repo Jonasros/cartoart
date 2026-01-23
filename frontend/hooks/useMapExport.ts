@@ -52,7 +52,7 @@ export function useMapExport(config: PosterConfig) {
     setLastExportResult(null);
   }, []);
 
-  const exportToPNG = async (resolutionKey: ExportResolutionKey = 'SMALL', filename?: string) => {
+  const exportToPNG = async (resolutionKey: ExportResolutionKey = 'SMALL', filename?: string, hideWatermark = false) => {
     if (!mapRef.current) {
       throw new Error('Map instance not available');
     }
@@ -66,6 +66,7 @@ export function useMapExport(config: PosterConfig) {
         map: mapRef.current,
         config,
         resolution,
+        hideWatermark,
       });
 
       // Download the full-resolution image

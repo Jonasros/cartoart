@@ -4,7 +4,7 @@ import { PosterConfig, LayerToggle, ColorPalette } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 import { useState, useMemo } from 'react';
-import { Heart, Home, MapPin, Target, Circle, Radio } from 'lucide-react';
+import { Heart, Home, MapPin, Target, Circle, Radio, Ruler } from 'lucide-react';
 import { ControlSection, ControlCheckbox, ControlSlider, ControlLabel, ControlInput, CollapsibleSection } from '@/components/ui/control-components';
 import { Tooltip } from '@/components/ui/tooltip';
 
@@ -24,12 +24,24 @@ const markerTypes = [
   { id: 'home', icon: Home, label: 'Home' },
 ] as const;
 
+const scaleBarPositions = [
+  { id: 'bottom-left', label: 'BL', fullLabel: 'Bottom Left' },
+  { id: 'bottom-right', label: 'BR', fullLabel: 'Bottom Right' },
+  { id: 'top-left', label: 'TL', fullLabel: 'Top Left' },
+  { id: 'top-right', label: 'TR', fullLabel: 'Top Right' },
+] as const;
+
 export function LayerControls({ layers, onLayersChange, availableToggles, palette }: LayerControlsProps) {
   const [showMarkerColorPicker, setShowMarkerColorPicker] = useState(false);
+  const [showScaleBarColorPicker, setShowScaleBarColorPicker] = useState(false);
   
   const effectiveMarkerColor = useMemo(() => {
     return layers.markerColor || palette.primary || palette.accent || palette.text;
   }, [layers.markerColor, palette.primary, palette.accent, palette.text]);
+
+  const effectiveScaleBarColor = useMemo(() => {
+    return layers.scaleBarColor || palette.text || '#FFFFFF';
+  }, [layers.scaleBarColor, palette.text]);
 
   const toggleLayer = (key: keyof PosterConfig['layers']) => {
     onLayersChange({ [key]: !layers[key] });
@@ -515,6 +527,99 @@ export function LayerControls({ layers, onLayersChange, availableToggles, palett
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Scale Bar */}
+        <div className="space-y-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+          <ControlCheckbox
+            label="Scale Bar"
+            checked={Boolean(layers.showScaleBar)}
+            onChange={() => toggleLayer('showScaleBar')}
+          />
+
+          {layers.showScaleBar && (
+            <div className="pl-8 pr-2 pb-2">
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 space-y-4">
+                <div className="space-y-2">
+                  <ControlLabel className="text-[10px] uppercase text-gray-500">Position</ControlLabel>
+                  <div className="grid grid-cols-4 gap-1">
+                    {scaleBarPositions.map((pos) => {
+                      const isActive = (layers.scaleBarPosition ?? 'bottom-left') === pos.id;
+                      return (
+                        <Tooltip key={pos.id} content={pos.fullLabel}>
+                          <button
+                            onClick={() => onLayersChange({ scaleBarPosition: pos.id as any })}
+                            className={cn(
+                              "py-1.5 px-1 text-[9px] uppercase font-bold rounded border transition-all",
+                              isActive
+                                ? "bg-primary border-primary text-white shadow-sm"
+                                : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
+                            )}
+                          >
+                            {pos.label}
+                          </button>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Scale Bar Color */}
+                <div className="space-y-2 relative">
+                  <ControlLabel
+                    className="text-[10px] uppercase text-gray-500"
+                    action={
+                      <button
+                        onClick={() => onLayersChange({ scaleBarColor: undefined })}
+                        className="text-[10px] text-primary hover:underline font-medium"
+                      >
+                        Reset
+                      </button>
+                    }
+                  >
+                    Color
+                  </ControlLabel>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowScaleBarColorPicker(!showScaleBarColorPicker)}
+                      className={cn(
+                        'w-9 h-9 rounded-md border shadow-sm transition-all',
+                        showScaleBarColorPicker
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      )}
+                      style={{ backgroundColor: effectiveScaleBarColor }}
+                      aria-label="Toggle scale bar color picker"
+                    />
+                    <ControlInput
+                      type="text"
+                      value={effectiveScaleBarColor}
+                      onChange={(e) => onLayersChange({ scaleBarColor: e.target.value })}
+                      className="font-mono"
+                      placeholder={palette.text || '#FFFFFF'}
+                    />
+                  </div>
+
+                  {showScaleBarColorPicker && (
+                    <div className="absolute left-0 top-full mt-2 z-50 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                      <div
+                        className="fixed inset-0 z-[-1]"
+                        onClick={() => setShowScaleBarColorPicker(false)}
+                      />
+                      <HexColorPicker
+                        color={effectiveScaleBarColor}
+                        onChange={(color) => onLayersChange({ scaleBarColor: color })}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-[8px] text-gray-400 italic">Shows distance scale on the map - useful for routes</p>
               </div>
             </div>
           )}

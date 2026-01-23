@@ -48,6 +48,7 @@ export function PosterEditor() {
   const [pendingAutoExport, setPendingAutoExport] = useState<{
     resolution: import('@/lib/export/constants').ExportResolutionKey;
     mode: ProductMode;
+    isPaid?: boolean; // Hide watermark for paid exports
   } | null>(null);
 
   // Track if we've already processed a paid download to prevent infinite loops
@@ -146,9 +147,9 @@ export function PosterEditor() {
   }, [productMode, sculptureConfig, config.route?.data]);
 
   // Wrap exportToPNG to handle errors
-  const handleExport = useCallback(async (resolutionKey: import('@/lib/export/constants').ExportResolutionKey) => {
+  const handleExport = useCallback(async (resolutionKey: import('@/lib/export/constants').ExportResolutionKey, hideWatermark = false) => {
     try {
-      await exportToPNG(resolutionKey);
+      await exportToPNG(resolutionKey, undefined, hideWatermark);
     } catch (error) {
       handleError(error);
     }
@@ -343,6 +344,7 @@ export function PosterEditor() {
             setPendingAutoExport({
               resolution: resolution as import('@/lib/export/constants').ExportResolutionKey,
               mode: exportMode,
+              isPaid: isPaidDownload, // Hide watermark for paid exports
             });
 
             // Mark this paid download as processed to prevent infinite loops
@@ -539,7 +541,8 @@ export function PosterEditor() {
         setShowShareModalAfterAutoExport(true);
         setPendingAutoExport(null);
         autoExportStartTimeRef.current = null;
-        handleExport(pendingAutoExport.resolution);
+        // Pass isPaid flag to hide watermark for paid exports
+        handleExport(pendingAutoExport.resolution, pendingAutoExport.isPaid ?? false);
       }, mapIsIdle ? 500 : 1000);
       return () => clearTimeout(posterTimeout);
     }

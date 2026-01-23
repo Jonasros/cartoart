@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import type { PosterLocation, PosterConfig, RouteConfig } from '@/types/poster';
 import { cn } from '@/lib/utils';
 import { MarkerIcon } from './MarkerIcon';
+import { CustomScaleControl } from './CustomScaleControl';
 import { MAP, TIMEOUTS, TEXTURE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { routeToGeoJSON, routeEndpointsToGeoJSON } from '@/lib/route';
@@ -358,6 +359,14 @@ export function MapPreview({
             </Source>
           )}
         </>
+      )}
+
+      {/* Scale Bar */}
+      {layers?.showScaleBar && (
+        <CustomScaleControl
+          position={layers?.scaleBarPosition || 'bottom-left'}
+          color={layers?.scaleBarColor}
+        />
       )}
       </Map>
 

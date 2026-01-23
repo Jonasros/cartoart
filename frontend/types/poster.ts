@@ -149,6 +149,10 @@ export interface PosterConfig {
     markerType?: 'pin' | 'crosshair' | 'dot' | 'ring' | 'heart' | 'home';
     markerColor?: string;
     roadWeight: number; // New: control road line thickness
+    // Scale bar for showing distances
+    showScaleBar?: boolean;
+    scaleBarPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    scaleBarColor?: string;
   };
 }
 

@@ -2,7 +2,7 @@ import type MapLibreGL from 'maplibre-gl';
 import type { PosterConfig } from '@/types/poster';
 import { DEFAULT_EXPORT_RESOLUTION, type BaseExportResolution } from './constants';
 import { calculateTargetResolution } from './resolution';
-import { drawMarker, applyTexture, drawCompassRose } from './drawing';
+import { drawMarker, applyTexture, drawCompassRose, drawScaleBar } from './drawing';
 import { drawTextOverlay } from './text-overlay';
 import { logger } from '@/lib/logger';
 import { createError } from '@/lib/errors/ServerActionError';
@@ -11,6 +11,8 @@ interface ExportOptions {
   map: MapLibreGL.Map;
   config: PosterConfig;
   resolution?: BaseExportResolution;
+  /** Hide watermark for paid exports */
+  hideWatermark?: boolean;
 }
 
 /**
@@ -72,7 +74,7 @@ async function waitForIdle(map: MapLibreGL.Map, timeoutMs = 15000): Promise<void
 }
 
 export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
-  const { map, config, resolution = DEFAULT_EXPORT_RESOLUTION } = options;
+  const { map, config, resolution = DEFAULT_EXPORT_RESOLUTION, hideWatermark = false } = options;
 
   // Wait for map to be stable before starting export
   await waitForMapStable(map);
@@ -269,8 +271,28 @@ export async function exportMapToPNG(options: ExportOptions): Promise<Blob> {
       applyTexture(exportCtx, exportResolution.width, exportResolution.height, texture, textureIntensity);
     }
 
-    // 9. WATERMARK
-    drawWatermark(exportCtx, exportResolution.width, exportResolution.height);
+    // 9. SCALE BAR
+    if (config.layers.showScaleBar) {
+      const scaleBarColor = config.layers.scaleBarColor || 'rgba(255, 255, 255, 0.9)';
+      const scaleBarPosition = config.layers.scaleBarPosition || 'bottom-left';
+      // Use the export zoom level (originalZoom + zoomOffset) for accurate distance calculation
+      // The export canvas is rendered at this higher zoom, so meters-per-pixel matches
+      drawScaleBar(
+        exportCtx,
+        exportResolution.width,
+        exportResolution.height,
+        marginPx,
+        scaleBarPosition,
+        scaleBarColor,
+        originalZoom + zoomOffset,
+        config.location.center[1] // latitude
+      );
+    }
+
+    // 10. WATERMARK (only for free/digital exports)
+    if (!hideWatermark) {
+      drawWatermark(exportCtx, exportResolution.width, exportResolution.height);
+    }
 
     return new Promise<Blob>((resolve, reject) => {
       exportCanvas.toBlob((blob) => {

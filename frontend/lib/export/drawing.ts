@@ -349,6 +349,135 @@ export function applyTexture(
   }
 }
 
+/**
+ * Draw a scale bar on the export canvas
+ * @param ctx Canvas rendering context
+ * @param canvasWidth Total canvas width in pixels
+ * @param canvasHeight Total canvas height in pixels
+ * @param marginPx Margin in pixels
+ * @param position Position of the scale bar
+ * @param color Color of the scale bar
+ * @param zoom Map zoom level
+ * @param latitude Center latitude for distance calculation
+ */
+export function drawScaleBar(
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  marginPx: number,
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
+  color: string,
+  zoom: number,
+  latitude: number
+) {
+  ctx.save();
+
+  // Calculate meters per pixel at this zoom level and latitude
+  // Formula: 156543.03392 * cos(lat * PI / 180) / (2 ^ zoom)
+  const metersPerPixel = 156543.03392 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom);
+
+  // Calculate map area dimensions (canvas minus margins)
+  const drawWidth = canvasWidth - (marginPx * 2);
+  const drawHeight = canvasHeight - (marginPx * 2);
+
+  // Scale bar max width is about 10% of the map area width
+  const maxScaleBarWidth = drawWidth * 0.1;
+
+  // Calculate the distance in meters that the max width represents
+  const maxDistance = maxScaleBarWidth * metersPerPixel;
+
+  // Find a nice round distance
+  const distanceMagnitude = Math.pow(10, Math.floor(Math.log10(maxDistance)));
+  const d = maxDistance / distanceMagnitude;
+
+  let niceDistance: number;
+  if (d >= 10) niceDistance = 10 * distanceMagnitude;
+  else if (d >= 5) niceDistance = 5 * distanceMagnitude;
+  else if (d >= 2) niceDistance = 2 * distanceMagnitude;
+  else niceDistance = 1 * distanceMagnitude;
+
+  // Format the display text
+  let displayDistance = niceDistance;
+  let suffix = 'm';
+  if (displayDistance >= 1000) {
+    displayDistance /= 1000;
+    suffix = 'km';
+  }
+  const scaleText = `${Math.round(displayDistance)} ${suffix}`;
+
+  // Calculate actual width of scale bar in pixels
+  const scaleBarWidth = (niceDistance / maxDistance) * maxScaleBarWidth;
+
+  // Calculate position - scale bar should be INSIDE the map area (within margins)
+  // Map area: starts at (marginPx, marginPx), size is (drawWidth, drawHeight)
+  const innerPadding = drawWidth * 0.03; // 3% padding from map area edges
+  const tickHeight = canvasWidth * 0.008; // Height of end ticks
+  const barHeight = canvasWidth * 0.002; // Height of horizontal bar
+  const fontSize = Math.max(12, canvasWidth * 0.012); // Font size
+  const textHeight = fontSize + 4; // Text height plus small gap
+
+  let x: number;
+  let y: number;
+
+  switch (position) {
+    case 'top-left':
+      x = marginPx + innerPadding;
+      y = marginPx + innerPadding + textHeight + tickHeight;
+      break;
+    case 'top-right':
+      x = marginPx + drawWidth - innerPadding - scaleBarWidth;
+      y = marginPx + innerPadding + textHeight + tickHeight;
+      break;
+    case 'bottom-right':
+      x = marginPx + drawWidth - innerPadding - scaleBarWidth;
+      y = marginPx + drawHeight - innerPadding;
+      break;
+    case 'bottom-left':
+    default:
+      x = marginPx + innerPadding;
+      y = marginPx + drawHeight - innerPadding;
+      break;
+  }
+
+  // Draw with subtle shadow for visibility
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 2;
+  ctx.shadowOffsetY = 1;
+
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = Math.max(1, canvasWidth * 0.001);
+  ctx.lineCap = 'butt';
+
+  // Draw left tick
+  ctx.beginPath();
+  ctx.moveTo(x, y - tickHeight);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+
+  // Draw horizontal bar
+  ctx.lineWidth = Math.max(2, barHeight);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + scaleBarWidth, y);
+  ctx.stroke();
+
+  // Draw right tick
+  ctx.lineWidth = Math.max(1, canvasWidth * 0.001);
+  ctx.beginPath();
+  ctx.moveTo(x + scaleBarWidth, y - tickHeight);
+  ctx.lineTo(x + scaleBarWidth, y);
+  ctx.stroke();
+
+  // Draw text
+  ctx.font = `600 ${fontSize}px "Inter", "SF Pro Display", system-ui, sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(scaleText, x, y - tickHeight - 4);
+
+  ctx.restore();
+}
+
 export function drawCompassRose(
   ctx: CanvasRenderingContext2D,
   centerX: number,
