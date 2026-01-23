@@ -22,16 +22,22 @@ async function main() {
   }
 
   console.log('Featured maps in database:\n');
+
+  // Count border styles
+  const borderCounts: Record<string, number> = {};
+
   data.forEach(m => {
     const config = m.config as Record<string, unknown>;
-    const route = config?.route as Record<string, unknown> | undefined;
-    const routeId = route?.id || 'none';
-    const style = (config?.style as Record<string, string>)?.id || 'unknown';
-    console.log(`  ${m.title}`);
-    console.log(`    ID: ${m.id}`);
-    console.log(`    Style: ${style}`);
-    console.log(`    Route in config: ${routeId ? 'yes' : 'no'}`);
-    console.log();
+    const format = config?.format as Record<string, unknown> | undefined;
+    const border = (format?.borderStyle as string) || 'none';
+    const margin = (format?.margin as number) || 0;
+    borderCounts[border] = (borderCounts[border] || 0) + 1;
+    console.log(`  ${m.title}: border=${border}, margin=${margin}`);
+  });
+
+  console.log('\nBorder style distribution:');
+  Object.entries(borderCounts).forEach(([style, count]) => {
+    console.log(`  ${style}: ${count}`);
   });
 
   console.log(`Total: ${data.length} featured maps`);

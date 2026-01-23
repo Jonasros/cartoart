@@ -62,17 +62,23 @@ function log(
 }
 
 /**
- * Fetch maps that need thumbnails
+ * Fetch maps that need thumbnails (or all if force mode)
  */
 async function getMapsNeedingThumbnails(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  forceAll: boolean = false
 ): Promise<MapRecord[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('maps')
     .select('id, title, thumbnail_url, user_id')
-    .eq('is_featured', true)
-    .is('thumbnail_url', null)
-    .order('created_at', { ascending: false });
+    .eq('is_featured', true);
+
+  // Only filter for null thumbnails if not forcing regeneration
+  if (!forceAll) {
+    query = query.is('thumbnail_url', null);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch maps: ${error.message}`);
@@ -95,29 +101,40 @@ async function captureMapThumbnail(
 
     await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 
-    // Wait for the map canvas to be rendered
+    // Wait for the poster container (includes map + border overlay + text overlay)
+    const posterContainer = page.locator('[data-poster-preview]').first();
+    await posterContainer.waitFor({ state: 'visible', timeout: 30000 });
+
+    // Also wait for the map canvas to ensure tiles are loaded
     const mapCanvas = page.locator('.maplibregl-canvas').first();
     await mapCanvas.waitFor({ state: 'visible', timeout: 30000 });
 
     // Additional wait for tiles to fully load
     await page.waitForTimeout(MAP_RENDER_WAIT_MS);
 
-    // Hide all UI overlays before taking screenshot
-    // This includes: zoom indicator, loading indicator, MapLibre controls, and any other overlays
+    // Hide UI overlays that shouldn't appear in thumbnails, but KEEP border overlay visible
     await page.evaluate(() => {
-      // Hide MapPreview's custom overlays (zoom indicator, loading tiles)
-      document.querySelectorAll('.z-30, .z-20').forEach((el) => {
-        (el as HTMLElement).style.visibility = 'hidden';
-      });
+      // Hide MapPreview's loading/zoom indicators (inside MapPreview component)
+      // These have z-30 class but are inside the MapPreview div, not the border overlay
+      const mapPreviewContainer = document.querySelector('[data-poster-preview] > div:first-child');
+      if (mapPreviewContainer) {
+        mapPreviewContainer.querySelectorAll('.z-30, .z-20').forEach((el) => {
+          (el as HTMLElement).style.visibility = 'hidden';
+        });
+      }
       // Hide MapLibre control containers
       document.querySelectorAll('.maplibregl-ctrl-top-right, .maplibregl-ctrl-top-left, .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-group').forEach((el) => {
         (el as HTMLElement).style.visibility = 'hidden';
       });
+      // Hide any shadows that might look bad in thumbnails (keep subtle ring though)
+      const poster = document.querySelector('[data-poster-preview]') as HTMLElement;
+      if (poster) {
+        poster.style.boxShadow = 'none';
+      }
     });
 
-    // Screenshot the map canvas directly - this captures only the map without any UI controls
-    // This is similar to how exportMapToPNG works - it captures just the canvas
-    const screenshot = await mapCanvas.screenshot({
+    // Screenshot the full poster container - includes map, text overlay, and border
+    const screenshot = await posterContainer.screenshot({
       type: 'png',
       scale: 'device',
     });
@@ -235,20 +252,24 @@ async function main(): Promise<void> {
   // Parse arguments
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
+  const forceAll = args.includes('--force');
   const limitArg = args.find((arg) => arg.startsWith('--limit='));
   const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : undefined;
 
   if (dryRun) {
     console.log('🔍 DRY RUN MODE - No changes will be made\n');
   }
+  if (forceAll) {
+    console.log('🔄 FORCE MODE - Regenerating all thumbnails\n');
+  }
 
   // Initialize Supabase
   const supabase = getSupabaseAdmin();
   log('info', 'Connected to Supabase');
 
-  // Fetch maps needing thumbnails
-  let maps = await getMapsNeedingThumbnails(supabase);
-  log('info', `Found ${maps.length} maps needing thumbnails`);
+  // Fetch maps needing thumbnails (or all in force mode)
+  let maps = await getMapsNeedingThumbnails(supabase, forceAll);
+  log('info', `Found ${maps.length} maps ${forceAll ? 'to regenerate' : 'needing thumbnails'}`);
 
   if (maps.length === 0) {
     console.log('\n✅ All maps already have thumbnails!\n');

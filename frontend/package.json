@@ -15,6 +15,7 @@
     "seed:routes:direct": "tsx scripts/seed-famous-routes/index.ts --direct-only",
     "seed:thumbnails": "tsx scripts/seed-famous-routes/generate-thumbnails.ts",
     "seed:thumbnails:dry": "tsx scripts/seed-famous-routes/generate-thumbnails.ts --dry-run",
+    "seed:thumbnails:force": "tsx scripts/seed-famous-routes/generate-thumbnails.ts --force",
     "update:designs": "tsx scripts/update-route-designs.ts",
     "update:designs:dry": "tsx scripts/update-route-designs.ts --dry-run"
   },

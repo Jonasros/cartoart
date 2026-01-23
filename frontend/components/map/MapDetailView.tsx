@@ -134,6 +134,7 @@ export function MapDetailView({ map, comments: initialComments, userVote, isOwne
                 ) : (
                   /* 2D Poster Preview */
                   <div
+                    data-poster-preview
                     className="relative shadow-2xl bg-white flex flex-col transition-all duration-300 ease-in-out ring-1 ring-black/5 w-full max-w-2xl"
                     style={{
                       aspectRatio: getAspectRatioCSS(map.config.format.aspectRatio, map.config.format.orientation),
