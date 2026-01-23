@@ -2,6 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { trackApiRequest } from '@/lib/api-usage/tracker';
 
+// Simple in-memory cache for TileJSON responses to reduce MapTiler API calls
+// Cache entries expire after 5 minutes
+const tileJsonCache = new Map<string, { data: string; timestamp: number; contentType: string }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCachedTileJson(cacheKey: string): { data: string; contentType: string } | null {
+  const cached = tileJsonCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return { data: cached.data, contentType: cached.contentType };
+  }
+  // Clean up expired entry
+  if (cached) {
+    tileJsonCache.delete(cacheKey);
+  }
+  return null;
+}
+
+function setCachedTileJson(cacheKey: string, data: string, contentType: string): void {
+  // Limit cache size to prevent memory issues
+  if (tileJsonCache.size > 100) {
+    // Remove oldest entries
+    const entries = Array.from(tileJsonCache.entries());
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    for (let i = 0; i < 20; i++) {
+      tileJsonCache.delete(entries[i][0]);
+    }
+  }
+  tileJsonCache.set(cacheKey, { data, timestamp: Date.now(), contentType });
+}
+
 const SOURCES: Record<string, string> = {
   openfreemap: 'https://tiles.openfreemap.org/',
   maptiler: 'https://api.maptiler.com/',
@@ -67,15 +97,41 @@ export async function GET(
     const origin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : urlObj.origin;
     const searchParams = urlObj.searchParams.toString();
     const tileUrl = `${baseUrl}${remainingPath}${searchParams ? '?' + searchParams : ''}`;
-    
+
+    // Check if this is a TileJSON request that we can serve from cache
+    const isTileJson = remainingPath.endsWith('tiles.json') || remainingPath === 'planet';
+    const cacheKey = `${sourceKey}:${remainingPath}:${origin}`;
+
+    if (isTileJson) {
+      const cached = getCachedTileJson(cacheKey);
+      if (cached) {
+        trackApiRequest(sourceKey, { isTileJson, isError: false });
+        return new NextResponse(cached.data, {
+          status: 200,
+          headers: {
+            'Content-Type': cached.contentType,
+            'Cache-Control': 'public, max-age=300',
+            'Access-Control-Allow-Origin': '*',
+            'X-Cache': 'HIT',
+          },
+        });
+      }
+    }
+
+    // Forward Referer header for domain-restricted API keys (e.g., MapTiler)
+    // This allows MapTiler to verify requests come from an allowed domain
+    const incomingReferer = request.headers.get('referer');
+    const refererHeader = incomingReferer || `${origin}/`;
+
     const response = await fetch(tileUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': refererHeader,
+        'Origin': origin,
       },
     });
 
     // Track the API request (fire-and-forget)
-    const isTileJson = remainingPath.endsWith('tiles.json') || remainingPath === 'planet';
     trackApiRequest(sourceKey, { isTileJson, isError: !response.ok });
 
     if (!response.ok) {
@@ -134,13 +190,19 @@ export async function GET(
           });
         }
 
-        const modifiedData = new TextEncoder().encode(JSON.stringify(json));
+        const modifiedJson = JSON.stringify(json);
+
+        // Cache the rewritten TileJSON for future requests
+        setCachedTileJson(cacheKey, modifiedJson, 'application/json');
+
+        const modifiedData = new TextEncoder().encode(modifiedJson);
         return new NextResponse(modifiedData, {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
+            'Cache-Control': 'public, max-age=300',
             'Access-Control-Allow-Origin': '*',
+            'X-Cache': 'MISS',
             'Vary': 'Host, X-Forwarded-Host, X-Forwarded-Proto',
           },
         });
