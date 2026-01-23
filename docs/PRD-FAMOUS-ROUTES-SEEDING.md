@@ -4,7 +4,7 @@
 > Integrates with [PROGRAMMATIC-SEO.md](./PROGRAMMATIC-SEO.md) as the content foundation
 
 **Created**: 2026-01-14
-**Updated**: 2026-01-19
+**Updated**: 2026-01-23
 **Status**: Phase 1 Complete ✅ (41 routes seeded)
 **Priority**: P0 - Critical for SEO Launch
 **Estimated Routes**: 100+ at launch, 500+ at scale
@@ -535,6 +535,82 @@ pnpm seed:routes --dry-run
 # With verbose logging
 pnpm seed:routes --verbose
 ```
+
+---
+
+## Complete Workflow for Adding New Routes
+
+Follow this workflow when adding new routes (e.g., next 50 routes):
+
+### Step 1: Add Route Definitions
+
+Add route entries to the appropriate route file in `scripts/seed-famous-routes/data/`:
+
+- Use existing route files as templates
+- Include GPX source URL, category, title, and subtitle
+- Reference existing templates (cycling, hiking, running)
+
+### Step 2: Run Seed Script (Dry Run First)
+
+```bash
+cd frontend
+
+# Dry run to preview what will be created
+npm run seed:routes:dry
+
+# Seed routes (creates maps in database)
+npm run seed:routes
+```
+
+### Step 3: Update Designs with CSV (Optional)
+
+To batch update poster designs (typography, margins, borders, colors):
+
+1. Export current designs: Check maps in database with `npx tsx scripts/check-maps.ts`
+2. Create/edit CSV with columns: `title`, `margin`, `borderStyle`, `backdropAlpha`, etc.
+3. Run design update:
+
+```bash
+# Preview changes
+npm run update:designs:dry
+
+# Apply changes
+npm run update:designs
+```
+
+**Typography Guidelines** (to prevent font overflow):
+
+- `titleSize`: Keep between 3.5-4.0 (scale 0-15)
+- `subtitleSize`: Keep between 2.0-2.5 (scale 0-8)
+- Never use values above 5 for titles (will overflow poster)
+- Original templates used 9.5-11 which caused overflow issues
+
+### Step 4: Generate Thumbnails
+
+```bash
+# Start dev server (required)
+npm run dev
+
+# In another terminal - generate thumbnails for new routes only
+npm run seed:thumbnails
+
+# Or force regenerate ALL thumbnails (e.g., after design changes)
+npm run seed:thumbnails:force
+```
+
+**Thumbnail Generation Notes**:
+
+- Thumbnails capture the full poster including borders, margins, and text overlay
+- Uses Playwright headless browser at 800x1200px (2:3 ratio)
+- Requires dev server running at localhost:3000
+- ~6 seconds per thumbnail
+
+### Step 5: Verify Results
+
+1. Check routes in database: `npx tsx scripts/check-maps.ts`
+2. Verify thumbnails in Supabase storage
+3. Check feed at `/feed` - routes should appear with correct thumbnails
+4. Check SEO landing pages if applicable
 
 ---
 

@@ -251,7 +251,7 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 - ✅ UI overlay hiding for clean screenshots
 - ✅ 41/41 thumbnails generated (100% success rate)
 
-**npm scripts**: `seed:routes`, `seed:routes:dry`, `seed:thumbnails`, `seed:thumbnails:dry`, `update:designs`, `update:designs:dry`
+**npm scripts**: `seed:routes`, `seed:routes:dry`, `seed:thumbnails`, `seed:thumbnails:dry`, `seed:thumbnails:force`, `update:designs`, `update:designs:dry`
 
 ### Stripe Payment Integration
 
@@ -365,9 +365,11 @@ Landing pages for famous routes to capture organic search traffic.
 
 - ✅ Redesigned all 41 featured route posters with improved typography
 - ✅ Fixed font overflow issue (titles going beyond poster borders)
-- ✅ Regenerated all 33 updated thumbnails (100% success rate)
+- ✅ Fixed thumbnail generation to include poster borders/frames (was capturing only map canvas)
+- ✅ Regenerated all 41 thumbnails with visible borders (100% success rate)
 - ✅ Updated poster templates with safer typography settings (titleSize 3.5-4 instead of 9.5-11)
 - ✅ Added `update:designs` npm script for future design updates from CSV
+- ✅ Added `seed:thumbnails:force` npm script to regenerate all thumbnails
 
 ### 2026-01-22
 
