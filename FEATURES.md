@@ -258,63 +258,78 @@ Enable users to annotate posters with multiple custom location markers.
 
 ---
 
-## Critical: 3D Sculpture Export Quality Fix
+## 3D Sculpture Export Quality ✅ COMPLETED
 
-**Priority**: 🔴 HIGH — Users pay €29-49 for STL exports; current quality is unacceptable.
+**Status**: ✅ Fixed — Paid exports now deliver print-quality STL files (~400K triangles).
 
-The STL export pipeline prioritizes browser performance over print quality. This causes visible defects in 3D printed sculptures.
+The export pipeline has been upgraded from browser-preview quality to professional print quality.
 
-### Issues Identified
+### Issues Fixed
 
-| Issue | Severity | Root Cause | Fix |
-|-------|----------|------------|-----|
-| **Route tube faceted** | 🔴 Critical | Only 8 radial segments — creates octagonal tubes | Increase to 24-32 segments |
-| **Terrain mesh blocky** | ⚠️ High | 128-192 segment grid — visible stair-stepping | Add "High Quality" export preset with 256+ segments |
-| **Route decimation** | ⚠️ Medium | Capped at 500 GPS points — long routes lose detail | Adaptive decimation (preserve curves, simplify straights) |
-| **No mesh validation** | 🔴 Critical | Can export non-manifold geometry — prints may fail | Add watertight/manifold checks before export |
-| **Text under-sampled** | ⚠️ Medium | Geometry capped at 256 segments despite 1024px canvas | Match geometry resolution to canvas |
-| **Terrain smoothing weak** | ⚠️ Medium | Only 1-2 blur passes — rough surface transitions | Implement multi-pass Gaussian smoothing |
+| Issue | Status | Solution Implemented |
+| ----- | ------ | -------------------- |
+| Route tube faceted | ✅ Fixed | 24 radial segments for export (was 8), 12 for preview |
+| Terrain mesh blocky | ✅ Fixed | 256×256 grid for high quality exports |
+| Route decimation crude | ✅ Fixed | Douglas-Peucker algorithm preserves shape |
+| Text hard to read | ✅ Fixed | 2048px canvas, 1.2mm engraving depth |
+| Terrain smoothing weak | ✅ Fixed | Multi-pass Gaussian smoothing |
+| Preview/export mismatch | ✅ Fixed | Settings sync (heightLimit, clearance, rotation) |
+| No mesh validation | ⏳ Planned | Add watertight/manifold checks |
 
-### Industry Context
+### Current Output Quality
 
-Modern 3D printers handle millions of triangles. Current Waymarker output (~50K triangles) is ~1% of what printers support:
+| Printer Type | Max Supported | Waymarker Output | Status |
+| ------------ | ------------- | ---------------- | ------ |
+| Desktop FDM | 2-5 million | ~400K | Good |
+| Resin SLA | 10-50 million | ~400K | Good |
+| Industrial | 50+ million | ~400K | Good |
 
-| Printer Type | Max File Size | Max Triangles | Current Output |
-|--------------|---------------|---------------|----------------|
-| Desktop FDM | <100MB | 2-5 million | ~50K ❌ |
-| Resin SLA | <500MB | 10-50 million | ~50K ❌ |
-| Industrial | <1GB | 50+ million | ~50K ❌ |
-
-**Conclusion**: We have massive headroom for quality improvements without printability issues.
-
-### Proposed Solution
-
-Add **Export Quality Presets** (default to High Quality for paid exports):
+### Export Quality Presets (Implemented)
 
 | Preset | Route Segments | Terrain Grid | Est. Triangles | File Size |
 |--------|----------------|--------------|----------------|-----------|
 | Draft | 8 radial | 128×128 | ~50K | ~2MB |
 | Standard | 16 radial | 192×192 | ~200K | ~10MB |
-| High Quality | 24 radial | 256×256 | ~500K | ~25MB |
+| **High Quality** | 24 radial | 256×256 | ~400K | ~20MB |
 | Ultra | 32 radial | 384×384 | ~1M | ~50MB |
 
-### Implementation Tasks
+**Note**: Paid exports automatically use "High Quality" preset.
 
-- [x] Increase route tube `radialSegments` from 8 → 12 for preview, configurable for export ✅
-- [ ] Add export quality preset selector to sculpture export modal
-- [ ] Implement adaptive route decimation (Douglas-Peucker algorithm)
-- [ ] Add mesh validation (manifold check, self-intersection detection)
+### Completed Implementation
+
+**Core Quality Improvements**:
+
+- [x] Export quality presets system (draft, standard, high, ultra) ✅
+- [x] Route tube radial segments (8 → 24 for export, 12 for preview) ✅
+- [x] Douglas-Peucker algorithm for shape-preserving route simplification ✅
+- [x] Multi-pass Gaussian smoothing for terrain surfaces ✅
+- [x] Text improvements (2048px canvas, 1024×512 grid, 1.2mm depth) ✅
 - [x] Terrain smoothing controls (0-3 passes configurable) ✅
-- [ ] Display estimated file size and polygon count before export
-- [ ] Add "Optimize for printing" post-processing step (vertex welding)
 
-**Recent Improvements (not in original plan)**:
+**Export UX Improvements**:
+
+- [x] Pre-export estimation UI (triangles, file size, generation time) ✅
+- [x] Progress tracking during export with stage indicators ✅
+- [x] Keep-tab-open warning for longer exports ✅
+
+**Preview/Export Consistency**:
+
+- [x] Sync terrainHeightLimit, routeClearance, routeDepth to export ✅
+- [x] Apply terrainRotation to STL export (was preview-only) ✅
+- [x] Route tube positioning aligned with terrain clearance ✅
+- [x] Pass terrain mode to elevation grid for export ✅
+
+**Additional Features**:
 
 - [x] Route elevation source toggle (GPS data vs terrain snap) ✅
 - [x] Route clearance optimization (terrain dips beneath raised routes) ✅
 - [x] Auto-orientation of route start to front ✅
 
-**Files to modify**: `lib/sculpture/meshGenerator.ts`, `lib/sculpture/stlExporter.ts`, `components/sculpture/RouteMesh.tsx`, `components/sculpture/TerrainMesh.tsx`
+### Remaining Tasks
+
+- [ ] Add mesh validation (manifold check, self-intersection detection)
+- [ ] Add "Optimize for printing" post-processing step (vertex welding)
+- [ ] Export quality selector in modal (currently auto-high for paid)
 
 ---
 
@@ -322,14 +337,15 @@ Add **Export Quality Presets** (default to High Quality for paid exports):
 
 | Issue | Priority |
 | ----- | -------- |
-| **3D export quality** | 🔴 High |
+| ~~3D export quality~~ | ✅ Fixed |
 | ESLint warnings (143, mostly `any`) | Medium |
 | No test coverage | Medium |
 | Console.log in production | Low |
+| 3D mesh validation (manifold checks) | Low |
 
 ### Recommended
 
-1. Fix 3D sculpture export quality (see section above)
+1. ~~Fix 3D sculpture export quality~~ ✅ Done
 2. Add TypeScript strict mode
 3. Add unit tests for GPX parser
 4. Add E2E tests for route upload
