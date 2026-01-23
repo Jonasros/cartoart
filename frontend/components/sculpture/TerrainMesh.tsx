@@ -231,6 +231,7 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
 
     // Height scale factor (convert to Three.js units)
     const heightScale = elevationScale * (size / 100);
+    const maxHeight = terrainHeightLimit * heightScale; // Max terrain height
 
     const positions = geo.attributes.position;
     const [[minLng, minLat], [maxLng, maxLat]] = routeData.bounds;
@@ -268,7 +269,8 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
 
       const elev = point.elevation ?? minElevation;
       const normalizedElev = (elev - minElevation) / elevRange;
-      const y = normalizedElev * heightScale;
+      // Clamp to maxHeight to match how RouteMesh positions the tube
+      const y = Math.min(normalizedElev * heightScale, maxHeight);
       routeMeshPoints.push({ x, z, y });
     }
 
@@ -282,7 +284,6 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
 
     // Route clearance settings - wider effect zone for better visibility
     const clearanceRadius = routeClearance * meshSize; // Scale clearance to mesh size
-    const maxHeight = terrainHeightLimit * heightScale; // Max terrain height
 
     if (elevationGrid && elevationGrid.length > 0) {
       // Use provided elevation grid

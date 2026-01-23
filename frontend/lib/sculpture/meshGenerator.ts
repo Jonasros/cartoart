@@ -207,6 +207,7 @@ function generateTerrainGeometry(
   // Route clearance and terrain height limits (match TerrainMesh.tsx preview)
   const clearanceRadius = routeClearance * meshSize; // Scale clearance to mesh size
   const maxHeight = terrainHeightLimit * heightScale; // Max terrain height
+  const minTerrainHeight = 0.003; // ~0.3mm offset prevents z-fighting with base
 
   // Always compute route mesh points (needed for both engraved groove and raised clearance)
   for (const point of routeData.points) {
@@ -227,7 +228,8 @@ function generateTerrainGeometry(
 
     const elev = point.elevation ?? minElevation;
     const normalizedElev = (elev - minElevation) / elevRange;
-    const y = normalizedElev * heightScale;
+    // Clamp to maxHeight to match how tube is positioned
+    const y = Math.min(normalizedElev * heightScale, maxHeight);
     routeMeshPoints.push({ x, z, y });
   }
 
@@ -297,6 +299,9 @@ function generateTerrainGeometry(
           y -= grooveDepth * (1 - smoothFactor);
         }
       }
+
+      // Ensure terrain is always above base platform (match preview)
+      y = Math.max(y, minTerrainHeight);
 
       positions.setY(i, y);
     }
@@ -377,6 +382,9 @@ function generateTerrainGeometry(
         }
       }
 
+      // Ensure terrain is always above base platform (match preview)
+      y = Math.max(y, minTerrainHeight);
+
       positions.setY(i, y);
     }
   }
@@ -391,6 +399,10 @@ function generateTerrainGeometry(
  * Generate route tube geometry
  * Mirrors the logic in RouteMesh.tsx
  *
+ * Uses GPS elevation from route points to position the tube.
+ * This matches how terrain clearance is calculated, ensuring the tube
+ * sits exactly on the cleared terrain surface.
+ *
  * @param routeData - GPS route data
  * @param config - Sculpture configuration
  * @param qualityParams - Quality parameters for mesh resolution
@@ -401,16 +413,19 @@ function generateRouteGeometry(
   qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
   const { points, stats, bounds } = routeData;
-  const { size, routeThickness, elevationScale, shape, routeDepth = 0.04 } = config;
+  const { size, routeThickness, elevationScale, shape, terrainHeightLimit = 0.8, routeDepth = 0.04 } = config;
 
   const [[minLng, minLat], [maxLng, maxLat]] = bounds;
   const lngRange = maxLng - minLng || 0.001;
   const latRange = maxLat - minLat || 0.001;
   const elevRange = stats.maxElevation - stats.minElevation || 1;
   const heightScale = elevationScale * (size / 100);
-  const tubeOffset = routeDepth; // Use config value (was hardcoded 0.02)
+  const maxHeight = terrainHeightLimit * heightScale;
   const meshSize = size / 10;
   const circleRadius = meshSize / 2 * 0.92;
+
+  // Tube radius - position tube so bottom touches terrain
+  const tubeRadius = routeThickness / 200;
 
   // Use Douglas-Peucker for adaptive point simplification (preserves shape better than step-based)
   const maxPoints = qualityParams?.maxRoutePoints ?? 750;
@@ -421,6 +436,10 @@ function generateRouteGeometry(
   }
 
   // Convert to 3D vectors
+  // IMPORTANT: Use GPS elevation from route points, NOT terrain grid sampling.
+  // This matches how generateTerrainGeometry calculates route clearance.
+  // The terrain is cleared around the route based on GPS elevation, so the tube must
+  // also be positioned based on GPS elevation for them to align perfectly.
   const curve3Points: THREE.Vector3[] = [];
 
   for (const point of processedPoints) {
@@ -440,9 +459,21 @@ function generateRouteGeometry(
       }
     }
 
+    // Use GPS elevation from the route point
+    // This matches generateTerrainGeometry's route clearance calculation which uses:
+    //   routeElev = (point.elevation - minElevation) / elevRange * heightScale
     const elevation = point.elevation ?? stats.minElevation;
     const normalizedElev = (elevation - stats.minElevation) / elevRange;
-    const y = normalizedElev * heightScale + tubeOffset;
+    let routeHeight = normalizedElev * heightScale;
+
+    // Apply height limit (same as terrain does)
+    routeHeight = Math.min(routeHeight, maxHeight);
+
+    // Position tube center at routeDepth above terrain surface
+    // Terrain clears to: tubeBottom = routeElev + routeDepth - tubeRadius - 0.005
+    // So tube center must be at: routeElev + routeDepth
+    // This creates a 0.005 unit gap between terrain max and tube bottom (the safety margin)
+    const y = routeHeight + routeDepth;
 
     curve3Points.push(new THREE.Vector3(x, y, z));
   }
@@ -454,12 +485,11 @@ function generateRouteGeometry(
   const curve = new THREE.CatmullRomCurve3(curve3Points, false, 'catmullrom', 0.5);
   const curveLength = curve.getLength();
   const tubularSegments = Math.max(64, Math.min(500, Math.floor(curveLength * 50)));
-  const radius = routeThickness / 200;
 
   // Use quality param for radial segments (8=octagonal, 24+=smooth cylinder)
   const radialSegments = qualityParams?.routeRadialSegments ?? 24;
 
-  return new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
+  return new THREE.TubeGeometry(curve, tubularSegments, tubeRadius, radialSegments, false);
 }
 
 /**

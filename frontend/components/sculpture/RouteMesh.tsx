@@ -97,7 +97,7 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     }
 
     const { points, stats, bounds } = routeData;
-    const { size, routeThickness, elevationScale, shape } = config;
+    const { size, routeThickness, elevationScale, shape, terrainHeightLimit = 0.8, routeDepth = 0.04 } = config;
 
     // Calculate bounds for normalization
     const [[minLng, minLat], [maxLng, maxLat]] = bounds;
@@ -107,10 +107,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 
     // Height scale factor (convert to Three.js units)
     const heightScale = elevationScale * (size / 100);
+    const maxHeight = terrainHeightLimit * heightScale;
 
-    // Offset: raised tube floats above terrain
-    // Use routeDepth from config (default 0.04 for backwards compatibility)
-    const verticalOffset = config.routeDepth ?? 0.04;
+    // Tube radius - needed to position tube so bottom touches terrain
+    const tubeRadius = routeThickness / 200;
 
     // Mesh size and circular boundary (for clipping)
     const meshSize = size / 10;
@@ -129,6 +129,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     }
 
     // Convert route points to 3D vectors
+    // IMPORTANT: Use GPS elevation from route points, NOT terrain grid sampling.
+    // This matches how TerrainMesh calculates route clearance (see TerrainMesh.tsx lines 399-413).
+    // The terrain is cleared around the route based on GPS elevation, so the tube must
+    // also be positioned based on GPS elevation for them to align perfectly.
     const curve3Points: THREE.Vector3[] = [];
 
     for (const point of processedPoints) {
@@ -151,10 +155,21 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
         }
       }
 
-      // Calculate height from elevation (or use minimum if not available)
+      // Use GPS elevation from the route point
+      // This matches TerrainMesh's route clearance calculation which uses:
+      //   routeElev = (point.elevation - minElevation) / elevRange * heightScale
       const elevation = point.elevation ?? stats.minElevation;
       const normalizedElev = (elevation - stats.minElevation) / elevRange;
-      const y = normalizedElev * heightScale + verticalOffset;
+      let routeHeight = normalizedElev * heightScale;
+
+      // Apply height limit (same as TerrainMesh does)
+      routeHeight = Math.min(routeHeight, maxHeight);
+
+      // Position tube center at routeDepth above terrain surface
+      // TerrainMesh clears terrain to: tubeBottom = routeElev + routeDepth - tubeRadius - 0.005
+      // So tube center must be at: routeElev + routeDepth
+      // This creates a 0.005 unit gap between terrain max and tube bottom (the safety margin)
+      const y = routeHeight + routeDepth;
 
       curve3Points.push(new THREE.Vector3(x, y, z));
     }
@@ -173,9 +188,8 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 
     // Create tube for raised style
     // Use 12 segments for preview (smoother than 8, but faster than 24 used in export)
-    const radius = routeThickness / 200;
     const radialSegments = 12;
-    return new THREE.TubeGeometry(curve, segments, radius, radialSegments, false);
+    return new THREE.TubeGeometry(curve, segments, tubeRadius, radialSegments, false);
   }, [routeData, config]);
 
   // Get route-specific material properties (shinier than terrain to stand out)
