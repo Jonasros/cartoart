@@ -59,6 +59,7 @@
 - ✅ Circular mask with compass rose option
 - ✅ Location marker with multiple icon types
 - ✅ Text backdrop/gradient options
+- ✅ Scale bar with position and color controls
 
 ### Map Styles (11 total)
 
@@ -363,6 +364,14 @@ Landing pages for famous routes to capture organic search traffic.
 
 ### 2026-01-23
 
+- ✅ Scale bar component with Haversine distance calculation
+- ✅ Scale bar UI controls (toggle, position, color picker)
+- ✅ Scale bar renders correctly in PNG export (uses export zoom for accurate distance)
+- ✅ Text overlay rewritten with flow-based layout matching CSS flexbox
+- ✅ Title text wrapping fixed to account for letter spacing
+- ✅ Watermark removal for paid exports
+- ✅ Updated FEATURES.md with ICP focus (hikers, cyclists, travelers, race finishers)
+- ✅ Added cartographic enhancements roadmap (compass rose, custom markers)
 - ✅ Redesigned all 41 featured route posters with improved typography
 - ✅ Fixed font overflow issue (titles going beyond poster borders)
 - ✅ Fixed thumbnail generation to include poster borders/frames (was capturing only map canvas)

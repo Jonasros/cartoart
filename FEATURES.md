@@ -253,20 +253,76 @@ Enable users to annotate posters with multiple custom location markers.
 
 ---
 
+## Critical: 3D Sculpture Export Quality Fix
+
+**Priority**: 🔴 HIGH — Users pay €29-49 for STL exports; current quality is unacceptable.
+
+The STL export pipeline prioritizes browser performance over print quality. This causes visible defects in 3D printed sculptures.
+
+### Issues Identified
+
+| Issue | Severity | Root Cause | Fix |
+|-------|----------|------------|-----|
+| **Route tube faceted** | 🔴 Critical | Only 8 radial segments — creates octagonal tubes | Increase to 24-32 segments |
+| **Terrain mesh blocky** | ⚠️ High | 128-192 segment grid — visible stair-stepping | Add "High Quality" export preset with 256+ segments |
+| **Route decimation** | ⚠️ Medium | Capped at 500 GPS points — long routes lose detail | Adaptive decimation (preserve curves, simplify straights) |
+| **No mesh validation** | 🔴 Critical | Can export non-manifold geometry — prints may fail | Add watertight/manifold checks before export |
+| **Text under-sampled** | ⚠️ Medium | Geometry capped at 256 segments despite 1024px canvas | Match geometry resolution to canvas |
+| **Terrain smoothing weak** | ⚠️ Medium | Only 1-2 blur passes — rough surface transitions | Implement multi-pass Gaussian smoothing |
+
+### Industry Context
+
+Modern 3D printers handle millions of triangles. Current Waymarker output (~50K triangles) is ~1% of what printers support:
+
+| Printer Type | Max File Size | Max Triangles | Current Output |
+|--------------|---------------|---------------|----------------|
+| Desktop FDM | <100MB | 2-5 million | ~50K ❌ |
+| Resin SLA | <500MB | 10-50 million | ~50K ❌ |
+| Industrial | <1GB | 50+ million | ~50K ❌ |
+
+**Conclusion**: We have massive headroom for quality improvements without printability issues.
+
+### Proposed Solution
+
+Add **Export Quality Presets** (default to High Quality for paid exports):
+
+| Preset | Route Segments | Terrain Grid | Est. Triangles | File Size |
+|--------|----------------|--------------|----------------|-----------|
+| Draft | 8 radial | 128×128 | ~50K | ~2MB |
+| Standard | 16 radial | 192×192 | ~200K | ~10MB |
+| High Quality | 24 radial | 256×256 | ~500K | ~25MB |
+| Ultra | 32 radial | 384×384 | ~1M | ~50MB |
+
+### Implementation Tasks
+
+- [ ] Increase route tube `radialSegments` from 8 → configurable (16-32)
+- [ ] Add export quality preset selector to sculpture export modal
+- [ ] Implement adaptive route decimation (Douglas-Peucker algorithm)
+- [ ] Add mesh validation (manifold check, self-intersection detection)
+- [ ] Increase terrain smoothing passes for high-quality presets
+- [ ] Display estimated file size and polygon count before export
+- [ ] Add "Optimize for printing" post-processing step (vertex welding)
+
+**Files to modify**: `lib/sculpture/meshGenerator.ts`, `lib/sculpture/stlExporter.ts`, `components/sculpture/RouteMesh.tsx`, `components/sculpture/TerrainMesh.tsx`
+
+---
+
 ## Technical Debt
 
 | Issue | Priority |
 | ----- | -------- |
+| **3D export quality** | 🔴 High |
 | ESLint warnings (143, mostly `any`) | Medium |
 | No test coverage | Medium |
 | Console.log in production | Low |
 
 ### Recommended
 
-1. Add TypeScript strict mode
-2. Add unit tests for GPX parser
-3. Add E2E tests for route upload
-4. Add Sentry for error monitoring
+1. Fix 3D sculpture export quality (see section above)
+2. Add TypeScript strict mode
+3. Add unit tests for GPX parser
+4. Add E2E tests for route upload
+5. Add Sentry for error monitoring
 
 ---
 
