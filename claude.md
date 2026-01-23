@@ -269,14 +269,26 @@ interface RouteConfig {
 
 ```typescript
 interface SculptureConfig {
-  baseShape: 'rectangular' | 'circular' | 'organic' | 'terrain';
-  baseColor: string;
-  size: '10cm' | '15cm' | '20cm';
-  material: 'matte' | 'glossy' | 'metallic' | 'wood' | 'stone';
-  texture: 'smooth' | 'brushed' | 'rough';
+  shape: 'rectangular' | 'circular';
+  size: number;                      // 10, 15, or 20 (cm)
+  material: 'pla' | 'wood' | 'resin';
+  routeStyle: 'raised' | 'engraved';
+  routeThickness: number;            // 1-5 mm
   routeColor: string;
-  elevationExaggeration: number;  // 1.0-3.0
+  routeDepth: number;                // 0.01-0.1 (height/depth of route)
+  routeElevationSource: 'gps' | 'terrain'; // GPS data or snap to terrain
+  terrainColor: string;
+  terrainMode: 'route' | 'terrain';  // Terrain data source
+  terrainResolution: number;         // Grid resolution (64-256)
+  terrainHeightLimit: number;        // Max height fraction (0.3-1.0)
+  terrainSmoothing: number;          // Smoothing passes (0-3)
+  routeClearance: number;            // Terrain lowering near route (0-0.15)
+  elevationScale: number;            // 0.5-3.0
+  baseHeight: number;                // 3-10 mm
+  rimHeight: number;                 // 0-5 mm
+  text: SculptureTextConfig;         // Title, subtitle, depth
   turntableEnabled: boolean;
+  turntableSpeed: number;            // 0.1-1.0
 }
 ```
 

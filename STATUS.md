@@ -225,6 +225,24 @@ Complete 3D sculpture system for creating printable route models from GPS data.
 - ✅ Size controls (10cm, 15cm, 20cm)
 - ✅ Wall thickness validation
 
+**Terrain & Route Controls**:
+
+- ✅ Route style (Raised tube / Engraved groove)
+- ✅ Route elevation source (GPS data / Terrain snap)
+- ✅ Terrain data source (Route interpolation / MapTiler terrain-rgb)
+- ✅ Terrain height limit, clearance, and smoothing controls
+- ✅ Route depth and thickness sliders
+- ✅ Style presets (Dramatic, Balanced, Subtle)
+- ✅ Terrain rotation (Auto / Manual)
+
+**Export Quality**:
+
+- ✅ High-quality STL export (24-segment tubes, 256x256 terrain)
+- ✅ Douglas-Peucker point simplification (preserves shape)
+- ✅ Gaussian terrain smoothing for print surfaces
+- ✅ Progress tracking during export generation
+- ✅ Accurate file size and generation time estimates
+
 ### Famous Routes Seeding
 
 Programmatic content generation for iconic hiking, cycling, and running routes worldwide.
