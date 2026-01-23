@@ -171,7 +171,10 @@ function generateTerrainGeometry(
   elevationGrid?: number[][],
   qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
-  const { size, elevationScale, shape, rimHeight, routeStyle, routeThickness } = config;
+  const {
+    size, elevationScale, shape, rimHeight, routeStyle, routeThickness,
+    terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04
+  } = config;
   // Use quality params for resolution, fall back to config
   const segments = qualityParams?.terrainResolution ?? config.terrainResolution;
   const smoothingPasses = qualityParams?.smoothingPasses ?? config.terrainSmoothing;
@@ -195,34 +198,37 @@ function generateTerrainGeometry(
   const latRange = maxLat - minLat || 0.001;
   const coordRange = meshSize;
 
-  // Pre-compute route points in mesh coordinates for groove carving
+  // Pre-compute route points in mesh coordinates for groove carving and route clearance
   const routeMeshPoints: Array<{ x: number; z: number; y: number }> = [];
   const grooveWidth = routeStyle === 'engraved' ? (routeThickness / 100) * 2.5 : 0;
-  const grooveDepth = routeStyle === 'engraved' ? 0.05 : 0;
+  const grooveDepth = routeStyle === 'engraved' ? routeDepth : 0; // Use config value
   const routeClipRadius = meshSize / 2 * 0.88;
 
-  if (routeStyle === 'engraved') {
-    for (const point of routeData.points) {
-      const normalizedX = (point.lng - minLng) / lngRange;
-      const normalizedZ = (point.lat - minLat) / latRange;
-      let x = (normalizedX - 0.5) * meshSize;
-      let z = (normalizedZ - 0.5) * meshSize;
+  // Route clearance and terrain height limits (match TerrainMesh.tsx preview)
+  const clearanceRadius = routeClearance * meshSize; // Scale clearance to mesh size
+  const maxHeight = terrainHeightLimit * heightScale; // Max terrain height
 
-      // For circular shape, clamp route points to stay within the circle
-      if (shape === 'circular') {
-        const distFromCenter = Math.sqrt(x * x + z * z);
-        if (distFromCenter > routeClipRadius) {
-          const scale = routeClipRadius / distFromCenter;
-          x *= scale;
-          z *= scale;
-        }
+  // Always compute route mesh points (needed for both engraved groove and raised clearance)
+  for (const point of routeData.points) {
+    const normalizedX = (point.lng - minLng) / lngRange;
+    const normalizedZ = (point.lat - minLat) / latRange;
+    let x = (normalizedX - 0.5) * meshSize;
+    let z = (normalizedZ - 0.5) * meshSize;
+
+    // For circular shape, clamp route points to stay within the circle
+    if (shape === 'circular') {
+      const distFromCenter = Math.sqrt(x * x + z * z);
+      if (distFromCenter > routeClipRadius) {
+        const scale = routeClipRadius / distFromCenter;
+        x *= scale;
+        z *= scale;
       }
-
-      const elev = point.elevation ?? minElevation;
-      const normalizedElev = (elev - minElevation) / elevRange;
-      const y = normalizedElev * heightScale;
-      routeMeshPoints.push({ x, z, y });
     }
+
+    const elev = point.elevation ?? minElevation;
+    const normalizedElev = (elev - minElevation) / elevRange;
+    const y = normalizedElev * heightScale;
+    routeMeshPoints.push({ x, z, y });
   }
 
   if (elevationGrid && elevationGrid.length > 0) {
@@ -253,6 +259,34 @@ function generateTerrainGeometry(
       const elev = smoothedGrid[zi]?.[xi] ?? minElevation;
       const normalizedElev = (elev - minElevation) / elevRange;
       let y = normalizedElev * heightScale;
+
+      // Apply height limit - clamp maximum terrain height (match preview)
+      y = Math.min(y, maxHeight);
+
+      // Apply route clearance - ensure route is visible (match preview)
+      if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
+        const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
+
+        if (distance < clearanceRadius) {
+          if (routeStyle === 'raised') {
+            // Route tube parameters (must match RouteMesh.tsx)
+            const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
+            const tubeRadius = routeThickness / 200; // Tube radius in scene units
+
+            // Calculate the bottom of the tube with small safety margin
+            const tubeBottom = routeElev + tubeVerticalOffset - tubeRadius - 0.005;
+
+            // Hard cap: terrain must not exceed tube bottom
+            y = Math.min(y, tubeBottom);
+          } else {
+            // For engraved: blend terrain toward route elevation near the groove
+            const t = distance / clearanceRadius;
+            const falloff = Math.pow(t, 0.5);
+            const blendedHeight = falloff * y + (1 - falloff) * routeElev;
+            y = blendedHeight;
+          }
+        }
+      }
 
       // Carve groove if engraved style and vertex is near route
       if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
@@ -305,6 +339,34 @@ function generateTerrainGeometry(
       const normalizedElev = (nearestElev - minElevation) / elevRange;
       let y = normalizedElev * heightScale;
 
+      // Apply height limit - clamp maximum terrain height (match preview)
+      y = Math.min(y, maxHeight);
+
+      // Apply route clearance - ensure route is visible (match preview)
+      if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
+        const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
+
+        if (distance < clearanceRadius) {
+          if (routeStyle === 'raised') {
+            // Route tube parameters (must match RouteMesh.tsx)
+            const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
+            const tubeRadius = routeThickness / 200; // Tube radius in scene units
+
+            // Calculate the bottom of the tube with small safety margin
+            const tubeBottom = routeElev + tubeVerticalOffset - tubeRadius - 0.005;
+
+            // Hard cap: terrain must not exceed tube bottom
+            y = Math.min(y, tubeBottom);
+          } else {
+            // For engraved: blend terrain toward route elevation near the groove
+            const t = distance / clearanceRadius;
+            const falloff = Math.pow(t, 0.5);
+            const blendedHeight = falloff * y + (1 - falloff) * routeElev;
+            y = blendedHeight;
+          }
+        }
+      }
+
       // Carve groove if engraved style and vertex is near route
       if (routeStyle === 'engraved' && routeMeshPoints.length > 1) {
         const { distance } = getDistanceToRoute(x, z, routeMeshPoints);
@@ -339,14 +401,14 @@ function generateRouteGeometry(
   qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
   const { points, stats, bounds } = routeData;
-  const { size, routeThickness, elevationScale, shape } = config;
+  const { size, routeThickness, elevationScale, shape, routeDepth = 0.04 } = config;
 
   const [[minLng, minLat], [maxLng, maxLat]] = bounds;
   const lngRange = maxLng - minLng || 0.001;
   const latRange = maxLat - minLat || 0.001;
   const elevRange = stats.maxElevation - stats.minElevation || 1;
   const heightScale = elevationScale * (size / 100);
-  const tubeOffset = 0.02;
+  const tubeOffset = routeDepth; // Use config value (was hardcoded 0.02)
   const meshSize = size / 10;
   const circleRadius = meshSize / 2 * 0.92;
 
