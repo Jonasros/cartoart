@@ -2,21 +2,24 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-01-23
 
 ---
 
 ## Strategic Summary
 
-Waymarker transforms GPS activity data into gallery-worthy wall art. Starting with hiking route posters, expanding to 3D printed sculptures.
+Waymarker transforms GPS activity data into gallery-worthy wall art for outdoor adventurers. Custom poster art for hikers, cyclists, trail runners, and travelers.
 
-### Market Position
+### Ideal Customer Profile (ICP)
 
-**Primary niche**: Hiking / Outdoor Adventure
+**Primary**: Active outdoor enthusiasts who want to commemorate their adventures
 
-- Strong buy readiness ("custom hike route print" is searched actively)
-- Expands naturally to trail runners, cyclists, skiers
-- Emotional hook: "I conquered this trail"
+- **Hikers & Trail Runners**: Long-distance trails, summit attempts, national park visits
+- **Cyclists**: Road cycling routes, mountain biking trails, bikepacking adventures
+- **Travelers & Adventurers**: Road trips, backpacking journeys, expedition routes
+- **Race Finishers**: Marathon runners, triathlon athletes, ultra-distance competitors
+
+**Emotional Hook**: "I conquered this route — now it's art on my wall"
 
 ### Competitive Advantage
 
@@ -27,10 +30,11 @@ Waymarker transforms GPS activity data into gallery-worthy wall art. Starting wi
 | 3D buildings | ✅ 4 presets | ❌ |
 | 3D terrain | ✅ | ❌ |
 | 3D sculptures | ✅ STL export | ❌ |
+| Scale bar | ✅ | Some |
 | Privacy zones | ✅ | Some |
 | High-res export | 7200x10800px | Varies |
 | Social features | ✅ | ❌ |
-| Stripe payments | ✅ | Varies |
+| Strava integration | ✅ | Some |
 
 **Positioning**: "Adventure route art that looks like a design studio made it"
 
@@ -60,13 +64,14 @@ Scale organic traffic through thousands of targeted landing pages capturing long
 | Trails & Hikes | ~200 | "[Trail] map print" | ✅ Phase 1 |
 | Cycling Routes | ~300 | "[Route] cycling poster" | ✅ Phase 1 |
 | Triathlons | ~100 | "Ironman [Location] map" | Planned |
-| Gift Guides | ~50 | "gift for marathon runner" | Planned |
+| Bikepacking | ~150 | "[Route] bikepacking map" | Planned |
+| Ultra Trails | ~100 | "[Race] ultra trail poster" | Planned |
 
 ### Next Steps
 
 1. **Phase 2**: City map pages (~10,000 pages for major cities)
 2. **Phase 3**: SEO optimization, A/B testing CTAs
-3. **Phase 4**: Gift guides and seasonal content
+3. **Phase 4**: Niche expansion (bikepacking, ultra trails, ski touring)
 
 See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD.
 
@@ -135,19 +140,50 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 
 ---
 
+## In Progress: Cartographic Enhancements
+
+Adopting high-value features from the upstream carto-art repository to enhance poster design capabilities.
+
+### Scale Bar ✅
+
+Dynamic distance scale for professional cartographic output.
+
+- ✅ Haversine formula for accurate ground distance
+- ✅ Auto-switches from meters to kilometers at 1000m
+- ✅ Position options (top-left, top-right, bottom-left, bottom-right)
+- ✅ Color picker matching poster palette
+- ✅ Renders correctly in PNG export
+
+### Compass Rose (Next Up)
+
+SVG compass for circular poster formats — adds a nautical/expedition feel.
+
+- [ ] 8 cardinal/intercardinal directions (N, NE, E, SE, S, SW, W, NW)
+- [ ] 24 intermediate tick marks at 15° intervals
+- [ ] Uses palette accent color
+- [ ] Only renders on circular mask posters
+- [ ] Renders in PNG export
+
+**Config exists**: `format.compassRose?: boolean` — just needs component implementation.
+
+### Custom Markers System (Planned)
+
+Enable users to annotate posters with multiple custom location markers.
+
+- [ ] Multiple markers per poster (not just center)
+- [ ] 6 marker types: pin, crosshair, dot, ring, heart, home
+- [ ] Color and size customization per marker
+- [ ] Optional labels with 4 styles (standard, elevated, glass, vintage)
+- [ ] Marker path lines connecting points
+- [ ] Fill polygon option for marked areas
+
+**Use case**: Mark trail highlights, summit points, rest stops, photo spots.
+
+---
+
 ## Future Phases
 
-### Phase 2: Wedding / Gift Modes
-
-- "Met / Engaged / Married" templates (dual/triple locations)
-- Heart-shaped route connector
-- Romantic font presets
-- Custom date formatting
-- Gift wrapping for prints
-
-**Why wait**: Higher support burden, need brand credibility first.
-
-### Phase 3: Sailing / Voyage Maps
+### Phase 2: Sailing & Voyage Maps
 
 - Nautical mile display
 - Port markers for stops
@@ -156,43 +192,62 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 
 **Why this niche**: Less crowded, higher price tolerance, already supports routes.
 
+### Phase 3: Advanced Terrain (Deferred)
+
+- Ray-marched terrain shadows with deck.gl
+- Configurable light direction (azimuth/altitude)
+- Shadow darkness and tint controls
+
+**Why deferred**: Complex implementation, deck.gl dependency, focus on print features first.
+
 ---
 
 ## Feature Backlog
 
 ### Route Enhancements
 
-- [ ] Elevation gradient coloring
-- [ ] Glow/shadow effects on route
+- [ ] Elevation gradient coloring (show climb difficulty)
+- [ ] Glow/shadow effects on route line
 - [ ] Mile/KM markers along route
+- [ ] Segment highlighting (e.g., steepest climb)
 - [x] Strava OAuth integration ✅
-- [ ] AllTrails integration
 - [ ] Garmin Connect integration
+- [ ] Komoot integration
 
-### Export & Formats
+### Cartographic Features
+
+- [ ] Topographic contour lines overlay
+- [ ] Trail difficulty indicators
+- [ ] Elevation profile mini-chart
+- [ ] Distance annotations on route
+
+### Export & Print
 
 - [ ] PDF export (vector output)
 - [ ] SVG export for certain styles
 - [ ] Print partnership (Printful, Gelato)
 - [ ] Multiple print sizes (A4, A3, A2, A1)
+- [ ] Physical 3D print fulfillment service
 
 ### Editor Enhancements
 
 - [ ] Undo/redo
 - [ ] Keyboard shortcuts
-- [ ] Preset location library (famous trails/cities)
+- [ ] Famous routes library (pre-loaded popular trails)
 - [ ] URL-based state for sharing configs
+- [ ] Route simplification slider (reduce detail)
 
-### Social & Sharing
+### Social & Community
 
 - [ ] Collections/folders for organizing maps
 - [ ] Search within feed
 - [ ] User profiles with bio/avatar
 - [ ] Follow users
+- [ ] Challenge/event groups
 
 ### Polish
 
-- [ ] Onboarding tutorial
+- [ ] Onboarding tutorial for first-time users
 - [ ] Accessibility improvements
 - [x] Mobile editor optimization ✅
 
@@ -247,4 +302,6 @@ Transform GPS routes into physical 3D sculptures — tangible keepsakes of adven
 
 **Brand**: Waymarker (waymarker.eu)
 
-**Focus**: Programmatic SEO for organic growth + Print fulfillment partnerships
+**ICP**: Hikers, cyclists, trail runners, travelers, race finishers
+
+**Focus**: Cartographic enhancements + Programmatic SEO + Print fulfillment partnerships
