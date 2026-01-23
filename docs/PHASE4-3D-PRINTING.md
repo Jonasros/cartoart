@@ -3,13 +3,13 @@
 > **Comprehensive Feature Specification**
 > Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
-**Last Updated**: 2026-01-05
+**Last Updated**: 2026-01-23
 
 ---
 
 ## Current Implementation Status
 
-### Completed Features (Phase 4.1-4.5)
+### Completed Features (Phase 4.1-4.6)
 
 | Feature | Status | Location |
 |---------|--------|----------|
@@ -39,12 +39,28 @@
 | Feed MapCard shows sculpture badge | ✅ Complete | `components/feed/MapCard.tsx` |
 | Feed MapCard uses sculpture thumbnail | ✅ Complete | `components/feed/MapCard.tsx` |
 
+### Phase 4.6: Export Quality & Polish (Completed 2026-01-23)
+
+| Feature | Status | Location |
+| ------- | ------ | -------- |
+| Export quality presets (draft/standard/high/ultra) | ✅ Complete | `types/sculpture.ts` |
+| High-quality route tubes (24 radial segments) | ✅ Complete | `meshGenerator.ts` |
+| Douglas-Peucker route simplification | ✅ Complete | `lib/algorithms/douglasPeucker.ts` |
+| Gaussian terrain smoothing | ✅ Complete | `meshGenerator.ts` |
+| Text geometry improvements (2048px, 1.2mm depth) | ✅ Complete | `meshGenerator.ts` |
+| Route elevation source toggle (GPS/terrain snap) | ✅ Complete | `RouteMesh.tsx`, `TerrainMesh.tsx` |
+| Preview/export setting consistency | ✅ Complete | `meshGenerator.ts`, `SculptureExportModal.tsx` |
+| Pre-export estimation UI | ✅ Complete | `SculptureExportModal.tsx` |
+| Export progress tracking | ✅ Complete | `SculptureExportModal.tsx` |
+| Terrain rotation applied to STL export | ✅ Complete | `SculptureExportModal.tsx` |
+
 ### Remaining Work
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | ExploreDrawer product type badges | Medium | Add poster/sculpture badge like MapCard |
 | ExploreDrawer sculpture thumbnails | Medium | Use `sculpture_thumbnail_url` for sculptures |
+| Mesh validation (manifold checks) | Low | Detect non-manifold geometry before export |
 | Fulfillment API integration | Low | Future: for ordering physical prints |
 
 **See Also**: [3D-SCULPTURE-GUIDE.md](./3D-SCULPTURE-GUIDE.md) for developer reference

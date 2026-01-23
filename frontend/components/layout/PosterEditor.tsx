@@ -99,7 +99,12 @@ export function PosterEditor() {
   const { errors, handleError, clearError } = useErrorHandler();
 
   // Elevation grid for sculpture mode STL export
-  const { grid: elevationGrid } = useElevationGrid(config.route?.data ?? null);
+  // IMPORTANT: Must pass sculptureConfig settings to get full terrain data
+  const { grid: elevationGrid, loading: elevationGridLoading } = useElevationGrid(
+    config.route?.data ?? null,
+    sculptureConfig.terrainResolution,
+    sculptureConfig.terrainMode
+  );
 
   // Track currently loaded saved map
   const [currentMapId, setCurrentMapId] = useState<string | null>(null);

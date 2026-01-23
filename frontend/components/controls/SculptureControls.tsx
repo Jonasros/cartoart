@@ -20,6 +20,7 @@ import type {
   SculptureConfig,
   SculptureShape,
   SculptureRouteStyle,
+  SculptureRouteElevationSource,
   SculptureMaterial,
   SculptureTextConfig,
   SculptureTerrainMode,
@@ -238,6 +239,45 @@ export function SculptureControls({
             )}
           </div>
         </div>
+
+        {/* Route Elevation Source Toggle - only for raised route style */}
+        {config.routeStyle === 'raised' && (
+          <div className="space-y-2 mt-4">
+            <ControlLabel className="text-[10px] uppercase text-gray-500">
+              Route Elevation
+            </ControlLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'gps' as SculptureRouteElevationSource, label: 'GPS Data', description: 'Follow recorded elevation' },
+                { value: 'terrain' as SculptureRouteElevationSource, label: 'Terrain Snap', description: 'Follow terrain surface' },
+              ]).map(({ value, label, description }) => (
+                <button
+                  key={value}
+                  onClick={() => onConfigChange({ routeElevationSource: value })}
+                  className={cn(
+                    'p-2.5 text-left rounded-lg border transition-all',
+                    (config.routeElevationSource ?? 'gps') === value
+                      ? 'bg-primary/5 dark:bg-primary/10 border-primary'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  )}
+                >
+                  <div className={cn(
+                    'text-xs font-semibold',
+                    (config.routeElevationSource ?? 'gps') === value ? 'text-primary dark:text-primary' : 'text-gray-700 dark:text-gray-300'
+                  )}>
+                    {label}
+                  </div>
+                  <div className="text-[9px] text-gray-500 mt-0.5">{description}</div>
+                </button>
+              ))}
+            </div>
+            <div className="text-[10px] text-gray-400 mt-1">
+              {(config.routeElevationSource ?? 'gps') === 'terrain'
+                ? 'Route follows terrain exactly - ideal when GPS elevation is inaccurate'
+                : 'Route uses recorded GPS elevation - may float above terrain if data differs'}
+            </div>
+          </div>
+        )}
 
         {/* Style Presets */}
         <div className="space-y-2 mt-4">

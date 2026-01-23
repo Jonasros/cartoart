@@ -9,6 +9,49 @@ import { getRouteMaterialProperties, getMaterialProperties } from './materials';
 interface RouteMeshProps {
   routeData: RouteData;
   config: SculptureConfig;
+  /** Elevation grid for terrain snapping (optional, used when routeElevationSource === 'terrain') */
+  elevationGrid?: number[][];
+}
+
+/**
+ * Sample elevation from the terrain grid at given normalized coordinates.
+ * Returns the elevation value from the grid using bilinear interpolation.
+ */
+function sampleTerrainElevation(
+  normalizedX: number,
+  normalizedZ: number,
+  elevationGrid: number[][],
+  minElevation: number
+): number {
+  const gridRows = elevationGrid.length;
+  const gridCols = elevationGrid[0]?.length || 1;
+
+  // Clamp normalized coordinates to valid range
+  const clampedX = Math.max(0, Math.min(1, normalizedX));
+  const clampedZ = Math.max(0, Math.min(1, normalizedZ));
+
+  // Convert to grid indices
+  const xi = clampedX * (gridCols - 1);
+  const zi = clampedZ * (gridRows - 1);
+
+  // Get integer and fractional parts for bilinear interpolation
+  const x0 = Math.floor(xi);
+  const z0 = Math.floor(zi);
+  const x1 = Math.min(x0 + 1, gridCols - 1);
+  const z1 = Math.min(z0 + 1, gridRows - 1);
+  const xFrac = xi - x0;
+  const zFrac = zi - z0;
+
+  // Sample four corners
+  const v00 = elevationGrid[z0]?.[x0] ?? minElevation;
+  const v10 = elevationGrid[z0]?.[x1] ?? minElevation;
+  const v01 = elevationGrid[z1]?.[x0] ?? minElevation;
+  const v11 = elevationGrid[z1]?.[x1] ?? minElevation;
+
+  // Bilinear interpolation
+  const v0 = v00 * (1 - xFrac) + v10 * xFrac;
+  const v1 = v01 * (1 - xFrac) + v11 * xFrac;
+  return v0 * (1 - zFrac) + v1 * zFrac;
 }
 
 /**
@@ -89,7 +132,7 @@ function createRibbonGeometry(
  * The route is normalized to fit within the sculpture size and
  * elevation scale parameters from the config.
  */
-export function RouteMesh({ routeData, config }: RouteMeshProps) {
+export function RouteMesh({ routeData, config, elevationGrid }: RouteMeshProps) {
   const geometry = useMemo(() => {
     // For engraved style, don't render a separate mesh - the groove in terrain IS the route
     if (config.routeStyle === 'engraved') {
@@ -97,7 +140,14 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     }
 
     const { points, stats, bounds } = routeData;
-    const { size, routeThickness, elevationScale, shape } = config;
+    const {
+      size, routeThickness, elevationScale, shape,
+      terrainHeightLimit = 0.8, routeDepth = 0.04,
+      routeElevationSource = 'gps'
+    } = config;
+
+    // Determine if we should use terrain snapping
+    const useTerrainSnap = routeElevationSource === 'terrain' && elevationGrid && elevationGrid.length > 0;
 
     // Calculate bounds for normalization
     const [[minLng, minLat], [maxLng, maxLat]] = bounds;
@@ -107,10 +157,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
 
     // Height scale factor (convert to Three.js units)
     const heightScale = elevationScale * (size / 100);
+    const maxHeight = terrainHeightLimit * heightScale;
 
-    // Offset: raised tube floats above terrain
-    // Use routeDepth from config (default 0.04 for backwards compatibility)
-    const verticalOffset = config.routeDepth ?? 0.04;
+    // Tube radius - needed to position tube so bottom touches terrain
+    const tubeRadius = routeThickness / 200;
 
     // Mesh size and circular boundary (for clipping)
     const meshSize = size / 10;
@@ -129,6 +179,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     }
 
     // Convert route points to 3D vectors
+    // IMPORTANT: Use GPS elevation from route points, NOT terrain grid sampling.
+    // This matches how TerrainMesh calculates route clearance (see TerrainMesh.tsx lines 399-413).
+    // The terrain is cleared around the route based on GPS elevation, so the tube must
+    // also be positioned based on GPS elevation for them to align perfectly.
     const curve3Points: THREE.Vector3[] = [];
 
     for (const point of processedPoints) {
@@ -151,10 +205,29 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
         }
       }
 
-      // Calculate height from elevation (or use minimum if not available)
-      const elevation = point.elevation ?? stats.minElevation;
+      // Get elevation based on source setting
+      let elevation: number;
+      if (useTerrainSnap) {
+        // Sample elevation from terrain grid at this position
+        elevation = sampleTerrainElevation(normalizedX, normalizedZ, elevationGrid!, stats.minElevation);
+      } else {
+        // Use GPS elevation from the route point
+        elevation = point.elevation ?? stats.minElevation;
+      }
+
+      // Normalize and scale elevation
       const normalizedElev = (elevation - stats.minElevation) / elevRange;
-      const y = normalizedElev * heightScale + verticalOffset;
+      let routeHeight = normalizedElev * heightScale;
+
+      // Apply height limit (same as TerrainMesh does)
+      routeHeight = Math.min(routeHeight, maxHeight);
+
+      // Position tube center based on elevation source:
+      // - Terrain snap: position at routeHeight + tubeRadius so tube bottom touches terrain exactly
+      // - GPS mode: position at routeHeight + routeDepth (TerrainMesh clears terrain beneath)
+      const y = useTerrainSnap
+        ? routeHeight + tubeRadius  // Bottom of tube touches terrain surface
+        : routeHeight + routeDepth; // Floating above terrain with clearance
 
       curve3Points.push(new THREE.Vector3(x, y, z));
     }
@@ -172,10 +245,10 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     const segments = Math.max(64, Math.min(500, Math.floor(curveLength * 50)));
 
     // Create tube for raised style
-    const radius = routeThickness / 200;
-    const radialSegments = 8;
-    return new THREE.TubeGeometry(curve, segments, radius, radialSegments, false);
-  }, [routeData, config]);
+    // Use 12 segments for preview (smoother than 8, but faster than 24 used in export)
+    const radialSegments = 12;
+    return new THREE.TubeGeometry(curve, segments, tubeRadius, radialSegments, false);
+  }, [routeData, config, elevationGrid]);
 
   // Get route-specific material properties (shinier than terrain to stand out)
   // Textures temporarily disabled for debugging

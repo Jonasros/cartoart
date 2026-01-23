@@ -28,6 +28,13 @@ export type SculptureRouteStyle = 'raised' | 'engraved';
 export type SculptureTerrainMode = 'route' | 'terrain';
 
 /**
+ * Route elevation source for tube positioning
+ * - 'gps': Use GPS elevation from route file (default, accurate to recorded data)
+ * - 'terrain': Snap tube to terrain surface (useful when GPS elevation is inaccurate)
+ */
+export type SculptureRouteElevationSource = 'gps' | 'terrain';
+
+/**
  * Material options for 3D printing
  */
 export type SculptureMaterial = 'pla' | 'wood' | 'resin';
@@ -42,6 +49,127 @@ export type SculptureMaterial = 'pla' | 'wood' | 'resin';
  * - 'custom': User-defined 3-color gradient
  */
 export type TerrainColorPreset = 'none' | 'natural' | 'earth' | 'topo' | 'mono' | 'custom';
+
+/**
+ * Export quality levels for STL generation
+ * - 'draft': Fast preview, lower quality (8 radial segments, 64x64 terrain)
+ * - 'standard': Free export quality (16 segments, 128x128 terrain)
+ * - 'high': Paid export quality - smooth surfaces, detailed terrain (24 segments, 256x256)
+ * - 'ultra': Maximum quality for demanding prints (32 segments, 384x384)
+ */
+export type ExportQuality = 'draft' | 'standard' | 'high' | 'ultra';
+
+/**
+ * Quality parameters for mesh generation
+ */
+export interface ExportQualityParams {
+  /** Radial segments for route tube (8=octagonal, 24+=smooth cylinder) */
+  routeRadialSegments: number;
+  /** Maximum route points before decimation */
+  maxRoutePoints: number;
+  /** Terrain grid resolution (segments per axis) */
+  terrainResolution: number;
+  /** Number of smoothing passes for terrain */
+  smoothingPasses: number;
+  /** Text canvas resolution in pixels */
+  textCanvasResolution: number;
+  /** Text grid segments [x, y] */
+  textGridSegments: [number, number];
+  /** Text engraving depth in mm */
+  textDepth: number;
+}
+
+/**
+ * Export quality preset with metadata for UI
+ */
+export interface ExportQualityPreset {
+  label: string;
+  description: string;
+  params: ExportQualityParams;
+  /** Estimated triangle count for typical sculpture */
+  estimatedTriangles: number;
+  /** Estimated file size in MB */
+  estimatedFileSizeMB: number;
+  /** Estimated generation time [min, max] in seconds */
+  estimatedTimeSeconds: [number, number];
+}
+
+/**
+ * Export quality presets with all parameters and estimates
+ */
+export const EXPORT_QUALITY_PRESETS: Record<ExportQuality, ExportQualityPreset> = {
+  draft: {
+    label: 'Draft',
+    description: 'Fast preview, lower quality',
+    params: {
+      routeRadialSegments: 8,
+      maxRoutePoints: 250,
+      terrainResolution: 64,
+      smoothingPasses: 0,
+      textCanvasResolution: 512,
+      textGridSegments: [256, 128],
+      textDepth: 0.8,
+    },
+    estimatedTriangles: 50000,
+    estimatedFileSizeMB: 3,
+    estimatedTimeSeconds: [2, 5],
+  },
+  standard: {
+    label: 'Standard',
+    description: 'Good quality for free exports',
+    params: {
+      routeRadialSegments: 16,
+      maxRoutePoints: 400,
+      terrainResolution: 128,
+      smoothingPasses: 1,
+      textCanvasResolution: 1024,
+      textGridSegments: [512, 256],
+      textDepth: 1.0,
+    },
+    estimatedTriangles: 150000,
+    estimatedFileSizeMB: 8,
+    estimatedTimeSeconds: [10, 20],
+  },
+  high: {
+    label: 'High Quality',
+    description: 'Smooth surfaces, detailed terrain (paid)',
+    params: {
+      routeRadialSegments: 24,
+      maxRoutePoints: 750,
+      terrainResolution: 256,
+      smoothingPasses: 2,
+      textCanvasResolution: 2048,
+      textGridSegments: [1024, 512],
+      textDepth: 1.2,
+    },
+    estimatedTriangles: 400000,
+    estimatedFileSizeMB: 20,
+    estimatedTimeSeconds: [30, 60],
+  },
+  ultra: {
+    label: 'Ultra',
+    description: 'Maximum quality for demanding prints',
+    params: {
+      routeRadialSegments: 32,
+      maxRoutePoints: 1200,
+      terrainResolution: 384,
+      smoothingPasses: 3,
+      textCanvasResolution: 2048,
+      textGridSegments: [1024, 512],
+      textDepth: 1.2,
+    },
+    estimatedTriangles: 800000,
+    estimatedFileSizeMB: 40,
+    estimatedTimeSeconds: [60, 180],
+  },
+};
+
+/**
+ * Get quality params for a given quality level
+ */
+export function getExportQualityParams(quality: ExportQuality): ExportQualityParams {
+  return EXPORT_QUALITY_PRESETS[quality].params;
+}
 
 /**
  * A color stop in a gradient (position 0-1, hex color)
@@ -193,6 +321,8 @@ export interface SculptureConfig {
   routeClearance: number;
   /** Route depth/height - raised: how high above terrain, engraved: how deep the groove (0.01-0.1) */
   routeDepth: number;
+  /** Route elevation source - 'gps' uses recorded elevation, 'terrain' snaps to terrain surface */
+  routeElevationSource: SculptureRouteElevationSource;
   /** Terrain smoothing passes for better 3D printing (0-3) */
   terrainSmoothing: number;
   /** Enable auto-rotation turntable animation for preview */
@@ -235,6 +365,7 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainHeightLimit: 0.8, // 80% of elevation scale - keeps terrain printable
   routeClearance: 0.05, // Terrain dips near route for visibility
   routeDepth: 0.04, // Route height (raised) or groove depth (engraved)
+  routeElevationSource: 'gps', // Use GPS elevation (accurate to recorded data)
   terrainSmoothing: 1, // One smoothing pass for gentle terrain
   turntableEnabled: false, // Auto-rotation disabled by default
   turntableSpeed: 0.3, // Slow rotation for hero shots

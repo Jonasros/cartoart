@@ -3,7 +3,7 @@
 > Complete reference for the 3D printed route sculpture feature.
 > Use this guide to understand, modify, and optimize the sculpture system.
 
-**Last Updated**: 2026-01-05
+**Last Updated**: 2026-01-23
 
 ---
 
@@ -106,13 +106,15 @@ interface SculptureConfig {
   routeStyle: 'raised' | 'engraved';
   routeThickness: number;    // Route width in mm (1-5)
   routeColor: string;        // Hex color
+  routeDepth: number;        // Height above terrain (raised) or groove depth (engraved)
+  routeElevationSource: 'gps' | 'terrain'; // GPS data or snap to terrain surface
 
   // Terrain Settings (CRITICAL for 3D print quality)
   elevationScale: number;       // Height multiplier (0.5-3.0)
   terrainHeightLimit: number;   // Max height as fraction (0.3-1.0)
   routeClearance: number;       // Depression around route (0-0.15)
   terrainSmoothing: number;     // Smoothing passes (0-3)
-  terrainResolution: number;    // Grid segments (64-192)
+  terrainResolution: number;    // Grid segments (64-256)
   terrainMode: 'route' | 'terrain';
   terrainColor: string;         // Hex color
 
@@ -140,7 +142,8 @@ interface SculptureConfig {
 | `terrainHeightLimit` | 0.3-1.0 | Caps max terrain height | Lower = flatter, more printable |
 | `routeClearance` | 0-0.15 | Depression around route | Higher = route more visible, terrain dips more |
 | `terrainSmoothing` | 0-3 | Smoothing passes | Higher = gentler slopes, better print quality |
-| `terrainResolution` | 64-192 | Grid detail | Higher = more detail, larger file size |
+| `terrainResolution` | 64-256 | Grid detail | Higher = more detail, larger file size |
+| `routeElevationSource` | gps/terrain | Where route gets elevation | 'terrain' = tube sits on surface, 'gps' = uses GPS data |
 
 ---
 
@@ -188,13 +191,24 @@ Two styles available in `RouteMesh.tsx`:
 
 ### Raised Route
 - Creates `TubeGeometry` along route path
-- Tube floats slightly above terrain surface
-- `routeClearance` creates depression to ensure visibility
+- Two elevation modes controlled by `routeElevationSource`:
+  - **GPS Data** (`'gps'`): Uses GPS elevation from route file. Terrain is cleared beneath tube to prevent clipping.
+  - **Terrain Snap** (`'terrain'`): Tube follows terrain surface exactly. No terrain clearance needed.
+- `routeClearance` creates depression to ensure visibility (GPS mode only)
 
 ### Engraved Route
 - Route carved into terrain surface
 - `grooveWidth` and `grooveDepth` control carving
 - Smooth edges with cosine falloff
+
+### Route Elevation Source
+
+| Source | Behavior | Use When |
+|--------|----------|----------|
+| `'gps'` | Tube follows GPS elevation data | GPS elevation is accurate |
+| `'terrain'` | Tube snaps to terrain surface | GPS elevation is inaccurate or missing |
+
+**Note**: When GPS elevation differs from terrain (common with barometric sensors), the tube may float above terrain. Use "Terrain Snap" to fix this.
 
 **Visibility Algorithm**:
 ```typescript
