@@ -110,20 +110,25 @@ User lifecycle email automation for retention and conversion.
 ### 3D Journey Sculptures ✅
 
 > **Specification**: [docs/PHASE4-3D-PRINTING.md](docs/PHASE4-3D-PRINTING.md)
+> **Developer Guide**: [docs/3D-SCULPTURE-GUIDE.md](docs/3D-SCULPTURE-GUIDE.md)
 
 Transform GPS routes into physical 3D sculptures — tangible keepsakes of adventures.
 
 **Completed Features**:
 
 - ✅ React Three Fiber rendering engine with OrbitControls
-- ✅ GPS route extrusion as 3D ribbon geometry
-- ✅ 4 base shapes (Rectangular, Circular, Organic, Terrain)
-- ✅ Material presets (Matte, Glossy, Metallic, Wood, Stone)
+- ✅ GPS route extrusion as 3D tube geometry
+- ✅ 2 base shapes (Rectangular, Circular) with rim options
+- ✅ Material presets (PLA, Wood, Resin) with realistic textures
 - ✅ Studio lighting with environment presets
-- ✅ Post-processing pipeline (bloom, AO, tone mapping)
+- ✅ Post-processing pipeline (SMAA anti-aliasing)
 - ✅ Turntable animation for showcase views
 - ✅ STL export for 3D printing
-- ✅ Printability indicators with "Print Ready" badge
+- ✅ Route style options (raised tube vs engraved groove)
+- ✅ Route elevation source (GPS data vs terrain snap)
+- ✅ Terrain height controls (elevation scale, height limit, smoothing)
+- ✅ Auto-orient route start to front
+- ✅ Engraved text on base with customization
 
 ### Stripe Payment Integration ✅
 
@@ -295,13 +300,19 @@ Add **Export Quality Presets** (default to High Quality for paid exports):
 
 ### Implementation Tasks
 
-- [ ] Increase route tube `radialSegments` from 8 → configurable (16-32)
+- [x] Increase route tube `radialSegments` from 8 → 12 for preview, configurable for export ✅
 - [ ] Add export quality preset selector to sculpture export modal
 - [ ] Implement adaptive route decimation (Douglas-Peucker algorithm)
 - [ ] Add mesh validation (manifold check, self-intersection detection)
-- [ ] Increase terrain smoothing passes for high-quality presets
+- [x] Terrain smoothing controls (0-3 passes configurable) ✅
 - [ ] Display estimated file size and polygon count before export
 - [ ] Add "Optimize for printing" post-processing step (vertex welding)
+
+**Recent Improvements (not in original plan)**:
+
+- [x] Route elevation source toggle (GPS data vs terrain snap) ✅
+- [x] Route clearance optimization (terrain dips beneath raised routes) ✅
+- [x] Auto-orientation of route start to front ✅
 
 **Files to modify**: `lib/sculpture/meshGenerator.ts`, `lib/sculpture/stlExporter.ts`, `components/sculpture/RouteMesh.tsx`, `components/sculpture/TerrainMesh.tsx`
 
