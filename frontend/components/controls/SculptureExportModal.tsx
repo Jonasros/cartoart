@@ -182,6 +182,39 @@ export function SculptureExportModal({
       const THREE = await import('three');
       const material = new THREE.MeshBasicMaterial();
       const mesh = new THREE.Mesh(meshes.combined, material);
+
+      // Apply terrain rotation to match preview
+      // If terrainRotation is -1 (auto), calculate based on start point position
+      const terrainRotation = exportConfig.terrainRotation ?? -1;
+      let finalRotation = 0;
+
+      if (terrainRotation === -1 && routeData.points.length > 0) {
+        // Calculate auto-rotation based on start point position (match SculpturePreview.tsx)
+        const meshSize = exportConfig.size / 10;
+        const [[minLng, minLat], [maxLng, maxLat]] = routeData.bounds;
+        const lngRange = maxLng - minLng || 0.001;
+        const latRange = maxLat - minLat || 0.001;
+        const startPoint = routeData.points[0];
+        const normalizedX = (startPoint.lng - minLng) / lngRange;
+        const normalizedZ = (startPoint.lat - minLat) / latRange;
+        const startX = (normalizedX - 0.5) * meshSize;
+        const startZ = (normalizedZ - 0.5) * meshSize;
+        // Angle from center to start point, then rotate so start faces front
+        const angleToStart = Math.atan2(startX, startZ);
+        finalRotation = -angleToStart + Math.PI; // Rotate so start point faces front (+Z)
+      } else if (terrainRotation !== -1) {
+        finalRotation = (terrainRotation * Math.PI) / 180;
+      }
+
+      // Apply rotation to the mesh geometry directly (bake into vertices)
+      if (finalRotation !== 0) {
+        mesh.rotation.y = finalRotation;
+        mesh.updateMatrix();
+        meshes.combined.applyMatrix4(mesh.matrix);
+        mesh.rotation.y = 0; // Reset rotation since it's now baked in
+        mesh.updateMatrix();
+      }
+
       const scene = new THREE.Scene();
       scene.add(mesh);
 
