@@ -28,6 +28,13 @@ export type SculptureRouteStyle = 'raised' | 'engraved';
 export type SculptureTerrainMode = 'route' | 'terrain';
 
 /**
+ * Route elevation source for tube positioning
+ * - 'gps': Use GPS elevation from route file (default, accurate to recorded data)
+ * - 'terrain': Snap tube to terrain surface (useful when GPS elevation is inaccurate)
+ */
+export type SculptureRouteElevationSource = 'gps' | 'terrain';
+
+/**
  * Material options for 3D printing
  */
 export type SculptureMaterial = 'pla' | 'wood' | 'resin';
@@ -314,6 +321,8 @@ export interface SculptureConfig {
   routeClearance: number;
   /** Route depth/height - raised: how high above terrain, engraved: how deep the groove (0.01-0.1) */
   routeDepth: number;
+  /** Route elevation source - 'gps' uses recorded elevation, 'terrain' snaps to terrain surface */
+  routeElevationSource: SculptureRouteElevationSource;
   /** Terrain smoothing passes for better 3D printing (0-3) */
   terrainSmoothing: number;
   /** Enable auto-rotation turntable animation for preview */
@@ -356,6 +365,7 @@ export const DEFAULT_SCULPTURE_CONFIG: SculptureConfig = {
   terrainHeightLimit: 0.8, // 80% of elevation scale - keeps terrain printable
   routeClearance: 0.05, // Terrain dips near route for visibility
   routeDepth: 0.04, // Route height (raised) or groove depth (engraved)
+  routeElevationSource: 'gps', // Use GPS elevation (accurate to recorded data)
   terrainSmoothing: 1, // One smoothing pass for gentle terrain
   turntableEnabled: false, // Auto-rotation disabled by default
   turntableSpeed: 0.3, // Slow rotation for hero shots

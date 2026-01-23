@@ -171,8 +171,12 @@ function SculptureScene({
           elevationGrid={elevationGrid ?? undefined}
         />
 
-        {/* Route following the trail path - uses GPS elevation to match terrain clearance */}
-        <RouteMesh routeData={routeData} config={config} />
+        {/* Route following the trail path - elevation source configurable (GPS or terrain snap) */}
+        <RouteMesh
+          routeData={routeData}
+          config={config}
+          elevationGrid={elevationGrid ?? undefined}
+        />
       </group>
 
       {/* Engraved text on base - stays fixed at front */}

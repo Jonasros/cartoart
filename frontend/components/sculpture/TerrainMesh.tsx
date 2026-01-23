@@ -208,7 +208,8 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
   const { geometry, skirtGeometry } = useMemo(() => {
     const {
       size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness,
-      terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04, terrainSmoothing = 1
+      terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04, terrainSmoothing = 1,
+      routeElevationSource = 'gps'
     } = config;
     const segments = terrainResolution;
 
@@ -397,11 +398,14 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
       y = Math.min(y, maxHeight);
 
       // Apply route clearance - ensure route is visible
+      // Note: When routeElevationSource is 'terrain', the tube follows terrain surface exactly,
+      // so we don't need to clear terrain for raised routes (the tube naturally sits on terrain)
       if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
         const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
 
         if (distance < clearanceRadius) {
-          if (routeStyle === 'raised') {
+          if (routeStyle === 'raised' && routeElevationSource === 'gps') {
+            // Only clear terrain for GPS-based elevation (when tube uses GPS coordinates)
             // Route tube parameters (must match RouteMesh.tsx)
             const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
             const tubeRadius = routeThickness / 200; // Tube radius in scene units
@@ -412,13 +416,15 @@ export function TerrainMesh({ routeData, config, elevationGrid }: TerrainMeshPro
             // Hard cap: terrain must not exceed tube bottom
             // This prevents terrain from poking through the route tube
             y = Math.min(y, tubeBottom);
-          } else {
+          } else if (routeStyle === 'engraved') {
             // For engraved: blend terrain toward route elevation near the groove
             const t = distance / clearanceRadius;
             const falloff = Math.pow(t, 0.5);
             const blendedHeight = falloff * y + (1 - falloff) * routeElev;
             y = blendedHeight;
           }
+          // When routeElevationSource === 'terrain' and routeStyle === 'raised':
+          // No clearance needed - tube follows terrain surface exactly with routeDepth offset
         }
       }
 

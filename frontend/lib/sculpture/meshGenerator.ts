@@ -38,7 +38,7 @@ export function generateSculptureMeshes(
   const params = qualityParams ?? EXPORT_QUALITY_PRESETS.high.params;
 
   const terrainGeo = generateTerrainGeometry(routeData, config, elevationGrid, params);
-  const routeGeo = generateRouteGeometry(routeData, config, params);
+  const routeGeo = generateRouteGeometry(routeData, config, elevationGrid, params);
   const baseGeo = generateBaseGeometry(config);
   const textGeo = generateTextGeometry(config, params);
 
@@ -112,6 +112,47 @@ function getDistanceToRoute(
 }
 
 /**
+ * Sample elevation from the terrain grid at given normalized coordinates.
+ * Returns the elevation value from the grid using bilinear interpolation.
+ */
+function sampleTerrainElevation(
+  normalizedX: number,
+  normalizedZ: number,
+  elevationGrid: number[][],
+  minElevation: number
+): number {
+  const gridRows = elevationGrid.length;
+  const gridCols = elevationGrid[0]?.length || 1;
+
+  // Clamp normalized coordinates to valid range
+  const clampedX = Math.max(0, Math.min(1, normalizedX));
+  const clampedZ = Math.max(0, Math.min(1, normalizedZ));
+
+  // Convert to grid indices
+  const xi = clampedX * (gridCols - 1);
+  const zi = clampedZ * (gridRows - 1);
+
+  // Get integer and fractional parts for bilinear interpolation
+  const x0 = Math.floor(xi);
+  const z0 = Math.floor(zi);
+  const x1 = Math.min(x0 + 1, gridCols - 1);
+  const z1 = Math.min(z0 + 1, gridRows - 1);
+  const xFrac = xi - x0;
+  const zFrac = zi - z0;
+
+  // Sample four corners
+  const v00 = elevationGrid[z0]?.[x0] ?? minElevation;
+  const v10 = elevationGrid[z0]?.[x1] ?? minElevation;
+  const v01 = elevationGrid[z1]?.[x0] ?? minElevation;
+  const v11 = elevationGrid[z1]?.[x1] ?? minElevation;
+
+  // Bilinear interpolation
+  const v0 = v00 * (1 - xFrac) + v10 * xFrac;
+  const v1 = v01 * (1 - xFrac) + v11 * xFrac;
+  return v0 * (1 - zFrac) + v1 * zFrac;
+}
+
+/**
  * Apply Gaussian smoothing to a 2D height grid
  * Multi-pass smoothing for print-quality terrain surfaces
  */
@@ -173,7 +214,8 @@ function generateTerrainGeometry(
 ): THREE.BufferGeometry {
   const {
     size, elevationScale, shape, rimHeight, routeStyle, routeThickness,
-    terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04
+    terrainHeightLimit = 0.8, routeClearance = 0.05, routeDepth = 0.04,
+    routeElevationSource = 'gps'
   } = config;
   // Use quality params for resolution, fall back to config
   const segments = qualityParams?.terrainResolution ?? config.terrainResolution;
@@ -266,11 +308,14 @@ function generateTerrainGeometry(
       y = Math.min(y, maxHeight);
 
       // Apply route clearance - ensure route is visible (match preview)
+      // Note: When routeElevationSource is 'terrain', the tube follows terrain surface exactly,
+      // so we don't need to clear terrain for raised routes (the tube naturally sits on terrain)
       if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
         const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
 
         if (distance < clearanceRadius) {
-          if (routeStyle === 'raised') {
+          if (routeStyle === 'raised' && routeElevationSource === 'gps') {
+            // Only clear terrain for GPS-based elevation (when tube uses GPS coordinates)
             // Route tube parameters (must match RouteMesh.tsx)
             const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
             const tubeRadius = routeThickness / 200; // Tube radius in scene units
@@ -280,13 +325,15 @@ function generateTerrainGeometry(
 
             // Hard cap: terrain must not exceed tube bottom
             y = Math.min(y, tubeBottom);
-          } else {
+          } else if (routeStyle === 'engraved') {
             // For engraved: blend terrain toward route elevation near the groove
             const t = distance / clearanceRadius;
             const falloff = Math.pow(t, 0.5);
             const blendedHeight = falloff * y + (1 - falloff) * routeElev;
             y = blendedHeight;
           }
+          // When routeElevationSource === 'terrain' and routeStyle === 'raised':
+          // No clearance needed - tube follows terrain surface exactly with routeDepth offset
         }
       }
 
@@ -348,11 +395,14 @@ function generateTerrainGeometry(
       y = Math.min(y, maxHeight);
 
       // Apply route clearance - ensure route is visible (match preview)
+      // Note: When routeElevationSource is 'terrain', the tube follows terrain surface exactly,
+      // so we don't need to clear terrain for raised routes (the tube naturally sits on terrain)
       if (routeMeshPoints.length > 1 && clearanceRadius > 0) {
         const { distance, elevation: routeElev } = getDistanceToRoute(x, z, routeMeshPoints);
 
         if (distance < clearanceRadius) {
-          if (routeStyle === 'raised') {
+          if (routeStyle === 'raised' && routeElevationSource === 'gps') {
+            // Only clear terrain for GPS-based elevation (when tube uses GPS coordinates)
             // Route tube parameters (must match RouteMesh.tsx)
             const tubeVerticalOffset = routeDepth; // Tube center floats above terrain (from config)
             const tubeRadius = routeThickness / 200; // Tube radius in scene units
@@ -362,13 +412,15 @@ function generateTerrainGeometry(
 
             // Hard cap: terrain must not exceed tube bottom
             y = Math.min(y, tubeBottom);
-          } else {
+          } else if (routeStyle === 'engraved') {
             // For engraved: blend terrain toward route elevation near the groove
             const t = distance / clearanceRadius;
             const falloff = Math.pow(t, 0.5);
             const blendedHeight = falloff * y + (1 - falloff) * routeElev;
             y = blendedHeight;
           }
+          // When routeElevationSource === 'terrain' and routeStyle === 'raised':
+          // No clearance needed - tube follows terrain surface exactly with routeDepth offset
         }
       }
 
@@ -399,21 +451,30 @@ function generateTerrainGeometry(
  * Generate route tube geometry
  * Mirrors the logic in RouteMesh.tsx
  *
- * Uses GPS elevation from route points to position the tube.
- * This matches how terrain clearance is calculated, ensuring the tube
- * sits exactly on the cleared terrain surface.
+ * Supports two elevation modes:
+ * - 'gps': Uses GPS elevation from route points (default)
+ * - 'terrain': Snaps tube to terrain surface (useful when GPS elevation is inaccurate)
  *
  * @param routeData - GPS route data
  * @param config - Sculpture configuration
+ * @param elevationGrid - Optional terrain elevation grid for terrain snapping
  * @param qualityParams - Quality parameters for mesh resolution
  */
 function generateRouteGeometry(
   routeData: RouteData,
   config: SculptureConfig,
+  elevationGrid?: number[][],
   qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
   const { points, stats, bounds } = routeData;
-  const { size, routeThickness, elevationScale, shape, terrainHeightLimit = 0.8, routeDepth = 0.04 } = config;
+  const {
+    size, routeThickness, elevationScale, shape,
+    terrainHeightLimit = 0.8, routeDepth = 0.04,
+    routeElevationSource = 'gps'
+  } = config;
+
+  // Determine if we should use terrain snapping
+  const useTerrainSnap = routeElevationSource === 'terrain' && elevationGrid && elevationGrid.length > 0;
 
   const [[minLng, minLat], [maxLng, maxLat]] = bounds;
   const lngRange = maxLng - minLng || 0.001;
@@ -459,21 +520,29 @@ function generateRouteGeometry(
       }
     }
 
-    // Use GPS elevation from the route point
-    // This matches generateTerrainGeometry's route clearance calculation which uses:
-    //   routeElev = (point.elevation - minElevation) / elevRange * heightScale
-    const elevation = point.elevation ?? stats.minElevation;
+    // Get elevation based on source setting
+    let elevation: number;
+    if (useTerrainSnap) {
+      // Sample elevation from terrain grid at this position
+      elevation = sampleTerrainElevation(normalizedX, normalizedZ, elevationGrid!, stats.minElevation);
+    } else {
+      // Use GPS elevation from the route point
+      elevation = point.elevation ?? stats.minElevation;
+    }
+
+    // Normalize and scale elevation
     const normalizedElev = (elevation - stats.minElevation) / elevRange;
     let routeHeight = normalizedElev * heightScale;
 
     // Apply height limit (same as terrain does)
     routeHeight = Math.min(routeHeight, maxHeight);
 
-    // Position tube center at routeDepth above terrain surface
-    // Terrain clears to: tubeBottom = routeElev + routeDepth - tubeRadius - 0.005
-    // So tube center must be at: routeElev + routeDepth
-    // This creates a 0.005 unit gap between terrain max and tube bottom (the safety margin)
-    const y = routeHeight + routeDepth;
+    // Position tube center based on elevation source:
+    // - Terrain snap: position at routeHeight + tubeRadius so tube bottom touches terrain exactly
+    // - GPS mode: position at routeHeight + routeDepth (terrain clears beneath the tube)
+    const y = useTerrainSnap
+      ? routeHeight + tubeRadius  // Bottom of tube touches terrain surface
+      : routeHeight + routeDepth; // Floating above terrain with clearance
 
     curve3Points.push(new THREE.Vector3(x, y, z));
   }
