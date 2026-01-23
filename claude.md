@@ -8,6 +8,45 @@
 > - See [docs/PRD-FAMOUS-ROUTES-SEEDING.md](docs/PRD-FAMOUS-ROUTES-SEEDING.md) for famous routes database seeding
 > - See [docs/PRD-BREVO-EMAIL-AUTOMATION.md](docs/PRD-BREVO-EMAIL-AUTOMATION.md) for email automation strategy
 
+---
+
+## Development Workflow Rules
+
+**CRITICAL**: Follow these rules when developing features for Waymarker.
+
+### Git & Commits
+
+- **NEVER commit to GitHub unless explicitly told to do so**
+- Wait for user approval after implementing and testing each feature
+- User will manually verify features work before committing
+- Commit messages should follow conventional commits format
+
+### Export Pipeline is King
+
+- **Every feature MUST work with the export functionality** — this is what customers pay for
+- Always test both:
+  - **Poster export (PNG)**: Verify feature renders correctly in high-res PNG export
+  - **Sculpture export (STL)**: Verify feature works with 3D sculpture generation
+- The editor preview is just a preview — the export is the product
+- If a feature looks good in the editor but breaks in export, it's not done
+
+### Dev Server
+
+- **NEVER run `npm run dev`** — the user will handle starting the dev server
+- Only run build commands (`npm run build`, `npm run lint`, `npm run typecheck`) to verify code compiles
+
+### Feature Implementation Checklist
+
+1. ✅ Implement feature in editor/preview
+2. ✅ Verify TypeScript compiles (`npm run build`)
+3. ✅ Test feature renders correctly in PNG export
+4. ✅ Test feature works with 3D sculpture (if applicable)
+5. ✅ Verify existing features still work
+6. ✅ Wait for user approval
+7. ✅ Commit only when user explicitly requests it
+
+---
+
 ## Quick Reference
 
 **Brand**: Waymarker (waymarker.eu)
@@ -15,6 +54,7 @@
 **Dev Server**: http://localhost:3000
 
 ### What's Working
+
 - 11 map styles with 15+ palettes
 - GPX route upload with styling (color, width, opacity, dash patterns)
 - Strava Connect: import activities directly from your Strava account
@@ -22,6 +62,7 @@
 - 3D buildings with style presets & perspective controls
 - 3D Journey Sculptures with STL export for 3D printing
 - High-res PNG export (up to 7200x10800px)
+- Scale bar with Haversine distance calculation
 - Stripe payment integration for poster and sculpture exports
 - Social features (feed, likes, comments, sharing)
 - User auth (email/password + Google OAuth) via Supabase
