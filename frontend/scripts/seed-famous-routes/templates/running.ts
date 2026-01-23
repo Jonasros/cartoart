@@ -15,12 +15,12 @@ export const marathonCity: PosterTemplate = {
   paletteId: 'minimal-ink',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 11, // Scale 0-15
+    titleSize: 4, // Scale 0-15 (reduced from 11 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 0,
     titleAllCaps: false,
     subtitleFont: 'DM Sans',
-    subtitleSize: 4.5, // Scale 0-8
+    subtitleSize: 2.5, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: true,
@@ -66,12 +66,12 @@ export const ultraDark: PosterTemplate = {
   paletteId: 'dark-default',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 1,
     titleAllCaps: true,
     subtitleFont: 'DM Sans',
-    subtitleSize: 3.75, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: false,
@@ -118,12 +118,12 @@ export const ultraTerrain: PosterTemplate = {
   paletteId: 'topographic-terrain',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10.5, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10.5 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 1,
     titleAllCaps: true,
     subtitleFont: 'DM Sans',
-    subtitleSize: 3.5, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: false,
@@ -170,12 +170,12 @@ export const bostonBlue: PosterTemplate = {
   paletteId: 'minimal-navy',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 11, // Scale 0-15
+    titleSize: 4, // Scale 0-15 (reduced from 11 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 0,
     titleAllCaps: false,
     subtitleFont: 'DM Sans',
-    subtitleSize: 4.5, // Scale 0-8
+    subtitleSize: 2.5, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: true,
@@ -221,12 +221,12 @@ export const neonRunner: PosterTemplate = {
   paletteId: 'dark-neon',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10.5, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10.5 to prevent overflow)
     titleWeight: 600,
     titleLetterSpacing: 0.5,
     titleAllCaps: false,
     subtitleFont: 'DM Sans',
-    subtitleSize: 4, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: true,

@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-01-23
 
 ---
 
@@ -251,7 +251,7 @@ Programmatic content generation for iconic hiking, cycling, and running routes w
 - ✅ UI overlay hiding for clean screenshots
 - ✅ 41/41 thumbnails generated (100% success rate)
 
-**npm scripts**: `seed:routes`, `seed:routes:dry`, `seed:thumbnails`, `seed:thumbnails:dry`
+**npm scripts**: `seed:routes`, `seed:routes:dry`, `seed:thumbnails`, `seed:thumbnails:dry`, `update:designs`, `update:designs:dry`
 
 ### Stripe Payment Integration
 
@@ -360,6 +360,14 @@ Landing pages for famous routes to capture organic search traffic.
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-23
+
+- ✅ Redesigned all 41 featured route posters with improved typography
+- ✅ Fixed font overflow issue (titles going beyond poster borders)
+- ✅ Regenerated all 33 updated thumbnails (100% success rate)
+- ✅ Updated poster templates with safer typography settings (titleSize 3.5-4 instead of 9.5-11)
+- ✅ Added `update:designs` npm script for future design updates from CSV
 
 ### 2026-01-22
 

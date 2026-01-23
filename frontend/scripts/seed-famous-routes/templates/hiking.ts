@@ -15,12 +15,12 @@ export const trailExplorer: PosterTemplate = {
   paletteId: 'topographic-classic',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 0.5,
     titleAllCaps: false,
     subtitleFont: 'DM Sans',
-    subtitleSize: 4, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: true,
@@ -67,12 +67,12 @@ export const vintageMap: PosterTemplate = {
   paletteId: 'vintage-sepia',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 9.5, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 9.5 to prevent overflow)
     titleWeight: 600,
     titleLetterSpacing: 2,
     titleAllCaps: true,
     subtitleFont: 'DM Sans',
-    subtitleSize: 3.5, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: false,
@@ -118,12 +118,12 @@ export const mountainAdventure: PosterTemplate = {
   paletteId: 'topographic-terrain',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10.5, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10.5 to prevent overflow)
     titleWeight: 700,
     titleLetterSpacing: 1,
     titleAllCaps: true,
     subtitleFont: 'DM Sans',
-    subtitleSize: 3.75, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: false,
@@ -170,12 +170,12 @@ export const forestTrail: PosterTemplate = {
   paletteId: 'minimal-sage',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 10, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 10 to prevent overflow)
     titleWeight: 600,
     titleLetterSpacing: 0.5,
     titleAllCaps: false,
     subtitleFont: 'DM Sans',
-    subtitleSize: 4, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: true,
@@ -222,12 +222,12 @@ export const caminoStyle: PosterTemplate = {
   paletteId: 'minimal-copper',
   typography: {
     titleFont: 'DM Sans',
-    titleSize: 9.5, // Scale 0-15
+    titleSize: 3.5, // Scale 0-15 (reduced from 9.5 to prevent overflow)
     titleWeight: 600,
     titleLetterSpacing: 1.5,
     titleAllCaps: true,
     subtitleFont: 'DM Sans',
-    subtitleSize: 3.5, // Scale 0-8
+    subtitleSize: 2.2, // Scale 0-8
     showTitle: true,
     showSubtitle: true,
     showCoordinates: false,
