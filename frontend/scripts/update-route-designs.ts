@@ -191,7 +191,7 @@ async function updateRoute(
     .from('maps')
     .select('id, config')
     .eq('title', dbTitle)
-    .single();
+    .single<{ id: string; config: Record<string, unknown> }>();
 
   if (fetchError || !existingMap) {
     console.log(`  ⚠️  Route not found in database: ${dbTitle}`);
@@ -201,7 +201,7 @@ async function updateRoute(
   console.log(`  ✓ Found map ID: ${existingMap.id}`);
 
   // Preserve the existing route data and location
-  const existingConfig = existingMap.config as Record<string, unknown>;
+  const existingConfig = existingMap.config;
   const existingRoute = existingConfig?.route;
   const existingLocation = existingConfig?.location;
 
