@@ -172,8 +172,9 @@ export function RouteMesh({ routeData, config }: RouteMeshProps) {
     const segments = Math.max(64, Math.min(500, Math.floor(curveLength * 50)));
 
     // Create tube for raised style
+    // Use 12 segments for preview (smoother than 8, but faster than 24 used in export)
     const radius = routeThickness / 200;
-    const radialSegments = 8;
+    const radialSegments = 12;
     return new THREE.TubeGeometry(curve, segments, radius, radialSegments, false);
   }, [routeData, config]);
 

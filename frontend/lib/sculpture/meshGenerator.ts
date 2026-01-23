@@ -8,7 +8,9 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { RouteData } from '@/types/poster';
-import type { SculptureConfig } from '@/types/sculpture';
+import type { SculptureConfig, ExportQualityParams } from '@/types/sculpture';
+import { EXPORT_QUALITY_PRESETS } from '@/types/sculpture';
+import { simplifyToCount } from '@/lib/algorithms/douglasPeucker';
 
 export interface GeneratedMeshes {
   terrain: THREE.BufferGeometry;
@@ -20,16 +22,25 @@ export interface GeneratedMeshes {
 
 /**
  * Generate all sculpture meshes for export
+ *
+ * @param routeData - GPS route data with points and bounds
+ * @param config - Sculpture configuration
+ * @param elevationGrid - Optional pre-fetched terrain elevation grid
+ * @param qualityParams - Optional quality parameters (defaults to 'high' preset)
  */
 export function generateSculptureMeshes(
   routeData: RouteData,
   config: SculptureConfig,
-  elevationGrid?: number[][]
+  elevationGrid?: number[][],
+  qualityParams?: ExportQualityParams
 ): GeneratedMeshes {
-  const terrainGeo = generateTerrainGeometry(routeData, config, elevationGrid);
-  const routeGeo = generateRouteGeometry(routeData, config);
+  // Default to 'high' quality for paid exports
+  const params = qualityParams ?? EXPORT_QUALITY_PRESETS.high.params;
+
+  const terrainGeo = generateTerrainGeometry(routeData, config, elevationGrid, params);
+  const routeGeo = generateRouteGeometry(routeData, config, params);
   const baseGeo = generateBaseGeometry(config);
-  const textGeo = generateTextGeometry(config);
+  const textGeo = generateTextGeometry(config, params);
 
   // Build list of geometries to merge
   const geometriesToMerge: THREE.BufferGeometry[] = [];
@@ -101,16 +112,69 @@ function getDistanceToRoute(
 }
 
 /**
+ * Apply Gaussian smoothing to a 2D height grid
+ * Multi-pass smoothing for print-quality terrain surfaces
+ */
+function applyGaussianSmoothing(
+  heightGrid: number[][],
+  passes: number
+): number[][] {
+  if (passes <= 0) return heightGrid;
+
+  const rows = heightGrid.length;
+  const cols = heightGrid[0]?.length ?? 0;
+  if (rows === 0 || cols === 0) return heightGrid;
+
+  let result = heightGrid.map(row => [...row]);
+
+  // Gaussian kernel (3x3, sigma ≈ 0.85)
+  const kernel = [
+    [1, 2, 1],
+    [2, 4, 2],
+    [1, 2, 1],
+  ];
+  const kernelSum = 16;
+
+  for (let pass = 0; pass < passes; pass++) {
+    const next = result.map(row => [...row]);
+
+    for (let y = 1; y < rows - 1; y++) {
+      for (let x = 1; x < cols - 1; x++) {
+        let sum = 0;
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            sum += result[y + ky][x + kx] * kernel[ky + 1][kx + 1];
+          }
+        }
+        next[y][x] = sum / kernelSum;
+      }
+    }
+
+    result = next;
+  }
+
+  return result;
+}
+
+/**
  * Generate terrain mesh geometry
  * Mirrors the logic in TerrainMesh.tsx
+ *
+ * @param routeData - GPS route data
+ * @param config - Sculpture configuration
+ * @param elevationGrid - Optional pre-fetched terrain data
+ * @param qualityParams - Quality parameters for mesh resolution
  */
 function generateTerrainGeometry(
   routeData: RouteData,
   config: SculptureConfig,
-  elevationGrid?: number[][]
+  elevationGrid?: number[][],
+  qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
-  const { size, elevationScale, terrainResolution, shape, rimHeight, routeStyle, routeThickness } = config;
-  const segments = terrainResolution;
+  const { size, elevationScale, shape, rimHeight, routeStyle, routeThickness } = config;
+  // Use quality params for resolution, fall back to config
+  const segments = qualityParams?.terrainResolution ?? config.terrainResolution;
+  const smoothingPasses = qualityParams?.smoothingPasses ?? config.terrainSmoothing;
 
   // Account for rim when sizing terrain
   const rimWidth = shape === 'circular' ? size * 0.03 : size * 0.04;
@@ -162,8 +226,10 @@ function generateTerrainGeometry(
   }
 
   if (elevationGrid && elevationGrid.length > 0) {
-    const gridRows = elevationGrid.length;
-    const gridCols = elevationGrid[0]?.length || 1;
+    // Apply Gaussian smoothing to elevation grid for smoother terrain surfaces
+    const smoothedGrid = applyGaussianSmoothing(elevationGrid, smoothingPasses);
+    const gridRows = smoothedGrid.length;
+    const gridCols = smoothedGrid[0]?.length || 1;
 
     for (let i = 0; i < positions.count; i++) {
       let x = positions.getX(i);
@@ -184,7 +250,7 @@ function generateTerrainGeometry(
       const normalizedZ = (z / coordRange + 0.5);
       const xi = Math.min(gridCols - 1, Math.max(0, Math.floor(normalizedX * gridCols)));
       const zi = Math.min(gridRows - 1, Math.max(0, Math.floor(normalizedZ * gridRows)));
-      const elev = elevationGrid[zi]?.[xi] ?? minElevation;
+      const elev = smoothedGrid[zi]?.[xi] ?? minElevation;
       const normalizedElev = (elev - minElevation) / elevRange;
       let y = normalizedElev * heightScale;
 
@@ -262,10 +328,15 @@ function generateTerrainGeometry(
 /**
  * Generate route tube geometry
  * Mirrors the logic in RouteMesh.tsx
+ *
+ * @param routeData - GPS route data
+ * @param config - Sculpture configuration
+ * @param qualityParams - Quality parameters for mesh resolution
  */
 function generateRouteGeometry(
   routeData: RouteData,
-  config: SculptureConfig
+  config: SculptureConfig,
+  qualityParams?: ExportQualityParams
 ): THREE.BufferGeometry {
   const { points, stats, bounds } = routeData;
   const { size, routeThickness, elevationScale, shape } = config;
@@ -279,15 +350,12 @@ function generateRouteGeometry(
   const meshSize = size / 10;
   const circleRadius = meshSize / 2 * 0.92;
 
-  // Simplify points if needed
-  const maxPoints = 500;
+  // Use Douglas-Peucker for adaptive point simplification (preserves shape better than step-based)
+  const maxPoints = qualityParams?.maxRoutePoints ?? 750;
   let processedPoints = points;
   if (points.length > maxPoints) {
-    const step = Math.ceil(points.length / maxPoints);
-    processedPoints = points.filter((_, i) => i % step === 0);
-    if (processedPoints[processedPoints.length - 1] !== points[points.length - 1]) {
-      processedPoints.push(points[points.length - 1]);
-    }
+    // Use Douglas-Peucker algorithm for shape-preserving simplification
+    processedPoints = simplifyToCount(points, maxPoints);
   }
 
   // Convert to 3D vectors
@@ -326,7 +394,10 @@ function generateRouteGeometry(
   const tubularSegments = Math.max(64, Math.min(500, Math.floor(curveLength * 50)));
   const radius = routeThickness / 200;
 
-  return new THREE.TubeGeometry(curve, tubularSegments, radius, 8, false);
+  // Use quality param for radial segments (8=octagonal, 24+=smooth cylinder)
+  const radialSegments = qualityParams?.routeRadialSegments ?? 24;
+
+  return new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
 }
 
 /**
@@ -424,8 +495,14 @@ function generateRectangularBaseGeometry(
  * Generate engraved text geometry using canvas-based displacement
  * Creates a plaque on the FRONT VERTICAL FACE of the base with text engraved into it
  * Matches the positioning in TextMesh.tsx preview component
+ *
+ * @param config - Sculpture configuration
+ * @param qualityParams - Quality parameters for text resolution
  */
-function generateTextGeometry(config: SculptureConfig): THREE.BufferGeometry | null {
+function generateTextGeometry(
+  config: SculptureConfig,
+  qualityParams?: ExportQualityParams
+): THREE.BufferGeometry | null {
   const { text, size, shape, baseHeight } = config;
 
   // Skip if text is disabled or no text content
@@ -440,16 +517,24 @@ function generateTextGeometry(config: SculptureConfig): THREE.BufferGeometry | n
     return null;
   }
 
+  // Get quality-adjusted parameters
+  const textCanvasResolution = qualityParams?.textCanvasResolution ?? 2048;
+  const textGridSegments = qualityParams?.textGridSegments ?? [1024, 512];
+  const textDepthMm = qualityParams?.textDepth ?? 1.2;
+
   console.log('[TextGeometry] Generating text plaque for:', {
     title: text.title,
     subtitle: text.subtitle,
     shape,
-    depth: text.depth
+    depth: textDepthMm,
+    canvasResolution: textCanvasResolution,
+    gridSegments: textGridSegments
   });
 
   const sceneSize = size / 10;
   const baseThickness = baseHeight / 100;
-  const textDepth = Math.max(text.depth / 100, 0.008); // Minimum 0.8mm depth for visibility
+  // Use quality param depth, with minimum for visibility
+  const textDepth = Math.max(textDepthMm / 100, 0.012); // Minimum 1.2mm depth for better visibility
   const radius = sceneSize / 2;
 
   // Plaque dimensions on the FRONT VERTICAL FACE
@@ -481,10 +566,10 @@ function generateTextGeometry(config: SculptureConfig): THREE.BufferGeometry | n
     baseThickness
   });
 
-  // Canvas for text rendering - VERY HIGH RESOLUTION for readable text in 3D print
+  // Canvas for text rendering - use quality param for resolution
   // Low resolution causes "morse code" appearance - need 1024+ for quality
   const aspectRatio = plaqueWidth / plaqueHeight;
-  const canvasHeight = 1024; // Very high resolution for readable text
+  const canvasHeight = textCanvasResolution; // Quality-adjusted resolution
   const canvasWidth = Math.round(canvasHeight * aspectRatio);
 
   const canvas = document.createElement('canvas');
@@ -531,10 +616,10 @@ function generateTextGeometry(config: SculptureConfig): THREE.BufferGeometry | n
   const imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
   const pixels = imageData.data;
 
-  // Subdivisions for the plaque surface - very high resolution for readable text
-  // Must match canvas resolution for proper sampling
-  const segmentsX = Math.min(canvasWidth, 512); // Higher cap for detail
-  const segmentsY = Math.min(canvasHeight, 256); // Higher cap for detail
+  // Subdivisions for the plaque surface - use quality params for grid resolution
+  // Higher segments = better text detail but more triangles
+  const segmentsX = Math.min(canvasWidth, textGridSegments[0]);
+  const segmentsY = Math.min(canvasHeight, textGridSegments[1]);
 
   // Build the plaque geometry - a box with engraved front face
   const vertices: number[] = [];

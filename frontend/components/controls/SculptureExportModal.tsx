@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { X, Download, Loader2, Box, Ruler, Package, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RouteData, PosterConfig } from '@/types/poster';
-import type { SculptureConfig } from '@/types/sculpture';
-import { SCULPTURE_MATERIALS, SCULPTURE_SHAPES } from '@/types/sculpture';
+import type { SculptureConfig, ExportQuality } from '@/types/sculpture';
+import { SCULPTURE_MATERIALS, SCULPTURE_SHAPES, EXPORT_QUALITY_PRESETS, getExportQualityParams } from '@/types/sculpture';
 import {
   generateSculptureMeshes,
   exportToSTL,
@@ -66,6 +66,18 @@ export function SculptureExportModal({
     triangles: number;
     fileSize: number;
   } | null>(null);
+
+  // Export progress tracking
+  const [exportProgress, setExportProgress] = useState<{
+    stage: 'preparing' | 'terrain' | 'route' | 'base' | 'text' | 'merging' | 'exporting';
+    percent: number;
+    elapsedSeconds: number;
+  } | null>(null);
+  const exportStartTimeRef = useRef<number | null>(null);
+
+  // Export quality - always 'high' for paid exports
+  const exportQuality: ExportQuality = 'high';
+  const qualityPreset = EXPORT_QUALITY_PRESETS[exportQuality];
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareThumbnail, setShareThumbnail] = useState<Blob | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -107,6 +119,14 @@ export function SculptureExportModal({
     }
   }, [isOpen, autoTriggerExport, isExporting, routeData]);
 
+  // Helper to update progress with elapsed time
+  const updateProgress = useCallback((stage: typeof exportProgress extends null ? never : NonNullable<typeof exportProgress>['stage'], percent: number) => {
+    const elapsed = exportStartTimeRef.current
+      ? Math.floor((Date.now() - exportStartTimeRef.current) / 1000)
+      : 0;
+    setExportProgress({ stage, percent, elapsedSeconds: elapsed });
+  }, []);
+
   // Internal export function that can be called from both button click and auto-trigger
   const handleExportInternal = useCallback(async () => {
     if (!routeData) {
@@ -117,32 +137,46 @@ export function SculptureExportModal({
     setIsExporting(true);
     setExportError(null);
     setExportStats(null);
+    exportStartTimeRef.current = Date.now();
+    updateProgress('preparing', 0);
 
     // Small delay to allow UI to update and show loading state before heavy computation
     await new Promise((resolve) => requestAnimationFrame(resolve));
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     try {
-      // Debug: Log export parameters to diagnose freezing
-      console.log('[STL Export] Starting with:', {
+      // Get quality params for high-quality export
+      const qualityParams = getExportQualityParams(exportQuality);
+
+      // Debug: Log export parameters
+      console.log('[STL Export] Starting HIGH QUALITY export with:', {
         hasElevationGrid: !!elevationGrid,
         elevationGridSize: elevationGrid ? `${elevationGrid.length}x${elevationGrid[0]?.length}` : 'null',
         routePoints: routeData.points.length,
-        terrainResolution: config.terrainResolution,
-        hasElevationInRoute: routeData.points.some(p => p.elevation !== undefined),
+        qualityParams,
       });
 
-      // Use a much lower resolution for export to prevent freezing
-      // 32x32 = 1,089 vertices vs 64x64 = 4,225 vertices
+      // Use quality preset terrain resolution (256 for high quality)
       const exportConfig = {
         ...config,
-        terrainResolution: Math.min(config.terrainResolution, 32), // Cap at 32 for export
+        terrainResolution: qualityParams.terrainResolution,
+        terrainSmoothing: qualityParams.smoothingPasses,
       };
 
-      console.log('[STL Export] Using terrainResolution:', exportConfig.terrainResolution);
+      console.log('[STL Export] Using high-quality config:', {
+        terrainResolution: exportConfig.terrainResolution,
+        routeRadialSegments: qualityParams.routeRadialSegments,
+        maxRoutePoints: qualityParams.maxRoutePoints,
+      });
 
-      // Generate meshes
-      const meshes = generateSculptureMeshes(routeData, exportConfig, elevationGrid);
+      updateProgress('terrain', 15);
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Allow UI update
+
+      // Generate meshes with quality params
+      const meshes = generateSculptureMeshes(routeData, exportConfig, elevationGrid, qualityParams);
+
+      updateProgress('merging', 70);
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Allow UI update
 
       // Create a scene with the combined mesh
       const THREE = await import('three');
@@ -150,6 +184,9 @@ export function SculptureExportModal({
       const mesh = new THREE.Mesh(meshes.combined, material);
       const scene = new THREE.Scene();
       scene.add(mesh);
+
+      updateProgress('exporting', 85);
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Allow UI update
 
       // Export to STL
       const filename = generateFilename(config, routeName);
@@ -159,20 +196,24 @@ export function SculptureExportModal({
         scale: 10, // 1 scene unit = 10mm (so 15cm sculpture = 1.5 scene units = 15 * 10 = 150mm)
       });
 
+      updateProgress('exporting', 100);
+
       if (result.success) {
         setExportStats({
           vertices: result.stats?.vertices ?? 0,
           triangles: result.stats?.triangles ?? 0,
           fileSize: result.fileSize ?? 0,
         });
-        // Track sculpture export event
+        // Track sculpture export event with quality info
         posthog.capture('sculpture_exported', {
           shape: config.shape,
           size_cm: config.size,
           material: config.material,
+          quality: exportQuality,
           vertices: result.stats?.vertices ?? 0,
           triangles: result.stats?.triangles ?? 0,
           file_size_bytes: result.fileSize ?? 0,
+          generation_time_seconds: Math.floor((Date.now() - (exportStartTimeRef.current || Date.now())) / 1000),
         });
         // Show share modal after successful export
         setShowShareModal(true);
@@ -186,8 +227,10 @@ export function SculptureExportModal({
       );
     } finally {
       setIsExporting(false);
+      setExportProgress(null);
+      exportStartTimeRef.current = null;
     }
-  }, [routeData, config, elevationGrid, routeName]);
+  }, [routeData, config, elevationGrid, routeName, exportQuality, updateProgress]);
 
   // Effect that actually triggers the export when hasAutoTriggered becomes true
   useEffect(() => {
@@ -348,6 +391,111 @@ export function SculptureExportModal({
               </div>
             </div>
           </div>
+
+          {/* Pre-Export Estimation (shown before export) */}
+          {!exportStats && !isExporting && (
+            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+              <h3 className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">
+                High Quality Export
+              </h3>
+              <div className="grid grid-cols-3 gap-2 text-center mb-3">
+                <div>
+                  <div className="text-base font-bold text-amber-700 dark:text-amber-300">
+                    ~{Math.round(qualityPreset.estimatedTriangles / 1000)}K
+                  </div>
+                  <div className="text-xs text-amber-600 dark:text-amber-400">
+                    Triangles
+                  </div>
+                </div>
+                <div>
+                  <div className="text-base font-bold text-amber-700 dark:text-amber-300">
+                    ~{qualityPreset.estimatedFileSizeMB} MB
+                  </div>
+                  <div className="text-xs text-amber-600 dark:text-amber-400">
+                    File Size
+                  </div>
+                </div>
+                <div>
+                  <div className="text-base font-bold text-amber-700 dark:text-amber-300">
+                    {qualityPreset.estimatedTimeSeconds[0]}-{qualityPreset.estimatedTimeSeconds[1]}s
+                  </div>
+                  <div className="text-xs text-amber-600 dark:text-amber-400">
+                    Generation
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-amber-600 dark:text-amber-500">
+                ⚠️ Keep this tab open during generation. Your file downloads automatically.
+              </p>
+            </div>
+          )}
+
+          {/* Export Progress (shown during export) */}
+          {isExporting && exportProgress && (
+            <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+              <h3 className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-3">
+                Generating Your Sculpture...
+              </h3>
+
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden mb-3">
+                <div
+                  className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-300 ease-out"
+                  style={{ width: `${exportProgress.percent}%` }}
+                />
+              </div>
+
+              {/* Stage indicator */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-blue-600 dark:text-blue-400 font-medium">
+                  {exportProgress.stage === 'preparing' && 'Preparing...'}
+                  {exportProgress.stage === 'terrain' && 'Building terrain mesh...'}
+                  {exportProgress.stage === 'route' && 'Creating route tube...'}
+                  {exportProgress.stage === 'base' && 'Generating base platform...'}
+                  {exportProgress.stage === 'text' && 'Engraving text...'}
+                  {exportProgress.stage === 'merging' && 'Combining meshes...'}
+                  {exportProgress.stage === 'exporting' && 'Creating STL file...'}
+                </span>
+                <span className="text-blue-500 dark:text-blue-500">
+                  {exportProgress.elapsedSeconds}s elapsed
+                </span>
+              </div>
+
+              {/* Progress steps */}
+              <div className="mt-3 space-y-1">
+                {[
+                  { key: 'terrain', label: 'Terrain mesh' },
+                  { key: 'merging', label: 'Combine geometry' },
+                  { key: 'exporting', label: 'Export STL' },
+                ].map((step) => {
+                  const stages = ['preparing', 'terrain', 'route', 'base', 'text', 'merging', 'exporting'];
+                  const currentIndex = stages.indexOf(exportProgress.stage);
+                  const stepIndex = stages.indexOf(step.key);
+                  const isComplete = currentIndex > stepIndex;
+                  const isCurrent = currentIndex === stepIndex;
+
+                  return (
+                    <div key={step.key} className="flex items-center gap-2 text-xs">
+                      {isComplete ? (
+                        <span className="text-blue-500">✓</span>
+                      ) : isCurrent ? (
+                        <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                      ) : (
+                        <span className="w-3 h-3 rounded-full border border-blue-300 dark:border-blue-600" />
+                      )}
+                      <span className={cn(
+                        isComplete ? 'text-blue-600 dark:text-blue-400' :
+                        isCurrent ? 'text-blue-700 dark:text-blue-300 font-medium' :
+                        'text-blue-400 dark:text-blue-600'
+                      )}>
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Export Stats (shown after successful export) */}
           {exportStats && (
