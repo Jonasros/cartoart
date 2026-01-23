@@ -9,7 +9,7 @@
  *   npx tsx scripts/update-route-designs.ts --route-id tdf-2025-stage-01
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
 import * as path from 'path';
 import LZString from 'lz-string';
@@ -169,12 +169,14 @@ function parseCSV(csvPath: string): RouteUpdate[] {
  * Update a single route in the database
  */
 async function updateRoute(
-  supabase: ReturnType<typeof createClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any>,
   update: RouteUpdate
 ): Promise<boolean> {
   console.log(`\n📍 Processing: ${update.routeId} - ${update.name}`);
 
-  if (!update.config) {
+  const config = update.config;
+  if (!config) {
     console.log('  ⚠️  Skipping - no valid config decoded');
     return false;
   }
@@ -206,15 +208,15 @@ async function updateRoute(
   const existingLocation = existingConfig?.location;
 
   // Resolve full style and palette objects (not just IDs)
-  const fullStyle = getStyleById(update.config.s);
+  const fullStyle = getStyleById(config.s);
   if (!fullStyle) {
-    console.log(`  ⚠️  Style not found: ${update.config.s}`);
+    console.log(`  ⚠️  Style not found: ${config.s}`);
     return false;
   }
 
-  const fullPalette = fullStyle.palettes.find(p => p.id === update.config.p) || fullStyle.defaultPalette;
+  const fullPalette = fullStyle.palettes.find(p => p.id === config.p) || fullStyle.defaultPalette;
   if (!fullPalette) {
-    console.log(`  ⚠️  Palette not found: ${update.config.p}`);
+    console.log(`  ⚠️  Palette not found: ${config.p}`);
     return false;
   }
 
@@ -223,9 +225,9 @@ async function updateRoute(
     ...existingConfig,
     style: fullStyle,
     palette: fullPalette,
-    typography: update.config.t,
-    format: update.config.f,
-    layers: update.config.ly,
+    typography: config.t,
+    format: config.f,
+    layers: config.ly,
     // Preserve location from existing config (NOT from URL)
     location: existingLocation,
     // Always preserve route data
@@ -234,14 +236,15 @@ async function updateRoute(
 
   if (isDryRun) {
     console.log('  📋 [DRY RUN] Would update with:');
-    console.log(`     Style: ${update.config.s}`);
-    console.log(`     Palette: ${update.config.p}`);
+    console.log(`     Style: ${config.s}`);
+    console.log(`     Palette: ${config.p}`);
     console.log(`     Route data preserved: ${existingRoute ? 'Yes' : 'No'}`);
     return true;
   }
 
   // Update the map config and clear thumbnail for regeneration
-  const { error: updateError } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateError } = await (supabase as any)
     .from('maps')
     .update({
       config: newConfig,
@@ -256,7 +259,7 @@ async function updateRoute(
   }
 
   console.log('  ✅ Updated successfully');
-  console.log(`     Style: ${update.config.s}, Palette: ${update.config.p}`);
+  console.log(`     Style: ${config.s}, Palette: ${config.p}`);
 
   return true;
 }
