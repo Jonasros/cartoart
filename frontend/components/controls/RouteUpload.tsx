@@ -10,6 +10,7 @@ import { LocationSearch } from '@/components/controls/LocationSearch';
 import { StravaActivityPicker } from '@/components/strava/StravaActivityPicker';
 import { RouteBuilder } from '@/components/controls/RouteBuilder';
 import type { StravaConnectionStatus } from '@/types/strava';
+import type { RoutingProfile } from '@/lib/route/routeBuilder';
 import posthog from 'posthog-js';
 
 type RouteTab = 'upload' | 'draw' | 'strava';
@@ -25,9 +26,17 @@ interface RouteUploadProps {
   useMyLocation?: () => void;
   isLocating?: boolean;
   locationError?: string | null;
+  // Route drawing props (forwarded to RouteBuilder)
+  drawWaypoints?: [number, number][];
+  drawProfile?: RoutingProfile;
+  onDrawProfileChange?: (profile: RoutingProfile) => void;
+  isSnapping?: boolean;
+  snapError?: string | null;
+  onUndoWaypoint?: () => void;
+  onClearWaypoints?: () => void;
 }
 
-export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode = false, onDrawModeChange, config, useMyLocation, isLocating, locationError }: RouteUploadProps) {
+export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode = false, onDrawModeChange, config, useMyLocation, isLocating, locationError, drawWaypoints, drawProfile, onDrawProfileChange, isSnapping, snapError, onUndoWaypoint, onClearWaypoints }: RouteUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -386,10 +395,15 @@ export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode =
               {/* Route drawing controls */}
               <RouteBuilder
                 route={route}
-                onRouteChange={onRouteChange}
-                onLocationChange={onLocationChange}
                 drawMode={drawMode}
                 onDrawModeChange={onDrawModeChange ?? (() => {})}
+                waypoints={drawWaypoints ?? []}
+                profile={drawProfile ?? 'foot'}
+                onProfileChange={onDrawProfileChange ?? (() => {})}
+                isSnapping={isSnapping ?? false}
+                snapError={snapError ?? null}
+                onUndo={onUndoWaypoint ?? (() => {})}
+                onClear={onClearWaypoints ?? (() => {})}
               />
             </div>
           )}

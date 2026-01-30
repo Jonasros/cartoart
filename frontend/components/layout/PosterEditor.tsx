@@ -8,6 +8,7 @@ import { useMapExport } from '@/hooks/useMapExport';
 import { useSculptureConfig } from '@/hooks/useSculptureConfig';
 import { useElevationGrid } from '@/hooks/useElevationGrid';
 import { usePrintValidation } from '@/hooks/usePrintValidation';
+import { useRouteDrawing } from '@/hooks/useRouteDrawing';
 import type { ProductMode } from '@/types/sculpture';
 import { Maximize, Plus, Minus, Undo2, Redo2, RotateCcw, Compass } from 'lucide-react';
 import { MapPreview } from '@/components/map/MapPreview';
@@ -86,7 +87,21 @@ export function PosterEditor() {
     isLocating,
     locationError,
   } = usePosterConfig();
-  
+
+  // Route drawing mode (multi-point with OSRM road snapping)
+  const {
+    drawMode,
+    setDrawMode: setDrawModeChange,
+    waypoints: drawWaypoints,
+    profile: drawProfile,
+    setProfile: setDrawProfile,
+    isSnapping,
+    snapError,
+    addWaypoint,
+    undoWaypoint,
+    clearWaypoints,
+  } = useRouteDrawing({ onRouteChange: updateRoute, existingRoute: config.route });
+
   const {
     projects,
     saveProject,
@@ -893,6 +908,15 @@ export function PosterEditor() {
         useMyLocation={useMyLocation}
         isLocating={isLocating}
         locationError={locationError}
+        drawMode={drawMode}
+        onDrawModeChange={setDrawModeChange}
+        drawWaypoints={drawWaypoints}
+        drawProfile={drawProfile}
+        onDrawProfileChange={setDrawProfile}
+        isSnapping={isSnapping}
+        snapError={snapError}
+        onUndoWaypoint={undoWaypoint}
+        onClearWaypoints={clearWaypoints}
       />
 
       {/* Main Content */}
@@ -1011,6 +1035,9 @@ export function PosterEditor() {
                   onMove={handleMapMove}
                   layers={config.layers}
                   route={config.route}
+                  drawMode={drawMode}
+                  onMapClick={addWaypoint}
+                  drawWaypoints={drawWaypoints}
                 />
 
                 {/* Floating Map Controls */}

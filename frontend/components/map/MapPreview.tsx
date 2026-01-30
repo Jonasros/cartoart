@@ -25,6 +25,12 @@ interface MapPreviewProps {
   route?: RouteConfig;
   /** When false, disables all map interactions (zoom, pan, rotate) for view-only mode */
   interactive?: boolean;
+  /** Draw mode: when true, map clicks add waypoints instead of panning */
+  drawMode?: boolean;
+  /** Called when map is clicked in draw mode with [lat, lng] */
+  onMapClick?: (lat: number, lng: number) => void;
+  /** Waypoints to show as numbered markers on the map */
+  drawWaypoints?: [number, number][]; // [lat, lng][]
 }
 
 export function MapPreview({
@@ -38,6 +44,9 @@ export function MapPreview({
   layers,
   route,
   interactive = true,
+  drawMode = false,
+  onMapClick,
+  drawWaypoints,
 }: MapPreviewProps) {
   const mapRef = useRef<MapRef>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,6 +203,33 @@ export function MapPreview({
     }
   }, [onMove]);
 
+  // Handle map click for draw mode
+  const handleClick = useCallback((evt: any) => {
+    if (!drawMode || !onMapClick) return;
+    const { lat, lng } = evt.lngLat;
+    onMapClick(lat, lng);
+  }, [drawMode, onMapClick]);
+
+  // Build GeoJSON for waypoint markers
+  const waypointMarkersGeoJSON = useMemo(() => {
+    if (!drawWaypoints || drawWaypoints.length === 0) return null;
+    return {
+      type: 'FeatureCollection' as const,
+      features: drawWaypoints.map(([lat, lng], index) => ({
+        type: 'Feature' as const,
+        properties: {
+          index: index + 1,
+          isFirst: index === 0,
+          isLast: index === drawWaypoints.length - 1,
+        },
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [lng, lat],
+        },
+      })),
+    };
+  }, [drawWaypoints]);
+
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -275,15 +311,17 @@ export function MapPreview({
         onLoad={handleLoad}
         onMove={interactive ? handleMove : undefined}
         onMoveEnd={interactive ? handleMove : undefined}
+        onClick={drawMode ? handleClick : undefined}
         onError={handleError}
         antialias={true}
         pixelRatio={MAP.PIXEL_RATIO}
         maxZoom={MAP.MAX_ZOOM}
         minZoom={MAP.MIN_ZOOM}
+        cursor={drawMode ? 'crosshair' : undefined}
         scrollZoom={interactive}
         dragPan={interactive}
         dragRotate={interactive}
-        doubleClickZoom={interactive}
+        doubleClickZoom={drawMode ? false : interactive}
         touchZoomRotate={interactive}
         keyboard={interactive}
       >
@@ -359,6 +397,42 @@ export function MapPreview({
             </Source>
           )}
         </>
+      )}
+
+      {/* Draw mode waypoint markers */}
+      {waypointMarkersGeoJSON && drawMode && (
+        <Source
+          id="draw-waypoints"
+          type="geojson"
+          data={waypointMarkersGeoJSON}
+        >
+          {/* Waypoint circles */}
+          <Layer
+            id="draw-waypoints-circle"
+            type="circle"
+            paint={{
+              'circle-radius': 7,
+              'circle-color': '#6366F1',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#FFFFFF',
+            }}
+          />
+          {/* Waypoint numbers */}
+          <Layer
+            id="draw-waypoints-label"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'index'],
+              'text-size': 10,
+              'text-font': ['Open Sans Bold'],
+              'text-allow-overlap': true,
+              'text-ignore-placement': true,
+            }}
+            paint={{
+              'text-color': '#FFFFFF',
+            }}
+          />
+        </Source>
       )}
 
       {/* Scale Bar */}

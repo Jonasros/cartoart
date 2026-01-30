@@ -19,6 +19,7 @@ import type { Tab } from './TabNavigation';
 import type { PosterConfig, PosterLocation, PosterStyle, ColorPalette, SavedProject, RouteConfig } from '@/types/poster';
 import type { SculptureConfig, ProductMode } from '@/types/sculpture';
 import type { PrintValidationResult } from '@/lib/sculpture/printValidator';
+import type { RoutingProfile } from '@/lib/route/routeBuilder';
 
 interface ControlDrawerProps {
   activeTab: Tab;
@@ -56,6 +57,16 @@ interface ControlDrawerProps {
   useMyLocation: () => void;
   isLocating: boolean;
   locationError: string | null;
+  // Route drawing
+  drawMode: boolean;
+  onDrawModeChange: (enabled: boolean) => void;
+  drawWaypoints: [number, number][];
+  drawProfile: RoutingProfile;
+  onDrawProfileChange: (profile: RoutingProfile) => void;
+  isSnapping: boolean;
+  snapError: string | null;
+  onUndoWaypoint: () => void;
+  onClearWaypoints: () => void;
 }
 
 export function ControlDrawer({
@@ -87,6 +98,15 @@ export function ControlDrawer({
   useMyLocation,
   isLocating,
   locationError,
+  drawMode,
+  onDrawModeChange,
+  drawWaypoints,
+  drawProfile,
+  onDrawProfileChange,
+  isSnapping,
+  snapError,
+  onUndoWaypoint,
+  onClearWaypoints,
 }: ControlDrawerProps) {
   const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('examples');
 
@@ -158,6 +178,15 @@ export function ControlDrawer({
               useMyLocation={useMyLocation}
               isLocating={isLocating}
               locationError={locationError}
+              drawMode={drawMode}
+              onDrawModeChange={onDrawModeChange}
+              drawWaypoints={drawWaypoints}
+              drawProfile={drawProfile}
+              onDrawProfileChange={onDrawProfileChange}
+              isSnapping={isSnapping}
+              snapError={snapError}
+              onUndoWaypoint={onUndoWaypoint}
+              onClearWaypoints={onClearWaypoints}
             />
 
             <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg text-xs text-gray-600 dark:text-gray-300">
