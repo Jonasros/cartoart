@@ -578,7 +578,7 @@ export function SculptureExportModal({
           {!routeData && (
             <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                Upload a GPX route to enable STL export
+                Add a route to enable STL export
               </p>
             </div>
           )}

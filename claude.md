@@ -57,6 +57,7 @@
 
 - 11 map styles with 15+ palettes
 - GPX route upload with styling (color, width, opacity, dash patterns)
+- Multi-point route builder with OSRM road snapping (walking + cycling profiles)
 - Strava Connect: import activities directly from your Strava account
 - 3D terrain elevation with MapTiler terrain-rgb tiles
 - 3D buildings with style presets & perspective controls
@@ -135,11 +136,13 @@ frontend/
 │   ├── errors/           # Custom error classes
 │   ├── features/         # Feature voting config (comingSoon.ts)
 │   ├── middleware/       # Rate limiting, CSRF protection
-│   ├── route/            # GPX parsing
+│   ├── route/            # GPX parsing + route builder (OSRM snapping)
 │   ├── strava/           # Strava API helpers
 │   ├── stripe/           # Stripe client, products, checkout
 │   ├── styles/           # 11 map style definitions
 │   └── validation/       # Zod schemas
+├── hooks/
+│   └── useRouteDrawing.ts   # Draw mode state management (waypoints, OSRM snapping)
 ├── scripts/
 │   └── seed-famous-routes/  # Famous routes seeding (41 routes)
 └── types/
@@ -184,6 +187,8 @@ See `lib/seo/routes.ts` for all available slugs and `app/sitemap.ts` for sitemap
 - `/api/geocode` - Location search (Nominatim)
 - `/api/tiles/[...path]` - Tile proxy
 - `/api/publish` - Map publishing
+- `/api/route/snap` - OSRM proxy for route snapping (foot/bike profiles)
+- `/api/route/elevation` - Elevation lookup via MapTiler terrain-RGB tiles (sharp decoding)
 
 ### Strava API Routes
 

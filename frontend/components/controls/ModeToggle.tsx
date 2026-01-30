@@ -48,7 +48,7 @@ export function ModeToggle({ mode, onModeChange, hasRoute }: ModeToggleProps) {
                 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           )}
-          title={sculptureDisabled ? 'Upload a GPX route to enable Journey Sculpture mode' : 'Create Journey Sculpture'}
+          title={sculptureDisabled ? 'Add a route to enable Journey Sculpture mode' : 'Create Journey Sculpture'}
         >
           <Box className="w-4 h-4" />
           <span className="text-[9px] font-medium mt-1 hidden md:block">3D</span>
@@ -58,7 +58,7 @@ export function ModeToggle({ mode, onModeChange, hasRoute }: ModeToggleProps) {
       {/* Tooltip for disabled state */}
       {sculptureDisabled && mode === 'poster' && (
         <p className="text-[8px] text-gray-400 dark:text-gray-500 text-center mt-1.5 px-1 hidden md:block leading-tight">
-          Upload trail for 3D
+          Add route for 3D
         </p>
       )}
     </div>

@@ -43,7 +43,7 @@ export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode =
   const [isDragOver, setIsDragOver] = useState(false);
   const [stravaStatus, setStravaStatus] = useState<StravaConnectionStatus | null>(null);
   const [showActivityPicker, setShowActivityPicker] = useState(false);
-  const [activeTab, setActiveTab] = useState<RouteTab>('upload');
+  const [activeTab, setActiveTab] = useState<RouteTab>('draw');
 
   // Check Strava connection status on mount
   useEffect(() => {
@@ -210,8 +210,8 @@ export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode =
 
   // Build tabs list — only show Strava tab if connected
   const tabs: { id: RouteTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'upload', label: 'Upload', icon: <Upload className="h-3.5 w-3.5" /> },
     { id: 'draw', label: 'Draw', icon: <MousePointerClick className="h-3.5 w-3.5" /> },
+    { id: 'upload', label: 'Upload', icon: <Upload className="h-3.5 w-3.5" /> },
   ];
   if (stravaStatus?.connected) {
     tabs.push({

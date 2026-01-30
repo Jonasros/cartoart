@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-23
+**Last Updated**: 2026-01-30
 
 ---
 
@@ -23,6 +23,7 @@
 | 11 | Famous Routes Seeding | ✅ Complete |
 | 12 | Brevo Email Automation | ✅ Complete |
 | 13 | Programmatic SEO Pages | ✅ Complete |
+| 14 | Multi-Point Route Builder | ✅ Complete |
 
 ---
 
@@ -145,6 +146,22 @@ Complete visual overhaul to position Waymarker as a premium outdoor adventure pl
 - New mountain logo with forest green to sunset orange gradient
 - Micro-interactions (card hover lift, button press, staggered animations)
 - Loading shimmer effects with warm stone colors
+
+### Multi-Point Route Builder
+
+Draw routes directly on the map with automatic road/trail snapping.
+
+- ✅ Click-to-place waypoints on map with numbered markers
+- ✅ OSRM road snapping via Next.js API proxy (walking + cycling profiles)
+- ✅ Elevation data via MapTiler terrain-RGB tiles (server-side sharp decoding)
+- ✅ Live distance & elevation stats update as route builds
+- ✅ Undo last waypoint / clear all waypoints
+- ✅ Profile switching (walking / cycling)
+- ✅ Tab UI: Upload GPX / Draw Route / Import from Strava
+- ✅ Waypoints preserved in saved routes for re-editing
+- ✅ Works with poster export (PNG) and sculpture export (STL)
+
+**New files**: `app/api/route/snap/route.ts`, `app/api/route/elevation/route.ts`, `lib/route/routeBuilder.ts`, `components/controls/RouteBuilder.tsx`, `hooks/useRouteDrawing.ts`
 
 ### GPX Route Support
 
@@ -379,6 +396,19 @@ Landing pages for famous routes to capture organic search traffic.
 ---
 
 ## Recent Updates (January 2026)
+
+### 2026-01-30
+
+- ✅ Multi-point route builder with OSRM road snapping (walking + cycling profiles)
+- ✅ `/api/route/snap` — OSRM proxy API route with rate limiting
+- ✅ `/api/route/elevation` — MapTiler terrain-RGB elevation lookup with sharp decoding
+- ✅ Route builder service (`lib/route/routeBuilder.ts`) orchestrating snap → elevation → RouteData
+- ✅ RouteBuilder UI component with profile selector, waypoint list, live stats
+- ✅ `useRouteDrawing` hook for draw mode state management
+- ✅ Map click-to-add waypoints with numbered indigo markers (GeoJSON)
+- ✅ Tab UI in RouteUpload: Upload / Draw / Strava
+- ✅ Full pipeline integration: drawn routes work with PNG poster and STL sculpture exports
+- ✅ Waypoint persistence in saved routes for re-editing
 
 ### 2026-01-23
 

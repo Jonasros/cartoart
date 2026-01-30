@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-23
+**Last Updated**: 2026-01-30
 
 ---
 
@@ -35,6 +35,7 @@ Waymarker transforms GPS activity data into gallery-worthy wall art for outdoor 
 | High-res export | 7200x10800px | Varies |
 | Social features | ✅ | ❌ |
 | Strava integration | ✅ | Some |
+| Route drawing/snapping | ✅ OSRM | ❌ |
 
 **Positioning**: "Adventure route art that looks like a design studio made it"
 
@@ -78,6 +79,19 @@ See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD.
 ---
 
 ## Recently Completed
+
+### Multi-Point Route Builder ✅
+
+Draw routes directly on the map with automatic road/trail snapping via OSRM.
+
+- ✅ Click-to-place waypoints on map with numbered markers
+- ✅ OSRM road snapping (walking + cycling profiles)
+- ✅ Elevation data via MapTiler terrain-RGB tiles (server-side sharp decoding)
+- ✅ Live distance & elevation stats as route builds
+- ✅ Undo/clear waypoints, profile switching
+- ✅ Tab UI: Upload GPX / Draw Route / Import from Strava
+- ✅ Works with poster export (PNG) and sculpture export (STL)
+- ✅ Waypoints preserved for re-editing saved routes
 
 ### Feature Voting System ✅
 
@@ -216,6 +230,7 @@ Enable users to annotate posters with multiple custom location markers.
 - [ ] Mile/KM markers along route
 - [ ] Segment highlighting (e.g., steepest climb)
 - [x] Strava OAuth integration ✅
+- [x] Multi-point route builder with OSRM road snapping ✅
 - [ ] Garmin Connect integration
 - [ ] Komoot integration
 
