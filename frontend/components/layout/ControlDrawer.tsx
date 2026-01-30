@@ -108,7 +108,7 @@ export function ControlDrawer({
   onUndoWaypoint,
   onClearWaypoints,
 }: ControlDrawerProps) {
-  const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('examples');
+  const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('saved');
 
   return (
     <aside className={cn(
@@ -117,7 +117,7 @@ export function ControlDrawer({
     )}>
       <div className="p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between md:hidden mb-2">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white capitalize">{activeTab}</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white capitalize">{activeTab === 'library' ? 'Gallery' : activeTab}</h2>
           <button 
             onClick={() => setIsDrawerOpen(false)}
             className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -130,17 +130,6 @@ export function ControlDrawer({
           <div className="space-y-6">
             <div className="flex p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
               <button
-                onClick={() => setLibraryTab('examples')}
-                className={cn(
-                  "flex-1 py-1.5 text-xs font-medium rounded-md transition-all",
-                  libraryTab === 'examples'
-                    ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                )}
-              >
-                Examples
-              </button>
-              <button
                 onClick={() => setLibraryTab('saved')}
                 className={cn(
                   "flex-1 py-1.5 text-xs font-medium rounded-md transition-all",
@@ -150,6 +139,17 @@ export function ControlDrawer({
                 )}
               >
                 Saved
+              </button>
+              <button
+                onClick={() => setLibraryTab('examples')}
+                className={cn(
+                  "flex-1 py-1.5 text-xs font-medium rounded-md transition-all",
+                  libraryTab === 'examples'
+                    ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                )}
+              >
+                Examples
               </button>
             </div>
 

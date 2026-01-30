@@ -1,6 +1,6 @@
 'use client';
 
-import { Map as MapIcon, Type, Layout, Sparkles, Palette, User, Compass, Box, Image } from 'lucide-react';
+import { Map as MapIcon, Type, Layout, LayoutGrid, Palette, User, Compass, Box, Image } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { ModeToggle } from '@/components/controls/ModeToggle';
@@ -80,7 +80,7 @@ export function TabNavigation({
 
   // Tab configuration with icons
   const tabConfig: Record<Tab, { icon: typeof MapIcon; label: string }> = {
-    library: { icon: Sparkles, label: 'Library' },
+    library: { icon: LayoutGrid, label: 'Gallery' },
     location: { icon: MapIcon, label: 'Location' },
     style: { icon: Palette, label: 'Style' },
     text: { icon: Type, label: 'Text' },
@@ -132,7 +132,7 @@ export function TabNavigation({
                   ? 'text-muted-foreground/30 cursor-not-allowed'
                   : 'text-muted-foreground'
             )}
-            title={sculptureDisabled ? 'Upload a GPX route first' : '3D Sculpture Mode'}
+            title={sculptureDisabled ? 'Add a route first' : '3D Sculpture Mode'}
           >
             <Box className="w-4 h-4" />
           </button>
