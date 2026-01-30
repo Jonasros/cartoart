@@ -2,15 +2,15 @@ import type { PosterConfig, PosterLocation } from '@/types/poster';
 import { getDefaultStyle } from '@/lib/styles';
 
 export const DEFAULT_LOCATION: PosterLocation = {
-  name: 'San Francisco',
-  city: 'San Francisco, CA',
-  subtitle: 'California, USA',
-  center: [-122.4194, 37.7749],
+  name: 'Chamonix',
+  city: 'Chamonix-Mont-Blanc',
+  subtitle: 'Haute-Savoie, France',
+  center: [6.8694, 45.9237],
   bounds: [
-    [-122.5179, 37.7038], // SW corner
-    [-122.3774, 37.8324], // NE corner
+    [6.8094, 45.8837], // SW corner
+    [6.9294, 45.9637], // NE corner
   ],
-  zoom: 12,
+  zoom: 13,
 };
 
 const defaultStyle = getDefaultStyle();
