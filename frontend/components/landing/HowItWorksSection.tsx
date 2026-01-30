@@ -9,10 +9,10 @@ const steps = [
   {
     number: '01',
     icon: Upload,
-    title: 'Connect or Upload',
+    title: 'Draw or Import',
     description:
-      'Connect your Strava account in one click, drop a GPX file, or search for any location on Earth. Your adventure awaits.',
-    features: ['Strava sync', 'GPX upload', 'Location search'],
+      'Draw your route directly on the map, connect Strava in one click, or drop a GPX file. Your adventure awaits.',
+    features: ['Draw route', 'Strava sync', 'GPX upload'],
   },
   {
     number: '02',
