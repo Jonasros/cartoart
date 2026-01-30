@@ -186,12 +186,16 @@ export interface RouteStats {
   endTime?: Date;
 }
 
+export type RouteSource = 'gpx' | 'draw' | 'strava';
+
 export interface RouteData {
   name?: string;
   description?: string;
   points: RoutePoint[];
   stats: RouteStats;
   bounds: [[number, number], [number, number]]; // SW, NE corners [lng, lat]
+  source?: RouteSource; // How this route was created
+  waypoints?: [number, number][]; // Original draw-mode waypoints [lng, lat] for re-editing
 }
 
 export interface RouteStyle {

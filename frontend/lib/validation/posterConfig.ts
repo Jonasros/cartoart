@@ -31,6 +31,8 @@ const RouteDataSchema = z.object({
     z.tuple([z.number(), z.number()]),
     z.tuple([z.number(), z.number()])
   ]),
+  source: z.enum(['gpx', 'draw', 'strava']).optional(),
+  waypoints: z.array(z.tuple([z.number(), z.number()])).optional(),
 });
 
 const RouteStyleSchema = z.object({
