@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
 export const runtime = 'nodejs';
 
@@ -37,24 +38,22 @@ function tileToBounds(
   return { n: nLat, s: sLat, e, w };
 }
 
-// Simple in-memory cache for terrain tiles to avoid re-fetching
-const tileCache = new Map<string, Uint8ClampedArray | null>();
+// Simple in-memory cache for decoded terrain tile pixel data
+const tileCache = new Map<string, { data: Buffer; width: number; height: number } | null>();
 
 /**
- * Fetch a single terrain-RGB tile and return raw pixel data.
+ * Fetch a single terrain-RGB tile and decode it using sharp.
+ * Returns raw RGBA pixel data.
  */
 async function fetchTerrainTileData(
   tx: number,
   ty: number,
   zoom: number,
   maptilerKey: string
-): Promise<{ data: Uint8ClampedArray; width: number; height: number } | null> {
+): Promise<{ data: Buffer; width: number; height: number } | null> {
   const cacheKey = `${zoom}/${tx}/${ty}`;
   if (tileCache.has(cacheKey)) {
-    const cached = tileCache.get(cacheKey);
-    if (!cached) return null;
-    // Cached tiles are 256x256
-    return { data: cached, width: 256, height: 256 };
+    return tileCache.get(cacheKey) ?? null;
   }
 
   try {
@@ -65,22 +64,17 @@ async function fetchTerrainTileData(
       return null;
     }
 
-    // Use sharp or canvas on server-side is complex. Instead, we decode on client.
-    // For server-side, we'll use a PNG tile format and parse the raw bytes.
-    // Actually, let's use the PNG format which is easier to parse server-side.
-    const pngUrl = `https://api.maptiler.com/tiles/terrain-rgb-v2/${zoom}/${tx}/${ty}.png?key=${maptilerKey}`;
-    const pngResponse = await fetch(pngUrl);
-    if (!pngResponse.ok) {
-      tileCache.set(cacheKey, null);
-      return null;
-    }
+    const arrayBuffer = await response.arrayBuffer();
+    const { data, info } = await sharp(Buffer.from(arrayBuffer))
+      .raw()
+      .ensureAlpha()
+      .toBuffer({ resolveWithObject: true });
 
-    // We need to decode PNG server-side. Use built-in node canvas or a library.
-    // For simplicity, return null and let the client handle elevation lookup.
-    // This endpoint will use a different approach - Open-Elevation API as server-side fallback.
-    tileCache.set(cacheKey, null);
-    return null;
-  } catch {
+    const result = { data, width: info.width, height: info.height };
+    tileCache.set(cacheKey, result);
+    return result;
+  } catch (err) {
+    console.warn(`Failed to fetch/decode terrain tile ${cacheKey}:`, err);
     tileCache.set(cacheKey, null);
     return null;
   }
@@ -112,30 +106,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try Open-Elevation API (free, no API key)
-    try {
-      const openElevationBody = {
-        locations: points.map(([lat, lng]) => ({ latitude: lat, longitude: lng })),
-      };
-
-      const response = await fetch('https://api.open-elevation.com/api/v1/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(openElevationBody),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const elevations = data.results.map(
-          (r: { elevation: number }) => Math.round(r.elevation * 10) / 10
-        );
-        return NextResponse.json({ elevations });
-      }
-    } catch {
-      // Open-Elevation failed, try MapTiler terrain-RGB
-    }
-
-    // Fallback: Use MapTiler terrain-RGB tiles
+    // Primary: Use MapTiler terrain-RGB tiles decoded with sharp
     const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
     if (maptilerKey) {
       // Calculate zoom level based on point spread
@@ -206,7 +177,35 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({ elevations });
+      // Check if we got at least some valid elevations
+      const hasValidElevations = elevations.some((e) => e !== null);
+      if (hasValidElevations) {
+        return NextResponse.json({ elevations });
+      }
+    }
+
+    // Fallback: Try Open-Elevation API (free, no API key, less reliable)
+    try {
+      const openElevationBody = {
+        locations: points.map(([lat, lng]) => ({ latitude: lat, longitude: lng })),
+      };
+
+      const response = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(openElevationBody),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const elevations = data.results.map(
+          (r: { elevation: number }) => Math.round(r.elevation * 10) / 10
+        );
+        return NextResponse.json({ elevations });
+      }
+    } catch {
+      // Open-Elevation also failed
     }
 
     // No elevation source available — return nulls

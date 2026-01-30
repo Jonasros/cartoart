@@ -164,7 +164,11 @@ export function RouteUpload({ route, onRouteChange, onLocationChange, drawMode =
     if (onDrawModeChange) {
       onDrawModeChange(false);
     }
-  }, [onRouteChange, onDrawModeChange]);
+    // Also clear draw waypoints so the route doesn't snap back
+    if (onClearWaypoints) {
+      onClearWaypoints();
+    }
+  }, [onRouteChange, onDrawModeChange, onClearWaypoints]);
 
   const handleStravaImport = useCallback((routeData: RouteData) => {
     // Create new route config with the imported data
