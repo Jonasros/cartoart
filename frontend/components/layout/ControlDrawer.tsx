@@ -1,9 +1,8 @@
 'use client';
 
-import { Minus, Navigation2, Loader2 } from 'lucide-react';
+import { Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
-import { LocationSearch } from '@/components/controls/LocationSearch';
+import { useState } from 'react';
 import { RouteUpload } from '@/components/controls/RouteUpload';
 import { RouteStyleControls } from '@/components/controls/RouteStyleControls';
 import { StyleSelector } from '@/components/controls/StyleSelector';
@@ -90,12 +89,6 @@ export function ControlDrawer({
   locationError,
 }: ControlDrawerProps) {
   const [libraryTab, setLibraryTab] = useState<'examples' | 'saved'>('examples');
-  const [locationMode, setLocationMode] = useState<'point' | 'route'>(config.route?.data ? 'route' : 'point');
-
-  // Sync locationMode when config.route changes (e.g., when loading a saved project)
-  useEffect(() => {
-    setLocationMode(config.route?.data ? 'route' : 'point');
-  }, [config.route?.data]);
 
   return (
     <aside className={cn(
@@ -157,100 +150,18 @@ export function ControlDrawer({
 
         {activeTab === 'location' && (
           <div className="space-y-6">
-            {/* Mode Toggle */}
-            <div className="flex p-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
-              <button
-                onClick={() => {
-                  setLocationMode('point');
-                  // Clear route data when switching to single location mode
-                  if (config.route?.data) {
-                    updateRoute(undefined);
-                  }
-                }}
-                className={cn(
-                  "flex-1 py-2 text-xs font-medium rounded-md transition-all",
-                  locationMode === 'point'
-                    ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                )}
-              >
-                📍 Single Location
-              </button>
-              <button
-                onClick={() => setLocationMode('route')}
-                className={cn(
-                  "flex-1 py-2 text-xs font-medium rounded-md transition-all",
-                  locationMode === 'route'
-                    ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                )}
-              >
-                🥾 GPX Route
-              </button>
-            </div>
-
-            {locationMode === 'point' ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {config.location.name && config.location.name !== 'WHERE WE MET'
-                      ? `Adventure in ${config.location.name}`
-                      : 'Search Location'}
-                  </h3>
-                  <LocationSearch
-                    onLocationSelect={updateLocation}
-                    currentLocation={config.location}
-                  />
-
-                  <button
-                    onClick={useMyLocation}
-                    disabled={isLocating}
-                    className={cn(
-                      "w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-                      isLocating
-                        ? "bg-primary/5 text-primary/50 cursor-wait"
-                        : "text-primary dark:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 border border-primary/30 dark:border-primary/40"
-                    )}
-                  >
-                    {isLocating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Getting location...
-                      </>
-                    ) : (
-                      <>
-                        <Navigation2 className="w-4 h-4" />
-                        Use my location
-                      </>
-                    )}
-                  </button>
-                  {locationError && (
-                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">{locationError}</p>
-                  )}
-                </div>
-
-                <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg text-xs text-primary dark:text-primary/90">
-                  <p className="font-medium mb-1">Single Location Mode</p>
-                  <p className="opacity-90">Search for a city, address, or landmark, or use your current location. The map will center on your chosen spot.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <RouteUpload
-                  route={config.route}
-                  onRouteChange={updateRoute}
-                  onLocationChange={updateLocation}
-                />
-
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-xs text-green-800 dark:text-green-200">
-                  <p className="font-medium mb-1">GPX Route Mode</p>
-                  <p className="opacity-90">Upload a GPX file from your hiking, running, or cycling app. The map will show your entire route.</p>
-                </div>
-              </div>
-            )}
+            <RouteUpload
+              route={config.route}
+              onRouteChange={updateRoute}
+              onLocationChange={updateLocation}
+              config={config}
+              useMyLocation={useMyLocation}
+              isLocating={isLocating}
+              locationError={locationError}
+            />
 
             <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg text-xs text-gray-600 dark:text-gray-300">
-              <p className="font-medium mb-1">💡 Tip</p>
+              <p className="font-medium mb-1">Tip</p>
               <p className="opacity-90">Drag the map to adjust position, or use the zoom controls to get the perfect framing.</p>
             </div>
           </div>
