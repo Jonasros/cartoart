@@ -37,22 +37,54 @@ export async function getSeedUserId(seedUser: SeedUser): Promise<string> {
 }
 
 /**
- * Check if a route already exists in the database
+ * Check if a route already exists in the database.
+ * Uses the config->location->name field as the stable identifier,
+ * since the `title` column gets manually curated after seeding.
+ * Falls back to checking `title` against both the route ID and shortName.
  */
-export async function routeExists(routeId: string): Promise<boolean> {
-  const { data, error } = await supabaseAdmin
+export async function routeExists(
+  routeId: string,
+  shortName?: string
+): Promise<boolean> {
+  // Check by config location name (most stable - set during seeding)
+  const { data: configMatch } = await supabaseAdmin
     .from('maps')
     .select('id')
-    .eq('title', routeId)
-    .single();
+    .eq('is_featured', true)
+    .filter('config->location->>name', 'eq', shortName || routeId)
+    .limit(1);
 
-  if (error && error.code !== 'PGRST116') {
-    // PGRST116 = no rows found
-    log('error', `Error checking route existence: ${error.message}`);
-    throw error;
+  if (configMatch && configMatch.length > 0) {
+    return true;
   }
 
-  return !!data;
+  // Fallback: check title against route ID (original behavior)
+  const { data: titleMatch } = await supabaseAdmin
+    .from('maps')
+    .select('id')
+    .eq('is_featured', true)
+    .eq('title', routeId)
+    .limit(1);
+
+  if (titleMatch && titleMatch.length > 0) {
+    return true;
+  }
+
+  // Fallback: check title against shortName (for manually curated routes)
+  if (shortName) {
+    const { data: shortNameMatch } = await supabaseAdmin
+      .from('maps')
+      .select('id')
+      .eq('is_featured', true)
+      .eq('title', shortName)
+      .limit(1);
+
+    if (shortNameMatch && shortNameMatch.length > 0) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export interface InsertOptions {
@@ -97,10 +129,10 @@ export async function insertRoute(
       userId = getAdminUserId();
     }
 
-    // Check if already exists
-    const exists = await routeExists(entry.id);
+    // Check if already exists (by config name, title, or shortName)
+    const exists = await routeExists(entry.id, mapTitle);
     if (exists) {
-      log('warning', `Route already exists: ${entry.id}`);
+      log('warning', `Route already exists: ${entry.id} (${mapTitle})`);
       return {
         routeId: entry.id,
         success: false,
@@ -121,7 +153,7 @@ export async function insertRoute(
     // Prepare the map record
     const mapRecord = {
       user_id: userId,
-      title: entry.id, // Use route ID as title for uniqueness
+      title: mapTitle, // Use display name (shortName) not raw slug
       config: config,
       is_published: true,
       is_featured: true, // Mark as featured for SEO pages
@@ -185,9 +217,9 @@ export async function insertRoutes(
     }
 
     if (skipExisting) {
-      const exists = await routeExists(entry.id);
+      const exists = await routeExists(entry.id, mapTitle);
       if (exists) {
-        log('info', `Skipping existing route: ${entry.id}`);
+        log('info', `Skipping existing route: ${entry.id} (${mapTitle})`);
         results.push({
           routeId: entry.id,
           success: false,

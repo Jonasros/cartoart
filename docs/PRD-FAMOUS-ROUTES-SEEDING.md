@@ -540,15 +540,29 @@ pnpm seed:routes --verbose
 
 ## Complete Workflow for Adding New Routes
 
-Follow this workflow when adding new routes (e.g., next 50 routes):
+Follow this workflow **exactly** when adding new routes. This prevents the duplicate/overflow issues encountered in Phase 2.
 
 ### Step 1: Add Route Definitions
 
-Add route entries to the appropriate route file in `scripts/seed-famous-routes/data/`:
+Add route entries to `scripts/seed-famous-routes/data/routes.ts`:
 
-- Use existing route files as templates
+- Use existing route entries as templates
 - Include GPX source URL, category, title, and subtitle
-- Reference existing templates (cycling, hiking, running)
+
+**CRITICAL RULES:**
+
+1. **Template IDs must use full prefixed names** matching the template registry:
+   - Cycling: `cycling-tdf-yellow`, `cycling-classic`, `cycling-mountain`, `cycling-giro-rosa`, `cycling-midnight`
+   - Hiking: `hiking-explorer`, `hiking-vintage`, `hiking-mountain`, `hiking-forest`, `hiking-camino`
+   - Running: `running-marathon-city`, `running-ultra-dark`, `running-ultra-terrain`, `running-boston`, `running-neon`
+   - **WRONG**: `marathon-city`, `tdf-yellow`, `mountain-stage`, `trail-explorer`
+   - **RIGHT**: `running-marathon-city`, `cycling-tdf-yellow`, `cycling-mountain`, `hiking-explorer`
+
+2. **`shortName` is the display title** - this becomes the poster title shown in the feed and on the map. Use trademark-safe geographic names:
+   - **WRONG**: `"Vienna City Marathon 2025"`, `"Tour de France 2025 - Stage 7"`
+   - **RIGHT**: `"Vienna 42K"`, `"Mûr-de-Bretagne"`
+
+3. **Add SEO route data** to `lib/seo/routes.ts` for each new route (landing pages)
 
 ### Step 2: Run Seed Script (Dry Run First)
 
@@ -562,70 +576,163 @@ npm run seed:routes:dry
 npm run seed:routes
 ```
 
-### Step 3: Update Designs with CSV (Optional)
+The seed script now checks for duplicates by matching against:
+1. `config->location->name` (most stable - survives title renames)
+2. `title` column against route slug
+3. `title` column against `shortName`
 
-To batch update poster designs (typography, margins, borders, colors):
+This prevents duplicates even after manually curating route titles.
 
-1. Export current designs: Check maps in database with `npx tsx scripts/check-maps.ts`
-2. Create/edit CSV with columns: `title`, `margin`, `borderStyle`, `backdropAlpha`, etc.
-3. Run design update:
+### Step 3: Update Typography in Database
 
-```bash
-# Preview changes
-npm run update:designs:dry
+After seeding, verify poster configs have safe typography values. The seeder uses template defaults, but if templates had wrong values, you need to fix them in the database.
 
-# Apply changes
-npm run update:designs
+**Typography Rules (MUST FOLLOW):**
+
+| Property | Safe Range | Notes |
+|----------|-----------|-------|
+| `titleSize` | 2.5 - 4.0 | Scale 0-15. **Never exceed 4.0.** |
+| `subtitleSize` | 1.8 - 2.5 | Scale 0-8. |
+| `titleLetterSpacing` | 0 - 0.5 | **Max 0.5 for allCaps, 0 for mixed case.** |
+| `titleAllCaps` | depends | ALL CAPS needs smaller titleSize (max 3.5) |
+
+**Font overflow happens when these combine:**
+- `titleSize > 4` + `titleAllCaps: true` = overflow
+- `titleLetterSpacing > 1` + `titleAllCaps: true` = overflow
+- Long title (15+ chars) + `titleSize > 3.0` + `titleAllCaps: true` = overflow
+
+**Size guide by title length (with allCaps: true):**
+- Short (≤8 chars, e.g., "GR20"): `titleSize: 3.5`, `letterSpacing: 0.5`
+- Medium (9-12 chars, e.g., "Laugavegur"): `titleSize: 3.5`, `letterSpacing: 0.5`
+- Long (13-16 chars, e.g., "Barcelona 42K"): `titleSize: 3.0`, `letterSpacing: 0.5`
+- Very long (17+ chars, e.g., "Pembrokeshire Coast"): `titleSize: 2.5`, `letterSpacing: 0.5`
+
+**SQL to batch-fix typography if needed:**
+```sql
+UPDATE maps SET
+  config = jsonb_set(
+    jsonb_set(
+      jsonb_set(config, '{typography,titleSize}',
+        CASE
+          WHEN length(title) > 16 THEN '2.5'::jsonb
+          WHEN length(title) > 12 THEN '3.0'::jsonb
+          ELSE '3.5'::jsonb
+        END
+      ),
+      '{typography,subtitleSize}', '2.0'::jsonb
+    ),
+    '{typography,titleLetterSpacing}',
+    CASE
+      WHEN (config->'typography'->>'titleAllCaps')::boolean = true THEN '0.5'::jsonb
+      ELSE '0'::jsonb
+    END
+  )
+WHERE is_featured = true AND thumbnail_url IS NULL;
 ```
 
-**Typography Guidelines** (to prevent font overflow):
+### Step 4: Rename Routes in Database
 
-- `titleSize`: Keep between 3.5-4.0 (scale 0-15)
-- `subtitleSize`: Keep between 2.0-2.5 (scale 0-8)
-- Never use values above 5 for titles (will overflow poster)
-- Original templates used 9.5-11 which caused overflow issues
+The seed script inserts `shortName` as the title. If you need to update titles:
 
-### Step 4: Generate Thumbnails
+```sql
+-- Update title and config location name together
+UPDATE maps SET
+  title = 'Display Name Here',
+  subtitle = 'Start → End',
+  config = jsonb_set(config, '{location,name}', '"Display Name Here"'::jsonb)
+WHERE id = 'uuid-here';
+```
+
+**Always update BOTH `title` AND `config->location->name`** - the title shows in the feed, the config name renders on the poster.
+
+### Step 5: Generate Thumbnails
 
 ```bash
-# Start dev server (required)
+# Start dev server first (required)
 npm run dev
 
-# In another terminal - generate thumbnails for new routes only
+# In another terminal - generate thumbnails for routes missing them
 npm run seed:thumbnails
 
-# Or force regenerate ALL thumbnails (e.g., after design changes)
+# Force regenerate ALL thumbnails (e.g., after design changes)
 npm run seed:thumbnails:force
+
+# Dry run to see what would be processed
+npm run seed:thumbnails:dry
 ```
 
 **Thumbnail Generation Notes**:
-
-- Thumbnails capture the full poster including borders, margins, and text overlay
-- Uses Playwright headless browser at 800x1200px (2:3 ratio)
+- Captures full poster including borders, margins, text overlay, and route
+- Uses Playwright headless browser at 800x1200px @2x (2:3 ratio, retina)
+- Cookie consent banner is pre-dismissed automatically
+- UI overlays (zoom indicators, map controls) are hidden
 - Requires dev server running at localhost:3000
 - ~6 seconds per thumbnail
 
-### Step 5: Verify Results
+### Step 6: Verify Results
 
-1. Check routes in database: `npx tsx scripts/check-maps.ts`
-2. Verify thumbnails in Supabase storage
-3. Check feed at `/feed` - routes should appear with correct thumbnails
-4. Check SEO landing pages if applicable
+1. Check feed at `/feed` - routes should appear with correct thumbnails and titles
+2. Open 2-3 route detail pages - verify text doesn't overflow poster
+3. Check SEO landing pages at `/race/[slug]`, `/trail/[slug]`, `/cycling/[slug]`
+4. Verify route count: `SELECT count(*) FROM maps WHERE is_featured = true;`
 
 ---
 
 ## Quality Checklist
 
-Before marking a route as seeded:
+Before marking a batch as complete:
 
 - [ ] GPX parses correctly with valid coordinates
 - [ ] Route renders on map without errors
 - [ ] Stats (distance, elevation) are reasonable
-- [ ] Poster design looks professional
-- [ ] Title and subtitle are accurate
-- [ ] Country/region metadata is correct
-- [ ] SEO slug is properly formatted
+- [ ] **Title text fits within poster** (no overflow on any route)
+- [ ] **Title uses geographic name**, not trademarked event name
+- [ ] **Subtitle shows "Start → End" format**
+- [ ] **`config->location->name` matches `title`** column
+- [ ] Template ID is valid (matches `templates/*.ts` registry)
+- [ ] `titleSize` ≤ 4.0, `letterSpacing` ≤ 0.5 for allCaps
+- [ ] `showStats: true` (shows km distance)
+- [ ] `showSubtitle: true`
 - [ ] No duplicate routes in database
+- [ ] Thumbnails generated and visible in feed
+- [ ] SEO landing pages added to `lib/seo/routes.ts`
+
+---
+
+## Known Issues & Lessons Learned
+
+### Issue 1: Duplicate Routes on Re-Seeding (Fixed Feb 2026)
+
+**Problem**: Running the seed script after manually curating route titles created duplicates. The `routeExists()` function checked `title = entry.id` (raw slug like `tdf-2025-stage-07`), but curated titles were changed to geographic names like "Mûr-de-Bretagne". The check failed, and new duplicates were inserted.
+
+**Fix**: `routeExists()` now checks three fields:
+1. `config->location->name` (stable - set during seeding, survives title edits)
+2. `title` column against route slug
+3. `title` column against `shortName`
+
+**Prevention**: The seed script now uses `mapTitle` (shortName) as the DB title instead of the raw slug ID, so titles are display-ready from the start.
+
+### Issue 2: Font Overflow on Posters (Fixed Feb 2026)
+
+**Problem**: Poster text overflowed the poster frame. Root causes:
+- `titleSize: 8` (scale 0-15) combined with `titleAllCaps: true` and `titleLetterSpacing: 2`
+- Template IDs in seed data didn't match actual template registry IDs, causing fallback to wrong defaults
+
+**Fix**:
+- Corrected all template IDs in `data/routes.ts` to use full prefixed names
+- Typography rules documented above (max `titleSize: 4.0`, max `letterSpacing: 0.5`)
+
+### Issue 3: Template ID Mismatch (Fixed Feb 2026)
+
+**Problem**: Seed data used short template names (`tdf-yellow`, `marathon-city`, `mountain-stage`) but actual template IDs are prefixed (`cycling-tdf-yellow`, `running-marathon-city`, `cycling-mountain`). This caused `getTemplateById()` to return `undefined`.
+
+**Fix**: All template references in `data/routes.ts` updated to use full IDs. See Step 1 for the complete mapping.
+
+### Issue 4: Raw Slug Used as Display Title
+
+**Problem**: `insertRoute()` set `title: entry.id` (e.g., `vienna-marathon-2025`) instead of the display name (`Vienna 42K`). Routes appeared in the feed with ugly raw slugs.
+
+**Fix**: Changed to `title: mapTitle` which uses the `shortName` from the route entry.
 
 ---
 
@@ -636,9 +743,11 @@ Before marking a route as seeded:
 | GPX source goes offline | High | Multiple fallback sources per route |
 | GPX accuracy issues | Medium | Validate bounds, distance against known values |
 | Rate limiting on sources | Medium | Cache GPX files locally, respect rate limits |
-| Legal concerns (route data) | Low | Use public/official sources only |
+| Legal concerns (route data) | Low | Use public/official sources only, geographic names only |
 | Stale annual events | Medium | Year-tag routes, update annually |
-| Duplicate user uploads | Low | Detect similar routes, offer to link |
+| Duplicate routes on re-seed | High | **Fixed**: Triple-check duplicate detection in `db-insert.ts` |
+| Font overflow on poster | High | **Fixed**: Typography rules enforced (see Step 3) |
+| Template ID mismatch | High | **Fixed**: All IDs use full prefixed names |
 
 ---
 
@@ -650,6 +759,7 @@ Before marking a route as seeded:
 4. **Localization** - Translate route names/descriptions
 5. **API for routes** - Public API for route data (SEO benefit)
 6. **Route comparison** - "Your route vs. official route"
+7. **Typography auto-sizing** - Calculate safe titleSize from title length + allCaps setting
 
 ---
 
@@ -662,7 +772,7 @@ Before marking a route as seeded:
 
 ---
 
-**Status**: Phase 1 Production Seeding Complete ✅ | Phase 2 Thumbnails Complete ✅
+**Status**: Phase 1 Complete ✅ (41 routes) | Phase 2 Complete ✅ (15 routes) | Total: 56 featured routes
 **Implementation Branch**: `feature/famous-routes-seeding`
 
 ---

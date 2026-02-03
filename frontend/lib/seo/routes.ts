@@ -324,6 +324,192 @@ export const raceRoutes: SEORouteMetadata[] = [
       },
     ],
   },
+  // Phase 2 European Marathons
+  {
+    id: 'vienna-marathon',
+    slug: 'vienna-marathon',
+    category: 'race',
+    name: 'Vienna 42K Running Route',
+    shortName: 'Vienna 42K',
+    subtitle: 'Reichsbrücke → Heldenplatz',
+    description:
+      'A scenic 42km running route through imperial Vienna, passing the Prater, Ringstraße, and Schönbrunn Palace.',
+    country: 'Austria',
+    region: 'Vienna',
+    distance: 42.2,
+    difficulty: 'moderate',
+    routeColor: '#ED1C24',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'vienna', 'austria', 'running', 'imperial'],
+    year: 2025,
+    website: 'https://www.vienna-marathon.com/',
+    mapTitle: 'Vienna 42K',
+    introText:
+      "The Vienna 42K route is one of Europe's most beautiful city running courses, passing imperial palaces, the famous Ringstraße boulevard, and the green expanse of the Prater. Vienna's flat course and stunning architecture make it a favorite for runners chasing fast times in a world-class setting.",
+    routeSpecificFAQs: [
+      {
+        question: 'What landmarks does the Vienna 42K route pass?',
+        answer:
+          'The route passes the Prater park, the Ringstraße with its grand buildings (Opera House, Parliament, City Hall), Schönbrunn Palace, and the Heldenplatz.',
+      },
+    ],
+  },
+  {
+    id: 'barcelona-marathon',
+    slug: 'barcelona-marathon',
+    category: 'race',
+    name: 'Barcelona 42K Running Route',
+    shortName: 'Barcelona 42K',
+    subtitle: 'Passeig de Gràcia Circuit',
+    description:
+      'A flat, fast 42km running route past 15 historic landmarks including the Sagrada Família.',
+    country: 'Spain',
+    region: 'Barcelona',
+    distance: 42.2,
+    difficulty: 'moderate',
+    routeColor: '#CF142B',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'barcelona', 'spain', 'running', 'gaudi'],
+    year: 2025,
+    website: 'https://www.zurichmaratobarcelona.es/',
+    mapTitle: 'Barcelona 42K',
+    introText:
+      "The Barcelona 42K route takes runners past 15 of the city's most iconic landmarks, from Gaudí's Sagrada Família to the Columbus Monument at the harbour. The flat, fast course along Mediterranean boulevards makes it one of Europe's most popular spring running destinations.",
+    routeSpecificFAQs: [
+      {
+        question: 'What Gaudí landmarks does the Barcelona 42K pass?',
+        answer:
+          "The route passes near several of Gaudí's masterpieces including the Sagrada Família, Casa Batlló, and Casa Milà (La Pedrera) along Passeig de Gràcia.",
+      },
+    ],
+  },
+  {
+    id: 'rome-marathon',
+    slug: 'rome-marathon',
+    category: 'race',
+    name: 'Rome 42K Running Route',
+    shortName: 'Rome 42K',
+    subtitle: 'Fori Imperiali Circuit',
+    description:
+      'A 42km running route through the Eternal City, past the Colosseum, Vatican, and ancient Roman ruins.',
+    country: 'Italy',
+    region: 'Rome',
+    distance: 42.2,
+    difficulty: 'moderate',
+    routeColor: '#008C45',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'rome', 'italy', 'running', 'historic', 'ancient'],
+    year: 2025,
+    website: 'https://www.runromethemarathon.com/',
+    mapTitle: 'Rome 42K',
+    introText:
+      "The Rome 42K route is a journey through 2,000 years of history. Running past the Colosseum, along the Tiber, near St. Peter's Basilica, and through the Forum—there is no marathon in the world with more monuments per kilometer.",
+    routeSpecificFAQs: [
+      {
+        question: 'What ancient sites does the Rome 42K pass?',
+        answer:
+          "The route passes the Colosseum, Roman Forum, Circus Maximus, Castel Sant'Angelo, St. Peter's Basilica, the Pantheon, and Piazza Navona among many other historic landmarks.",
+      },
+    ],
+  },
+  {
+    id: 'athens-marathon',
+    slug: 'athens-marathon',
+    category: 'race',
+    name: 'Athens 42K Running Route',
+    shortName: 'Athens 42K',
+    subtitle: 'Marathon → Panathenaic Stadium',
+    description:
+      'The original marathon route, retracing the legendary run from Marathon to Athens.',
+    country: 'Greece',
+    region: 'Attica',
+    distance: 42.2,
+    difficulty: 'hard',
+    routeColor: '#0D5EAF',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'athens', 'greece', 'running', 'original-marathon', 'historic'],
+    year: 2025,
+    website: 'https://www.athensauthenticmarathon.gr/',
+    mapTitle: 'Athens 42K',
+    introText:
+      "The Athens 42K is where it all began—the original marathon route from the town of Marathon to the marble Panathenaic Stadium in Athens. Running this historic course, you retrace the legendary footsteps of Pheidippides from 490 BC. No other running route carries this much history.",
+    routeSpecificFAQs: [
+      {
+        question: 'Why is the Athens route called the original marathon?',
+        answer:
+          "The marathon distance was inspired by the legend of Pheidippides, who ran from the Battle of Marathon to Athens in 490 BC. The Athens route follows this historic path, finishing in the Panathenaic Stadium—the venue of the first modern Olympics in 1896.",
+      },
+      {
+        question: 'Is the Athens 42K a difficult course?',
+        answer:
+          'Yes, the Athens course is challenging with significant uphill sections in the first half. The route climbs steadily from Marathon before descending into Athens, making it slower than flat city courses.',
+      },
+    ],
+  },
+  {
+    id: 'hamburg-marathon',
+    slug: 'hamburg-marathon',
+    category: 'race',
+    name: 'Hamburg 42K Running Route',
+    shortName: 'Hamburg 42K',
+    subtitle: 'Hamburg City Circuit',
+    description:
+      'A flat, fast 42km running route through the vibrant port city of Hamburg.',
+    country: 'Germany',
+    region: 'Hamburg',
+    distance: 42.2,
+    difficulty: 'moderate',
+    routeColor: '#E30613',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'hamburg', 'germany', 'running', 'flat', 'port-city'],
+    year: 2024,
+    website: 'https://www.haspa-marathon-hamburg.de/',
+    mapTitle: 'Hamburg 42K',
+    introText:
+      "The Hamburg 42K route takes runners through Germany's gateway to the world. The flat, fast course passes the historic port, the Alster lakes, and the elegant Speicherstadt warehouse district—a unique blend of maritime heritage and urban energy.",
+    routeSpecificFAQs: [
+      {
+        question: 'Why is Hamburg considered a fast marathon course?',
+        answer:
+          'The Hamburg course is almost entirely flat with excellent crowd support, making it one of the fastest marathon courses in Germany. The course record stands at 2:04:47.',
+      },
+    ],
+  },
+  {
+    id: 'munich-marathon',
+    slug: 'munich-marathon',
+    category: 'race',
+    name: 'Munich 42K Running Route',
+    shortName: 'Munich 42K',
+    subtitle: 'Olympic Park → Marienplatz',
+    description:
+      "A one-lap 42km running route through Munich's top spots, from the Olympic Park to Marienplatz.",
+    country: 'Germany',
+    region: 'Munich',
+    distance: 42.2,
+    difficulty: 'moderate',
+    routeColor: '#0098DB',
+    styleId: 'minimalist',
+    paletteId: 'clean',
+    tags: ['marathon', 'munich', 'germany', 'running', 'bavaria', 'olympic'],
+    year: 2025,
+    website: 'https://www.muenchenmarathon.de/',
+    mapTitle: 'Munich 42K',
+    introText:
+      "The Munich 42K route is a sightseeing tour of Bavaria's capital at running pace. Starting from the iconic Olympic Park, the one-lap course passes the Siegestor, Odeonsplatz, and finishes at the famous Marienplatz—offering Bavarian hospitality with every kilometer.",
+    routeSpecificFAQs: [
+      {
+        question: 'What is the Munich marathon course like?',
+        answer:
+          "The new one-lap course passes Munich's top landmarks, starting at the Olympic Park (host of the 1972 Olympics) and running through the English Garden, past Odeonsplatz, and finishing at the iconic Marienplatz in the heart of the old town.",
+      },
+    ],
+  },
 ];
 
 /**
@@ -613,6 +799,307 @@ export const trailRoutes: SEORouteMetadata[] = [
         question: 'What Roman sites can I see along the path?',
         answer:
           'Major sites include Housesteads Fort (the most complete Roman fort in Britain), Vindolanda (with its famous writing tablets), Chesters Fort, and Birdoswald Fort.',
+      },
+    ],
+  },
+  // Phase 2 UK Trails
+  {
+    id: 'pennine-way',
+    slug: 'pennine-way',
+    category: 'trail',
+    name: 'Pennine Way',
+    shortName: 'Pennine Way',
+    subtitle: 'Edale → Kirk Yetholm',
+    description:
+      "Britain's first and most famous National Trail, 268 miles along the backbone of England.",
+    country: 'United Kingdom',
+    region: 'Northern England',
+    distance: 429,
+    elevationGain: 11700,
+    difficulty: 'hard',
+    duration: '16-20 days',
+    routeColor: '#5D4037',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['england', 'scotland', 'pennines', 'national-trail', 'backbone'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/pennine-way/',
+    mapTitle: 'Pennine Way',
+    introText:
+      "The Pennine Way was Britain's first National Trail, opened in 1965. Running 268 miles from the Peak District to the Scottish Borders, it follows the Pennine ridge—the backbone of England—through wild moorland, dramatic waterfalls, and the finest upland scenery in Britain.",
+    routeSpecificFAQs: [
+      {
+        question: 'How long does the Pennine Way take?',
+        answer:
+          'Most walkers take 16-20 days to complete the 268-mile trail. Strong walkers can finish in 14 days, while a more relaxed pace might take 3 weeks. The current fastest known time is under 3 days.',
+      },
+      {
+        question: 'What is the hardest section of the Pennine Way?',
+        answer:
+          'The Cross Fell to Hadrian\'s Wall section and the Cheviot crossing near the finish are considered the most challenging, with exposed moorland, boggy terrain, and limited shelter.',
+      },
+    ],
+  },
+  {
+    id: 'offas-dyke-path',
+    slug: 'offas-dyke-path',
+    category: 'trail',
+    name: "Offa's Dyke Path",
+    shortName: "Offa's Dyke",
+    subtitle: 'Sedbury → Prestatyn',
+    description:
+      'A 177-mile National Trail following the ancient earthwork boundary between England and Wales.',
+    country: 'United Kingdom',
+    countries: ['England', 'Wales'],
+    distance: 285,
+    elevationGain: 8500,
+    difficulty: 'moderate',
+    duration: '12-14 days',
+    routeColor: '#558B2F',
+    styleId: 'topographic',
+    paletteId: 'forest',
+    tags: ['england', 'wales', 'border', 'national-trail', 'historic', 'earthwork'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/offas-dyke-path/',
+    mapTitle: "Offa's Dyke",
+    introText:
+      "Offa's Dyke Path follows the ancient 8th-century earthwork built by King Offa of Mercia to mark the boundary between England and Wales. This 177-mile National Trail crosses some of the most beautiful borderland scenery in Britain, from the Severn Estuary to the Irish Sea.",
+    routeSpecificFAQs: [
+      {
+        question: "What is Offa's Dyke?",
+        answer:
+          "Offa's Dyke is an ancient earthwork barrier built around AD 780 by King Offa of Mercia. It stretches roughly along the border between England and Wales. The National Trail follows much of this historic boundary.",
+      },
+    ],
+  },
+  {
+    id: 'pembrokeshire-coast-path',
+    slug: 'pembrokeshire-coast-path',
+    category: 'trail',
+    name: 'Pembrokeshire Coast Path',
+    shortName: 'Pembrokeshire Coast',
+    subtitle: 'St Dogmaels → Amroth',
+    description:
+      'A stunning 186-mile coastal trail around the Pembrokeshire peninsula in Wales.',
+    country: 'United Kingdom',
+    region: 'Pembrokeshire, Wales',
+    distance: 299,
+    elevationGain: 10600,
+    difficulty: 'hard',
+    duration: '12-15 days',
+    routeColor: '#1565C0',
+    styleId: 'topographic',
+    paletteId: 'classic',
+    tags: ['wales', 'coastal', 'national-trail', 'sea-cliffs', 'wildlife'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/pembrokeshire-coast-path/',
+    mapTitle: 'Pembrokeshire Coast',
+    introText:
+      "The Pembrokeshire Coast Path hugs 186 miles of the most spectacular coastline in Britain. Towering sea cliffs, hidden coves, sandy beaches, and abundant wildlife—from puffins to seals—make this National Trail in Wales one of the finest coastal walks anywhere in the world.",
+    routeSpecificFAQs: [
+      {
+        question: 'What wildlife can I see on the Pembrokeshire Coast Path?',
+        answer:
+          'The trail passes puffin colonies on Skomer Island, grey seal haul-outs, dolphins in Cardigan Bay, and a rich variety of seabirds including gannets, razorbills, and guillemots.',
+      },
+    ],
+  },
+  {
+    id: 'north-downs-way',
+    slug: 'north-downs-way',
+    category: 'trail',
+    name: 'North Downs Way',
+    shortName: 'North Downs Way',
+    subtitle: 'Farnham → Dover',
+    description:
+      'A 153-mile National Trail along the chalk ridge of the North Downs, following the ancient Pilgrims\' Way to Canterbury.',
+    country: 'United Kingdom',
+    region: 'Surrey / Kent',
+    distance: 246,
+    elevationGain: 4500,
+    difficulty: 'moderate',
+    duration: '10-13 days',
+    routeColor: '#7CB342',
+    styleId: 'minimal',
+    paletteId: 'sage',
+    tags: ['england', 'surrey', 'kent', 'national-trail', 'pilgrims-way', 'chalk'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/north-downs-way/',
+    mapTitle: 'North Downs Way',
+    introText:
+      "The North Downs Way follows the ancient chalk ridge from Farnham to Dover, sharing its path with the historic Pilgrims' Way to Canterbury. Walking this 153-mile trail through the Garden of England, you pass through ancient woodlands, across sweeping downland, and finish at the iconic White Cliffs of Dover.",
+    routeSpecificFAQs: [
+      {
+        question: "What is the Pilgrims' Way?",
+        answer:
+          "The Pilgrims' Way is the historic route taken by medieval pilgrims from Winchester to Canterbury. The North Downs Way follows much of this ancient path along the chalk ridge of the North Downs.",
+      },
+    ],
+  },
+  {
+    id: 'the-ridgeway',
+    slug: 'the-ridgeway',
+    category: 'trail',
+    name: 'The Ridgeway',
+    shortName: 'The Ridgeway',
+    subtitle: 'Overton Hill → Ivinghoe Beacon',
+    description:
+      "Britain's oldest road, an 87-mile National Trail following an ancient route across the Wessex Downs.",
+    country: 'United Kingdom',
+    region: 'Wiltshire / Oxfordshire',
+    distance: 139,
+    elevationGain: 2400,
+    difficulty: 'moderate',
+    duration: '5-7 days',
+    routeColor: '#A1887F',
+    styleId: 'vintage',
+    paletteId: 'sepia',
+    tags: ['england', 'ancient', 'national-trail', 'wessex', 'oldest-road', 'prehistoric'],
+    website: 'https://www.nationaltrail.co.uk/en_GB/trails/the-ridgeway/',
+    mapTitle: 'The Ridgeway',
+    introText:
+      "The Ridgeway is Britain's oldest road—a route that has been in continuous use for over 5,000 years. This 87-mile National Trail follows the ancient chalk ridge past Avebury stone circle, the White Horse of Uffington, and Neolithic burial chambers, connecting you to the deepest layers of British prehistory.",
+    routeSpecificFAQs: [
+      {
+        question: 'Why is The Ridgeway called Britain\'s oldest road?',
+        answer:
+          'The Ridgeway has been used as a travel route for over 5,000 years, since the Neolithic period. It passes prehistoric sites including Avebury stone circle (older than Stonehenge), the Uffington White Horse, and Wayland\'s Smithy burial chamber.',
+      },
+    ],
+  },
+  // International Trails
+  {
+    id: 'laugavegur-trail',
+    slug: 'laugavegur-trail',
+    category: 'trail',
+    name: 'Laugavegur Trail',
+    shortName: 'Laugavegur',
+    subtitle: 'Landmannalaugar → Þórsmörk',
+    description:
+      "Iceland's most famous trek through volcanic landscapes, hot springs, and colorful rhyolite mountains.",
+    country: 'Iceland',
+    region: 'Southern Highlands',
+    distance: 55,
+    elevationGain: 1800,
+    difficulty: 'moderate',
+    duration: '3-4 days',
+    routeColor: '#FF5722',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['iceland', 'volcanic', 'hot-springs', 'trekking', 'highlands'],
+    website: 'https://www.laugavegurtrailguide.com/',
+    mapTitle: 'Laugavegur',
+    introText:
+      "The Laugavegur Trail is Iceland's most iconic trek—55 km through a landscape that looks like another planet. From the steaming hot springs of Landmannalaugar, through rainbow-colored rhyolite mountains, across black obsidian deserts, to the lush green valley of Þórsmörk. There is nothing else like it on Earth.",
+    routeSpecificFAQs: [
+      {
+        question: 'When is the best time to hike the Laugavegur?',
+        answer:
+          'The trail is typically open from late June to early September. July and August offer the best weather and longest daylight hours, including the midnight sun.',
+      },
+      {
+        question: 'What makes the Laugavegur landscape unique?',
+        answer:
+          'The trail passes through an extraordinary range of volcanic terrain: hot springs, rhyolite mountains in every color, obsidian lava fields, glacial rivers, and lush green valleys—all within 55 km.',
+      },
+    ],
+  },
+  {
+    id: 'gr20-corsica',
+    slug: 'gr20-corsica',
+    category: 'trail',
+    name: 'GR20 Corsica',
+    shortName: 'GR20',
+    subtitle: 'Calenzana → Conca',
+    description:
+      "Often called Europe's toughest long-distance trail, 180km along the mountainous spine of Corsica.",
+    country: 'France',
+    region: 'Corsica',
+    distance: 180,
+    elevationGain: 12500,
+    difficulty: 'expert',
+    duration: '12-16 days',
+    routeColor: '#D84315',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['france', 'corsica', 'mountains', 'toughest-trail', 'gr-trail'],
+    website: 'https://www.le-gr20.fr/',
+    mapTitle: 'GR20 Corsica',
+    introText:
+      "The GR20 is legendary—widely considered Europe's toughest long-distance trail. This 180km route runs along the mountainous spine of Corsica, traversing dramatic granite peaks, glacial lakes, and pristine alpine forests. Completing the GR20 is a badge of honor among serious hikers.",
+    routeSpecificFAQs: [
+      {
+        question: "Why is the GR20 considered Europe's toughest trail?",
+        answer:
+          'The GR20 involves 12,500m of total elevation gain over rugged, rocky terrain with steep scrambles, exposed ridges, and limited water sources. Many sections require hands-on scrambling over granite slabs and boulders.',
+      },
+      {
+        question: 'What is the difference between the north and south sections?',
+        answer:
+          'The northern section (Calenzana to Vizzavona) is the harder half, with more exposed terrain, rocky scrambles, and higher elevations. The southern section (Vizzavona to Conca) is generally easier with more forest cover.',
+      },
+    ],
+  },
+  {
+    id: 'haute-route-chamonix-zermatt',
+    slug: 'haute-route-chamonix-zermatt',
+    category: 'trail',
+    name: "Walker's Haute Route",
+    shortName: 'Haute Route',
+    subtitle: 'Chamonix → Zermatt',
+    description:
+      'The classic alpine high-level route connecting two mountain capitals through the French and Swiss Alps.',
+    country: 'France',
+    countries: ['France', 'Switzerland'],
+    distance: 180,
+    elevationGain: 11800,
+    difficulty: 'hard',
+    duration: '12-14 days',
+    routeColor: '#C62828',
+    styleId: 'topographic',
+    paletteId: 'terrain',
+    tags: ['france', 'switzerland', 'alps', 'haute-route', 'multi-country', 'high-altitude'],
+    website: 'https://www.chamonix.com/',
+    mapTitle: 'Haute Route',
+    introText:
+      "The Walker's Haute Route connects two of the Alps' great mountain towns—Chamonix at the foot of Mont Blanc and Zermatt beneath the Matterhorn. This 180km high-level traverse crosses passes over 2,900m, descending into flower-filled Swiss valleys between breathtaking alpine panoramas.",
+    routeSpecificFAQs: [
+      {
+        question: 'What is the highest point on the Haute Route?',
+        answer:
+          "The highest point on the Walker's Haute Route is the Col de Prafleuri at approximately 2,987m. Several other passes exceed 2,700m, making proper acclimatization important.",
+      },
+    ],
+  },
+  {
+    id: 'lycian-way',
+    slug: 'lycian-way',
+    category: 'trail',
+    name: 'Lycian Way',
+    shortName: 'Lycian Way',
+    subtitle: 'Fethiye → Antalya',
+    description:
+      "Turkey's first long-distance trail, 540km along the Turquoise Coast past ancient Lycian ruins.",
+    country: 'Turkey',
+    region: 'Mediterranean Coast',
+    distance: 540,
+    elevationGain: 20000,
+    difficulty: 'hard',
+    duration: '25-30 days',
+    routeColor: '#00838F',
+    styleId: 'topographic',
+    paletteId: 'classic',
+    tags: ['turkey', 'coastal', 'ancient-ruins', 'mediterranean', 'turquoise-coast'],
+    website: 'https://www.lycianway.org/',
+    mapTitle: 'Lycian Way',
+    introText:
+      "The Lycian Way is Turkey's premier long-distance trail—540km along the stunning Turquoise Coast from Fethiye to Antalya. Named after the ancient Lycian civilization, the trail passes rock-cut tombs, Roman ruins, secluded beaches, and mountain villages, combining Mediterranean coastal beauty with 3,000 years of history.",
+    routeSpecificFAQs: [
+      {
+        question: 'What are the Lycian ruins along the trail?',
+        answer:
+          'The trail passes remarkable ancient Lycian sites including the rock tombs of Myra, the sunken city of Kekova, the mountaintop ruins of Termessos, and the eternal flames of Chimera (Yanartaş).',
+      },
+      {
+        question: 'When is the best time to hike the Lycian Way?',
+        answer:
+          'The best seasons are spring (March-May) and autumn (September-November). Summer is too hot for comfortable hiking, while winter can bring rain and cold at higher elevations.',
       },
     ],
   },
