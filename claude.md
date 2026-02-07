@@ -7,6 +7,7 @@
 > - See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for SEO growth strategy
 > - See [docs/PRD-FAMOUS-ROUTES-SEEDING.md](docs/PRD-FAMOUS-ROUTES-SEEDING.md) for famous routes database seeding
 > - See [docs/PRD-BREVO-EMAIL-AUTOMATION.md](docs/PRD-BREVO-EMAIL-AUTOMATION.md) for email automation strategy
+> - See [docs/PRD-SEO-LANDING-PAGES.md](docs/PRD-SEO-LANDING-PAGES.md) for SEO landing pages strategy & implementation
 
 ---
 

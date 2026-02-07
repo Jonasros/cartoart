@@ -72,3 +72,118 @@ export interface RoutePageData {
   thumbnailUrl?: string;
   config?: unknown; // PosterConfig from database
 }
+
+// ============================================
+// Gift Page Types
+// ============================================
+
+export type GiftAudience =
+  | 'marathon-finisher'
+  | 'trail-runner'
+  | 'cyclist'
+  | 'first-marathon'
+  | 'personal-best';
+
+export interface GiftWhyCard {
+  title: string;
+  description: string;
+  icon: string; // Lucide icon name
+}
+
+export interface GiftFeaturedRoute {
+  name: string;
+  description: string;
+  slug: string; // Link to /race/, /trail/, or /cycling/ page
+  category: SEOCategory;
+}
+
+export interface GiftPageMetadata {
+  slug: GiftAudience;
+  title: string; // H1
+  subtitle: string;
+  intro: string;
+  ctaText: string;
+
+  // Why this gift section
+  whyCards: GiftWhyCard[];
+
+  // Featured routes to showcase
+  featuredRoutes: GiftFeaturedRoute[];
+
+  // Personalization angle
+  personalizationHeading: string;
+  personalizationText: string;
+
+  // How it works steps
+  steps: { title: string; description: string }[];
+
+  // Price anchoring text
+  pricingText: string;
+
+  // FAQs specific to this gift page
+  faqs: FAQ[];
+
+  // Final CTA
+  finalCTA: {
+    heading: string;
+    subtext: string;
+    buttonText: string;
+  };
+
+  // SEO metadata
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+}
+
+// ============================================
+// Guide Page Types
+// ============================================
+
+export type GuideSlug =
+  | 'strava-to-poster'
+  | 'gpx-to-poster'
+  | '3d-print-running-route'
+  | 'custom-running-map'
+  | 'cycling-route-poster';
+
+export interface GuideStep {
+  title: string;
+  description: string;
+  tip?: string;
+}
+
+export interface GuideTip {
+  title: string;
+  description: string;
+  icon: string; // Lucide icon name
+}
+
+export interface GuidePageMetadata {
+  slug: GuideSlug;
+  title: string; // H1
+  subtitle: string;
+  intro: string;
+  ctaText: string;
+
+  // Step-by-step guide
+  steps: GuideStep[];
+
+  // Tips section
+  tips: GuideTip[];
+
+  // FAQs
+  faqs: FAQ[];
+
+  // Final CTA
+  finalCTA: {
+    heading: string;
+    subtext: string;
+    buttonText: string;
+  };
+
+  // SEO metadata
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+}

@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getRouteSlugs } from '@/lib/seo/routes';
+import { getAllGiftSlugs } from '@/lib/seo/gifts';
+import { getAllGuideSlugs } from '@/lib/seo/guides';
 
 const BASE_URL = 'https://waymarker.eu';
 
@@ -90,5 +92,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...racePages, ...trailPages, ...cyclingPages];
+  // Gift landing pages
+  const giftContentDate = formatSitemapDate(new Date('2026-02-07'));
+  const giftSlugs = getAllGiftSlugs();
+  const giftPages: MetadataRoute.Sitemap = giftSlugs.map((slug) => ({
+    url: `${BASE_URL}/gift/${slug}`,
+    lastModified: giftContentDate,
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
+  // Guide landing pages
+  const guideSlugs = getAllGuideSlugs();
+  const guidePages: MetadataRoute.Sitemap = guideSlugs.map((slug) => ({
+    url: `${BASE_URL}/guide/${slug}`,
+    lastModified: giftContentDate,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  return [
+    ...staticPages,
+    ...racePages,
+    ...trailPages,
+    ...cyclingPages,
+    ...giftPages,
+    ...guidePages,
+  ];
 }
