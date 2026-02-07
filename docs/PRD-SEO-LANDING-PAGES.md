@@ -3,8 +3,8 @@
 > Actionable PRD for programmatic SEO landing pages, LLM search optimization, and route catalog expansion.
 
 **Created**: 2026-02-03
-**Updated**: 2026-02-03
-**Status**: Ready for Implementation
+**Updated**: 2026-02-07
+**Status**: Phase 1 & 2 Complete
 **Priority**: Critical (Primary Growth Channel)
 
 **Related Documents**:
@@ -554,14 +554,17 @@ No public API available.
 #### 3. Schema Markup on Every Page
 
 Already implemented:
+
 - ✅ FAQPage schema (JSON-LD)
 - ✅ Product schema (JSON-LD)
+- ✅ HowTo schema on guide pages
+- ✅ BreadcrumbList schema on all gift and guide pages
 
 To add:
-- [ ] HowTo schema on guide pages
-- [ ] BreadcrumbList schema on all pages
+
 - [ ] Review/AggregateRating schema (when testimonials exist)
 - [ ] CollectionPage schema on collection pages
+- [ ] BreadcrumbList schema on route pages (`/race/`, `/trail/`, `/cycling/`)
 
 #### 4. Direct-Answer Content Format
 
@@ -710,30 +713,53 @@ Every page should link to related pages:
 
 ## Implementation Phases
 
-### Phase 1: Gift Pages (Weeks 1-2)
+### Phase 1: Gift Pages (Weeks 1-2) ✅ COMPLETE
 
 **Goal**: 5 gift pages live, targeting highest-volume gift keywords.
 
-1. Create `GiftLandingPageClient.tsx` template component
-2. Create `lib/seo/gifts.ts` with gift page metadata
-3. Create `app/gift/[slug]/page.tsx` dynamic route
-4. Build 5 gift pages: marathon-finisher, trail-runner, cyclist, first-marathon, personal-best
-5. Add JSON-LD (FAQPage + Product schema) to gift pages
-6. Update sitemap
+1. ✅ Create `GiftLandingPageClient.tsx` template component
+2. ✅ Create `lib/seo/gifts.ts` with gift page metadata
+3. ✅ Create `app/gift/[slug]/page.tsx` dynamic route
+4. ✅ Build 5 gift pages: marathon-finisher, trail-runner, cyclist, first-marathon, personal-best
+5. ✅ Add JSON-LD (FAQPage + Product schema) to gift pages
+6. ✅ Update sitemap
 7. Submit to Google Search Console + Bing Webmaster Tools
 
-### Phase 2: Guide Pages + LLM Optimization (Weeks 3-4)
+**Implemented (2026-02-07)**:
+
+- 5 gift landing pages with UnifiedHeader, Footer, and real Supabase poster thumbnails
+- 2-column hero with poster fan layout (3 real posters with rotation/offset)
+- Style gallery section with 6 poster examples from Supabase (fallback to PosterThumbnail SVGs)
+- FAQPage + Product JSON-LD structured data
+- BreadcrumbList schema on all gift pages
+- Sections: Hero → WhyThisGift → StyleGallery → FeaturedRoutes → Personalization → HowItWorks → Pricing → FAQ → RelatedGifts → FinalCTA → Disclaimer
+
+### Phase 2: Guide Pages + LLM Optimization (Weeks 3-4) ✅ PARTIALLY COMPLETE
 
 **Goal**: 5 guide pages live, `/llms.txt` deployed, Bing optimization.
 
-1. Create `GuideLandingPageClient.tsx` template component
-2. Create `lib/seo/guides.ts` with guide page metadata
-3. Create `app/guide/[slug]/page.tsx` dynamic route
-4. Build 5 guide pages: strava-to-poster, gpx-to-poster, 3d-print-running-route, custom-running-map, cycling-route-poster
-5. Add HowTo schema (JSON-LD) to guide pages
+1. ✅ Create `GuideLandingPageClient.tsx` template component
+2. ✅ Create `lib/seo/guides.ts` with guide page metadata
+3. ✅ Create `app/guide/[slug]/page.tsx` dynamic route
+4. ✅ Build 5 guide pages: strava-to-poster, gpx-to-poster, 3d-print-running-route, custom-running-map, cycling-route-poster
+5. ✅ Add HowTo schema (JSON-LD) to guide pages
 6. Deploy `/llms.txt`
 7. Set up Bing Webmaster Tools + IndexNow
-8. Add BreadcrumbList schema to all pages
+8. ✅ Add BreadcrumbList schema to all pages
+
+**Implemented (2026-02-07)**:
+
+- 5 guide landing pages with UnifiedHeader, Footer, and real Supabase poster thumbnails
+- 2-column hero with poster fan layout (3 real posters with rotation/offset)
+- Step-by-step guide section with numbered steps and tips
+- Style gallery section ("What You'll Create") with 6 poster examples
+- HowTo + FAQPage + BreadcrumbList JSON-LD structured data
+- Sections: Hero → StepByStep → StyleGallery → Tips → FAQ → RelatedGuides → FinalCTA → Disclaimer
+
+**Remaining**:
+
+- Deploy `/llms.txt` file
+- Set up Bing Webmaster Tools + IndexNow
 
 ### Phase 3: Route Catalog Expansion (Weeks 5-8)
 
@@ -1264,8 +1290,8 @@ Mobile is likely 60-70% of traffic for these pages (running/cycling audience bro
 - [ ] `StickyMobileCTA` — fixed bottom bar on mobile
 - [ ] `PosterStyleGallery` — small thumbnail carousel for ProductShowcase
 - [ ] `ComparisonTable` — poster vs sculpture comparison
-- [ ] `GiftLandingPageClient` — gift page template
-- [ ] `GuideLandingPageClient` — guide page template
+- [x] `GiftLandingPageClient` — gift page template ✅
+- [x] `GuideLandingPageClient` — guide page template ✅
 - [ ] `CollectionLandingPageClient` — collection page template
 
 #### PostHog Events for CRO Tracking

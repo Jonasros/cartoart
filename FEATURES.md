@@ -2,7 +2,7 @@
 
 > Future plans and business strategy. For completed features see [STATUS.md](STATUS.md).
 
-**Last Updated**: 2026-01-30
+**Last Updated**: 2026-02-07
 
 ---
 
@@ -56,29 +56,53 @@ Scale organic traffic through thousands of targeted landing pages capturing long
 - `/cycling/[slug]` - Cycling routes
 - Sitemap integration, JSON-LD structured data, trademark-safe naming
 
+### Phase 2 Complete ✅
+
+**Gift & Guide SEO landing pages:**
+
+> **Specification**: [docs/PRD-SEO-LANDING-PAGES.md](docs/PRD-SEO-LANDING-PAGES.md)
+
+- `/gift/[slug]` - 5 gift pages (marathon-finisher, trail-runner, cyclist, first-marathon, personal-best)
+- `/guide/[slug]` - 5 guide pages (strava-to-poster, gpx-to-poster, 3d-print-running-route, custom-running-map, cycling-route-poster)
+- Real poster thumbnails from Supabase, UnifiedHeader/Footer, JSON-LD structured data
+
 ### Remaining Phases
 
 | Category | Pages | Target Keywords | Status |
 |----------|-------|-----------------|--------|
-| City Maps | ~10,000 | "[City] map poster" | Planned |
 | Marathons & Races | ~500 | "[Race] route poster 2026" | ✅ Phase 1 |
 | Trails & Hikes | ~200 | "[Trail] map print" | ✅ Phase 1 |
 | Cycling Routes | ~300 | "[Route] cycling poster" | ✅ Phase 1 |
+| Gift Pages | 5 | "gift for runner/cyclist" | ✅ Phase 2 |
+| Guide Pages | 5 | "strava to poster", "gpx to poster" | ✅ Phase 2 |
+| City Maps | ~10,000 | "[City] map poster" | Planned |
 | Triathlons | ~100 | "Ironman [Location] map" | Planned |
 | Bikepacking | ~150 | "[Route] bikepacking map" | Planned |
 | Ultra Trails | ~100 | "[Race] ultra trail poster" | Planned |
 
 ### Next Steps
 
-1. **Phase 2**: City map pages (~10,000 pages for major cities)
-2. **Phase 3**: SEO optimization, A/B testing CTAs
-3. **Phase 4**: Niche expansion (bikepacking, ultra trails, ski touring)
+1. **Phase 3**: Route catalog expansion (half marathons, ultra trails, cycling climbs)
+2. **Phase 4**: Collection & comparison pages
+3. **Phase 5**: City map pages (~10,000 pages for major cities)
 
-See [docs/PROGRAMMATIC-SEO.md](docs/PROGRAMMATIC-SEO.md) for complete PRD.
+See [docs/PRD-SEO-LANDING-PAGES.md](docs/PRD-SEO-LANDING-PAGES.md) for complete PRD.
 
 ---
 
 ## Recently Completed
+
+### SEO Landing Pages (Gift & Guide) ✅
+
+> **Specification**: [docs/PRD-SEO-LANDING-PAGES.md](docs/PRD-SEO-LANDING-PAGES.md)
+
+10 new SEO landing pages targeting gift-intent and how-to keywords.
+
+- ✅ 5 gift pages (`/gift/[slug]`): marathon-finisher, trail-runner, cyclist, first-marathon, personal-best
+- ✅ 5 guide pages (`/guide/[slug]`): strava-to-poster, gpx-to-poster, 3d-print-running-route, custom-running-map, cycling-route-poster
+- ✅ Real poster thumbnails from Supabase (featured maps)
+- ✅ JSON-LD: FAQPage, Product, HowTo, BreadcrumbList schemas
+- ✅ Sitemap integration, UnifiedHeader/Footer
 
 ### Multi-Point Route Builder ✅
 

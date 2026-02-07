@@ -2,7 +2,7 @@
 
 > Historical record of completed features. For development context see [CLAUDE.md](CLAUDE.md).
 
-**Last Updated**: 2026-01-30
+**Last Updated**: 2026-02-07
 
 ---
 
@@ -24,6 +24,7 @@
 | 12 | Brevo Email Automation | ✅ Complete |
 | 13 | Programmatic SEO Pages | ✅ Complete |
 | 14 | Multi-Point Route Builder | ✅ Complete |
+| 15 | SEO Landing Pages (Gift & Guide) | ✅ Complete |
 
 ---
 
@@ -381,6 +382,34 @@ Landing pages for famous routes to capture organic search traffic.
 
 **Route Catalog**: `lib/seo/routes.ts` with 41 pre-seeded routes
 
+### SEO Landing Pages (Gift & Guide)
+
+10 new SEO landing pages targeting gift-intent and how-to keywords.
+
+> **Specification**: [docs/PRD-SEO-LANDING-PAGES.md](docs/PRD-SEO-LANDING-PAGES.md)
+
+**Gift Pages** (`/gift/[slug]`):
+
+- ✅ 5 gift landing pages: marathon-finisher, trail-runner, cyclist, first-marathon, personal-best
+- ✅ `GiftLandingPageClient.tsx` template with UnifiedHeader and Footer
+- ✅ Real poster thumbnails from Supabase (featured maps with `is_featured=true`)
+- ✅ 2-column hero with poster fan layout (3 real posters with rotation/offset)
+- ✅ Style gallery section with 6 poster examples
+- ✅ FAQPage + Product + BreadcrumbList JSON-LD structured data
+- ✅ Sitemap integration
+
+**Guide Pages** (`/guide/[slug]`):
+
+- ✅ 5 guide landing pages: strava-to-poster, gpx-to-poster, 3d-print-running-route, custom-running-map, cycling-route-poster
+- ✅ `GuideLandingPageClient.tsx` template with UnifiedHeader and Footer
+- ✅ Real poster thumbnails from Supabase
+- ✅ Step-by-step guide sections with numbered steps and tips
+- ✅ HowTo + FAQPage + BreadcrumbList JSON-LD structured data
+- ✅ Sitemap integration
+
+**Data files**: `lib/seo/gifts.ts`, `lib/seo/guides.ts`
+**Types**: `types/seo.ts` (GiftPageMetadata, GuidePageMetadata)
+
 ---
 
 ## Codebase Health
@@ -395,7 +424,16 @@ Landing pages for famous routes to capture organic search traffic.
 
 ---
 
-## Recent Updates (January 2026)
+## Recent Updates
+
+### 2026-02-07
+
+- ✅ 5 gift SEO landing pages (`/gift/[slug]`) with real Supabase poster thumbnails
+- ✅ 5 guide SEO landing pages (`/guide/[slug]`) with real Supabase poster thumbnails
+- ✅ Gift/guide page types, data files, and sitemap integration
+- ✅ JSON-LD structured data: FAQPage, Product, HowTo, BreadcrumbList schemas
+- ✅ UnifiedHeader and Footer on all new landing pages
+- ✅ PRD documentation (`docs/PRD-SEO-LANDING-PAGES.md`)
 
 ### 2026-01-30
 
@@ -520,6 +558,7 @@ Landing pages for famous routes to capture organic search traffic.
 - `docs/PRD-FAMOUS-ROUTES-SEEDING.md` - Famous routes database seeding
 - `docs/PRD-BREVO-EMAIL-AUTOMATION.md` - Brevo email automation strategy
 - `docs/EXPORT-PAYMENT-SAFETY.md` - Export & payment flow safety system
+- `docs/PRD-SEO-LANDING-PAGES.md` - SEO landing pages strategy & implementation
 
 ---
 

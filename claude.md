@@ -51,7 +51,7 @@
 ## Quick Reference
 
 **Brand**: Waymarker (waymarker.eu)
-**Phase**: Core Features ✅ Complete — Next: Programmatic SEO
+**Phase**: Core Features ✅ Complete — SEO Landing Pages Phase 1-2 ✅ Complete
 **Dev Server**: http://localhost:3000
 
 ### What's Working
@@ -74,6 +74,8 @@
 - Famous routes seeding (41 pre-seeded routes with thumbnails)
 - API usage monitoring dashboard
 - Programmatic SEO pages (/race, /trail, /cycling)
+- Gift SEO landing pages (/gift) — 5 pages targeting gift-intent keywords
+- Guide SEO landing pages (/guide) — 5 pages targeting how-to keywords
 - Feature voting system in export modals
 
 ---
@@ -180,8 +182,10 @@ frontend/
 | `/race/[slug]` | Marathon/running route landing pages (e.g., `/race/boston-marathon`) |
 | `/trail/[slug]` | Hiking trail landing pages (e.g., `/trail/camino-de-santiago`) |
 | `/cycling/[slug]` | Cycling route landing pages (e.g., `/cycling/mont-ventoux-cycling-route`) |
+| `/gift/[slug]` | Gift landing pages (e.g., `/gift/marathon-finisher`) |
+| `/guide/[slug]` | Guide/how-to landing pages (e.g., `/guide/strava-to-poster`) |
 
-See `lib/seo/routes.ts` for all available slugs and `app/sitemap.ts` for sitemap generation.
+See `lib/seo/routes.ts`, `lib/seo/gifts.ts`, `lib/seo/guides.ts` for all available slugs and `app/sitemap.ts` for sitemap generation.
 
 ### API Routes
 
