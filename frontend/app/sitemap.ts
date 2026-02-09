@@ -16,8 +16,9 @@ function formatSitemapDate(date: Date): string {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use a fixed date for static content (updated when content actually changes)
-  const staticContentDate = formatSitemapDate(new Date('2025-01-20'));
-  const routeContentDate = formatSitemapDate(new Date('2025-01-15'));
+  // IMPORTANT: These dates must use the correct year (currently 2026). See CLAUDE.md sitemap rules.
+  const staticContentDate = formatSitemapDate(new Date('2026-01-20'));
+  const routeContentDate = formatSitemapDate(new Date('2026-01-15'));
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
