@@ -98,6 +98,36 @@ See `lib/seo/routes.ts` for the trademark-safe naming convention in the route ca
 
 ---
 
+## Sitemap & Crawler Rules
+
+**CRITICAL**: These rules MUST be followed to avoid breaking Google Search Console indexing.
+
+### Sitemap Dates (`app/sitemap.ts`)
+
+1. **Always use the correct year** — We are in **2026**. Never write `2025` for dates that should be `2026`. This mistake has happened multiple times.
+2. **Date format**: Use `YYYY-MM-DD` only (e.g., `2026-02-07`). No ISO timestamps with milliseconds — Google Search Console rejects them.
+3. **Dates must reflect actual content modification**, not sitemap generation date. Update the date only when page content actually changes.
+4. **When adding new pages**: Set `lastModified` to the date the content was created/deployed.
+5. **When modifying existing pages**: Update the relevant `lastModified` date to the current date.
+6. **Verify after changes**: Always check the generated XML in `.next/server/app/sitemap.xml.body` after building to confirm dates are correct.
+
+Current date groups in `app/sitemap.ts`:
+
+- `staticContentDate`: For landing page, create, feed, FAQ, legal pages
+- `routeContentDate`: For `/race/`, `/trail/`, `/cycling/` route pages
+- `giftContentDate`: For `/gift/` and `/guide/` pages
+
+### Middleware Exclusions (`middleware.ts`)
+
+**NEVER let the Supabase auth middleware run on crawler-facing routes.** The middleware matcher MUST exclude:
+
+- `sitemap.xml` — Supabase auth calls can timeout/fail, causing Google "Couldn't fetch" errors
+- `robots.txt` — Must be accessible without any auth processing
+
+These are excluded in the middleware matcher regex. If adding new SEO files (e.g., `llms.txt`), add them to the exclusion list too.
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 14+ App Router
